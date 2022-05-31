@@ -1,0 +1,9 @@
+env: dev
+level: 4
+log: /dev/stdout
+
+debug:
+    addr: "127.0.0.1:8081"
+
+http:
+    addr: "127.0.0.1:8080"
