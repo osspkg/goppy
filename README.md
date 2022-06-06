@@ -23,10 +23,11 @@ go get -u github.com/dewep-online/goppy
 
 ## Plugins
 
-|Plugin|Comment|Import|
-|---|---|---|
-|**debug**|profiling application (pprof) with HTTP access.|`http.WithHTTPDebug()`|
-|**http**|Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware.|`http.WithHTTP()`|
+| Plugin       |Comment| Import                  |
+|--------------|---|-------------------------|
+| **debug**    |profiling application (pprof) with HTTP access.| `http.WithHTTPDebug()`  |
+| **http**     |Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware.| `http.WithHTTP()`       |
+| **database** |Multi connection pools with MySQL and SQLite databases (with initialization migration setup).| `database.WithMySQL()` `database.WithSQLite()` |
 
 ## Quick Start
 
