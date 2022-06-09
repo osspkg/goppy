@@ -23,7 +23,7 @@ func main() {
 	)
 	app.Plugins(
 		plugins.Plugin{
-			Resolve: func(routes *http.RouterPool, gip geoip.GeoIP) {
+			Resolve: func(routes http.RouterPool, gip geoip.GeoIP) {
 				router := routes.Main()
 				router.Use(
 					middlewares.CloudflareMiddleware(),

@@ -217,14 +217,24 @@ type (
 		active bool
 		route  *route
 	}
+
 	//RouterPool router pool handler
-	RouterPool struct {
+	RouterPool interface {
+		//All method to get all route handlers
+		All(call func(name string, router Router))
+		//Main method to get Main route handler
+		Main() Router
+		//Get method to get route handler by key
+		Get(name string) Router
+	}
+
+	routeProvider struct {
 		pool map[string]*routePoolItem
 	}
 )
 
-func newRoutePool(configs map[string]servers.Config, log logger.Logger) *RouterPool {
-	v := &RouterPool{
+func newRouteProvider(configs map[string]servers.Config, log logger.Logger) *routeProvider {
+	v := &routeProvider{
 		pool: make(map[string]*routePoolItem),
 	}
 	for name, config := range configs {
@@ -237,26 +247,26 @@ func newRoutePool(configs map[string]servers.Config, log logger.Logger) *RouterP
 }
 
 //All method to get all route handlers
-func (v *RouterPool) All(call func(name string, router Router)) {
+func (v *routeProvider) All(call func(name string, router Router)) {
 	for n, r := range v.pool {
 		call(n, r.route)
 	}
 }
 
 //Main method to get Main route handler
-func (v *RouterPool) Main() Router {
+func (v *routeProvider) Main() Router {
 	return v.Get("main")
 }
 
 //Get method to get route handler by key
-func (v *RouterPool) Get(name string) Router {
+func (v *routeProvider) Get(name string) Router {
 	if r, ok := v.pool[name]; ok {
 		return r.route
 	}
 	panic(fmt.Sprintf("Route with name `%s` is not found", name))
 }
 
-func (v *RouterPool) Up() error {
+func (v *routeProvider) Up() error {
 	for n, r := range v.pool {
 		r.active = true
 		if err := r.route.Up(); err != nil {
@@ -266,7 +276,7 @@ func (v *RouterPool) Up() error {
 	return nil
 }
 
-func (v *RouterPool) Down() error {
+func (v *routeProvider) Down() error {
 	for n, r := range v.pool {
 		if !r.active {
 			continue

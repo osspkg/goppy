@@ -21,7 +21,7 @@ func main() {
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes *http.RouterPool, c *Controller) {
+			Resolve: func(routes http.RouterPool, c *Controller) {
 				router := routes.Main()
 				router.Use(middlewares.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
