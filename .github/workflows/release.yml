@@ -1,0 +1,14 @@
+name: Release publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: pkg.go.dev push
+        run: curl https://proxy.golang.org/github.com/dewep-online/goppy/@latest
