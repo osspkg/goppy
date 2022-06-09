@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dewep-online/goppy/middlewares"
 	"github.com/deweppro/go-http/pkg/httputil"
 	"github.com/deweppro/go-http/pkg/httputil/dec"
 	"github.com/deweppro/go-http/pkg/httputil/enc"
@@ -287,13 +288,10 @@ type (
 		l  logger.Logger
 	}
 
-	//Middleware type of middleware
-	Middleware func(func(nethttp.ResponseWriter, *nethttp.Request)) func(nethttp.ResponseWriter, *nethttp.Request)
-
 	//Router router handler interface
 	Router interface {
-		Use(args ...Middleware)
-		Collection(prefix string, args ...Middleware) RouteCollector
+		Use(args ...middlewares.Middleware)
+		Collection(prefix string, args ...middlewares.Middleware) RouteCollector
 
 		RouteCollector
 	}
@@ -315,7 +313,7 @@ func (v *route) Down() error {
 	return v.ws.Down()
 }
 
-func (v *route) Use(args ...Middleware) {
+func (v *route) Use(args ...middlewares.Middleware) {
 	for _, arg := range args {
 		arg := arg
 		v.r.Global(func(ctrlFunc routes.CtrlFunc) routes.CtrlFunc {
@@ -371,7 +369,7 @@ func (v *rc) Options(path string, call func(ctx Ctx)) { v.Match(path, call, neth
 func (v *rc) Patch(path string, call func(ctx Ctx))   { v.Match(path, call, nethttp.MethodPatch) }
 
 //Collection route collection handler
-func (v *route) Collection(prefix string, args ...Middleware) RouteCollector {
+func (v *route) Collection(prefix string, args ...middlewares.Middleware) RouteCollector {
 	prefix = strings.TrimRight(prefix, "/")
 	for _, arg := range args {
 		arg := arg

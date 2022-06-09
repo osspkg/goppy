@@ -14,6 +14,7 @@ go get -u github.com/dewep-online/goppy
 
 ## Features
 
+- Config auto generation
 - Custom pool of HTTP servers with configuration via config
 - Group APIs with middleware hanging on each group
 - Extensible middleware framework
@@ -23,11 +24,13 @@ go get -u github.com/dewep-online/goppy
 
 ## Plugins
 
-| Plugin       |Comment| Import                  |
-|--------------|---|-------------------------|
-| **debug**    |profiling application (pprof) with HTTP access.| `http.WithHTTPDebug()`  |
-| **http**     |Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware.| `http.WithHTTP()`       |
-| **database** |Multi connection pools with MySQL and SQLite databases (with initialization migration setup).| `database.WithMySQL()` `database.WithSQLite()` |
+| Plugin       |Comment| Import                                               |
+|--------------|---|------------------------------------------------------|
+| **debug**    |profiling application (pprof) with HTTP access.| `http.WithHTTPDebug()`                               |
+| **http**     |Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware.| `http.WithHTTP()`                                    |
+| **database** |Multi connection pools with MySQL and SQLite databases (with initialization migration setup).| `database.WithMySQL()` `database.WithSQLite()`       |
+| **geoip**    |Definition of geo-IP information.| `geoip.WithMaxMindGeoIP()` + `middlewares.CloudflareMiddleware()` `middlewares.MaxMindMiddleware(gip)` |
+
 
 ## Quick Start
 
@@ -56,6 +59,7 @@ import (
 	"github.com/dewep-online/goppy"
 	"github.com/dewep-online/goppy/plugins"
 	"github.com/dewep-online/goppy/plugins/http"
+	"github.com/dewep-online/goppy/middlewares"
 )
 
 func main() {
@@ -71,10 +75,10 @@ func main() {
 			Inject: NewController,
 			Resolve: func(routes *http.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(middlewares.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", middlewares.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},
