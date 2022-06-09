@@ -1,9 +1,12 @@
-package http
+package middlewares
 
 import (
 	"net/http"
 	"sync/atomic"
 )
+
+//Middleware type of middleware
+type Middleware func(func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request)
 
 //ThrottlingMiddleware limits active requests
 func ThrottlingMiddleware(max int64) Middleware {

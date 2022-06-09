@@ -58,9 +58,7 @@ func (v *goppy) Plugins(args ...plugins.Plugin) {
 
 //Run launching Goppy with initialization of all dependencies
 func (v *goppy) Run() {
-	if len(v.config) == 0 {
-		v.WithConfig(createTempConfig(v.cfgs...))
-	}
+	v.config = createTempConfig(v.config, v.cfgs...)
 
 	v.app.ConfigFile(v.config, v.cfgs...).
 		Modules(v.plgs...).
@@ -68,8 +66,10 @@ func (v *goppy) Run() {
 }
 
 //nolint: unparam
-func createTempConfig(cfgs ...interface{}) string {
-	filename := "./config.yaml"
+func createTempConfig(filename string, cfgs ...interface{}) string {
+	if len(filename) == 0 {
+		filename = "./config.yaml"
+	}
 	if _, err := os.Stat(filename); !errors.Is(err, os.ErrNotExist) {
 		return filename
 	}
