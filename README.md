@@ -5,6 +5,7 @@
 [![Release](https://img.shields.io/github/release/dewep-online/goppy.svg?style=flat-square)](https://github.com/dewep-online/goppy/releases/latest) 
 [![Go Report Card](https://goreportcard.com/badge/github.com/dewep-online/goppy)](https://goreportcard.com/report/github.com/dewep-online/goppy) 
 [![CI](https://github.com/dewep-online/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/dewep-online/goppy/actions/workflows/ci.yml)
+[![Codeql](https://github.com/dewep-online/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/dewep-online/goppy/actions/workflows/codeql.yml)
 
 ## Installation
 
