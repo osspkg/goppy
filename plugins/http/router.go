@@ -201,7 +201,6 @@ func (v *ctx) Context() context.Context {
 func (v *ctx) URL() *url.URL {
 	uri := v.r.URL
 	uri.Host = v.r.Host
-	uri.Scheme = v.r.Proto
 	return uri
 }
 
