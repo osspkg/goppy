@@ -9,8 +9,8 @@ github.com/deweppro/go-chan-pool v1.1.2 h1:mm+gvwAFB5NijCiJDSx9RqrB2AWTembzL9Rf6
 github.com/deweppro/go-chan-pool v1.1.2/go.mod h1:6meJsORhraeyvJNPy4hx8xgBNjp2xx3KGB/d5Q5a/I4=
 github.com/deweppro/go-errors v0.0.4 h1:TW91LRqHAkUauDJ5lzz73LziANH7mjli1tyvtwzXRCM=
 github.com/deweppro/go-errors v0.0.4/go.mod h1:BLsNcxaHh1fjNl/o1TB69JwA8XueSk/Nszkvw4ZwI/I=
-github.com/deweppro/go-http v1.4.2 h1:aQiydt57SRXwiAHjOxtKhRtSbNxYHG7iqWpWL9iBQu8=
-github.com/deweppro/go-http v1.4.2/go.mod h1:zta7HINyRd9nmSRtqxw6APOTXwDPBI42G9iZQwqtQVU=
+github.com/deweppro/go-http v1.4.3 h1:bm4PY+SBoZ9KISdtrAx8rV/hKn6t+ggt5P12+hqlE3o=
+github.com/deweppro/go-http v1.4.3/go.mod h1:zta7HINyRd9nmSRtqxw6APOTXwDPBI42G9iZQwqtQVU=
 github.com/deweppro/go-logger v1.3.0 h1:KN6RQmb6IoNBxQ7zx7Y1AtptHeL//FRgvQyEF5PrcsE=
 github.com/deweppro/go-logger v1.3.0/go.mod h1:jxBBLyHmIvJ4erGUj5qeE6ir36ztyAL1pI+9GymOHVI=
 github.com/deweppro/go-orm v1.0.6 h1:HoM9SniQTI6oJ95EBEW4MX0vWhZPuVj5Qxp6l9B4oVU=
@@ -34,6 +34,7 @@ github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZN
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+golang.org/x/sys v0.0.0-20220325203850-36772127a21f/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220412211240-33da011f77ad/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68 h1:z8Hj/bl9cOV2grsOpEaQFUaly0JWN3i97mo3jXKJNp0=
 golang.org/x/sys v0.0.0-20220608164250-635b8c9b7f68/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=

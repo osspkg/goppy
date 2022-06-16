@@ -301,6 +301,7 @@ type (
 	Router interface {
 		Use(args ...middlewares.Middleware)
 		Collection(prefix string, args ...middlewares.Middleware) RouteCollector
+		NotFoundHandler(call func(ctx Ctx))
 
 		RouteCollector
 	}
@@ -329,6 +330,12 @@ func (v *route) Use(args ...middlewares.Middleware) {
 			return arg(ctrlFunc)
 		})
 	}
+}
+
+func (v *route) NotFoundHandler(call func(ctx Ctx)) {
+	v.r.NoFoundHandler(func(w nethttp.ResponseWriter, r *nethttp.Request) {
+		call(newCtx(w, r, v.l))
+	})
 }
 
 func (v *route) Match(path string, call func(ctx Ctx), methods ...string) {
