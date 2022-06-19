@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer, out *ErrMessage) {
+func easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer, out *errMessage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -76,18 +76,13 @@ func easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer,
 		in.Consumed()
 	}
 }
-func easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Writer, in ErrMessage) {
+func easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Writer, in errMessage) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
 		const prefix string = ",\"code\":"
-		if first {
-			first = false
-			out.RawString(prefix[1:])
-		} else {
-			out.RawString(prefix)
-		}
+		out.RawString(prefix[1:])
 		out.String(string(in.InternalCode))
 	}
 	{
@@ -124,25 +119,25 @@ func easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Writ
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v ErrMessage) MarshalJSON() ([]byte, error) {
+func (v errMessage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v ErrMessage) MarshalEasyJSON(w *jwriter.Writer) {
+func (v errMessage) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *ErrMessage) UnmarshalJSON(data []byte) error {
+func (v *errMessage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *ErrMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *errMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(l, v)
 }

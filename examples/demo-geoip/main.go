@@ -35,7 +35,7 @@ func main() {
 						Country:  geoip.GetCountryName(ctx),
 						ProxyIPs: geoip.GetProxyIPs(ctx),
 					}
-					ctx.SetBody().JSON(&m)
+					ctx.SetBody(200).JSON(&m)
 				})
 			},
 		},

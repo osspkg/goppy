@@ -15,7 +15,6 @@ import (
 	"github.com/dewep-online/goppy/middlewares"
 	"github.com/deweppro/go-http/pkg/httputil"
 	"github.com/deweppro/go-http/pkg/httputil/dec"
-	"github.com/deweppro/go-http/pkg/httputil/enc"
 	"github.com/deweppro/go-http/pkg/routes"
 	"github.com/deweppro/go-http/servers"
 	"github.com/deweppro/go-http/servers/web"
@@ -39,7 +38,7 @@ type (
 		GetCookie(key string) *nethttp.Cookie
 		SetCookie(value *nethttp.Cookie)
 		GetBody() BodyReader
-		SetBody() BodyWriter
+		SetBody(code int) BodyWriter
 		Context() context.Context
 		Log() logger.LogWriter
 	}
@@ -153,43 +152,85 @@ type (
 		JSON(in interface{})
 		Stream(in []byte, filename string)
 		Raw(in []byte)
-		Error(in ErrMessage)
+		String(b string, args ...interface{})
+		ErrorJSON(err error, code string, ctx ErrCtx)
+		Error(err error)
 	}
 
-	//ErrMessage standard error message type
 	//easyjson:json
-	ErrMessage struct {
-		HTTPCode     int                    `json:"-"`
-		InternalCode string                 `json:"code"`
-		Message      string                 `json:"msg"`
-		Ctx          map[string]interface{} `json:"ctx,omitempty"`
+	errMessage struct {
+		InternalCode string `json:"code,omitempty"`
+		Message      string `json:"msg"`
+		Ctx          ErrCtx `json:"ctx,omitempty"`
 	}
+
+	ErrCtx map[string]interface{}
 
 	bodyWriter struct {
-		w nethttp.ResponseWriter
+		code int
+		w    nethttp.ResponseWriter
 	}
 )
 
 //Raw recording the response in raw format
-func (v *bodyWriter) Raw(in []byte) { enc.Raw(v.w, in) }
-
-//JSON recording the response in json format
-func (v *bodyWriter) JSON(in interface{}) { enc.JSON(v.w, in) }
-
-//Stream sending raw data in response with the definition of the content type by the file name
-func (v *bodyWriter) Stream(in []byte, filename string) { enc.Stream(v.w, in, filename) }
-
-//Error recording an error response
-func (v *bodyWriter) Error(in ErrMessage) {
-	b, _ := json.Marshal(&in) //nolint: errcheck
-	v.w.Header().Add("Content-Type", "application/json; charset=utf-8")
-	v.w.WriteHeader(in.HTTPCode)
+func (v *bodyWriter) Raw(b []byte) {
+	v.w.WriteHeader(v.code)
 	v.w.Write(b) //nolint: errcheck
 }
 
+//String recording the response in string format
+func (v *bodyWriter) String(b string, args ...interface{}) {
+	v.w.WriteHeader(v.code)
+	fmt.Fprintf(v.w, b, args...) //nolint: errcheck
+}
+
+//JSON recording the response in json format
+func (v *bodyWriter) JSON(in interface{}) {
+	b, err := json.Marshal(in)
+	if err != nil {
+		v.code = nethttp.StatusInternalServerError
+		v.ErrorJSON(err, "x0", nil)
+		return
+	}
+	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	v.w.WriteHeader(v.code)
+	v.w.Write(b) //nolint: errcheck
+}
+
+//Stream sending raw data in response with the definition of the content type by the file name
+func (v *bodyWriter) Stream(in []byte, filename string) {
+	v.w.Header().Set("Content-Type", "application/octet-stream")
+	v.w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
+	v.w.WriteHeader(v.code)
+	v.w.Write(in) //nolint: errcheck
+}
+
+//ErrorJSON recording an error response
+func (v *bodyWriter) ErrorJSON(err error, code string, ctx ErrCtx) {
+	if err == nil {
+		err = fmt.Errorf("unknown error")
+	}
+	model := errMessage{
+		InternalCode: code,
+		Message:      err.Error(),
+		Ctx:          ctx,
+	}
+	b, _ := json.Marshal(&model) //nolint: errcheck
+	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	v.w.WriteHeader(v.code)
+	v.w.Write(b) //nolint: errcheck
+}
+
+func (v *bodyWriter) Error(err error) {
+	if err == nil {
+		err = fmt.Errorf("unknown error")
+	}
+	nethttp.Error(v.w, err.Error(), v.code)
+}
+
 //SetBody response body handler
-func (v *ctx) SetBody() BodyWriter {
-	return &bodyWriter{w: v.w}
+func (v *ctx) SetBody(code int) BodyWriter {
+	return &bodyWriter{w: v.w, code: code}
 }
 
 //Context provider the request context
