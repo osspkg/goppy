@@ -40,8 +40,8 @@ func (v *ConfigSqlite) Default() {
 
 //List getting all configs
 func (v *ConfigSqlite) List() (list []schema.ItemInterface) {
-	for _, item := range v.Pool {
-		list = append(list, item)
+	for _, vv := range v.Pool {
+		list = append(list, vv)
 	}
 	return
 }
@@ -76,7 +76,7 @@ type (
 
 	//SQLite connection SQLite interface
 	SQLite interface {
-		Pool(name string) orm.StmtInterface
+		Pool(name string) *orm.Stmt
 	}
 )
 
@@ -84,18 +84,18 @@ func (v *sqliteProvider) Up() error {
 	if err := v.conn.Reconnect(); err != nil {
 		return err
 	}
-	for _, item := range v.conf.Pool {
-		p, err := v.conn.Pool(item.Name)
+	for _, vv := range v.conf.Pool {
+		p, err := v.conn.Pool(vv.Name)
 		if err != nil {
-			return fmt.Errorf("pool `%s`: %w", item.Name, err)
+			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
 		if err = p.Ping(); err != nil {
-			return fmt.Errorf("pool `%s`: %w", item.Name, err)
+			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
-		if err = v.migration(p, item.InitMigration); err != nil {
-			return fmt.Errorf("pool `%s`: %w", item.Name, err)
+		if err = v.migration(p, vv.InitMigration); err != nil {
+			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
-		v.log.WithFields(logger.Fields{item.Name: item.File}).Infof("SQLite connect")
+		v.log.WithFields(logger.Fields{vv.Name: vv.File}).Infof("SQLite connect")
 	}
 	return nil
 }

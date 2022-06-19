@@ -41,6 +41,8 @@ type (
 		SetBody(code int) BodyWriter
 		Context() context.Context
 		Log() logger.LogWriter
+		Request() *nethttp.Request
+		Response() nethttp.ResponseWriter
 	}
 )
 
@@ -50,6 +52,14 @@ func newCtx(w nethttp.ResponseWriter, r *nethttp.Request, l logger.Logger) *ctx 
 		r: r,
 		l: l,
 	}
+}
+
+func (v *ctx) Request() *nethttp.Request {
+	return v.r
+}
+
+func (v *ctx) Response() nethttp.ResponseWriter {
+	return v.w
 }
 
 type (
