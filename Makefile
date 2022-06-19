@@ -1,5 +1,6 @@
 TOOLS_BIN=$(shell pwd)/.tools
 COVERALLS_TOKEN?=dev
+VERSION=$(shell git describe --tags $(git rev-list --tags --max-count=1))
 
 install:
 	go mod download
@@ -29,3 +30,7 @@ tests:
 pre-commite: generate lint tests
 
 ci: install build lint tests
+
+push_version:
+	@echo "Current version  - $(VERSION)"
+	@curl 'https://sum.golang.org/lookup/github.com/dewep-online/goppy@@$(VERSION)'

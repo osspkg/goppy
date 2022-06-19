@@ -1,24 +1,17 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/dewep-online/goppy"
 	"github.com/dewep-online/goppy/middlewares"
 	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/database"
 	"github.com/dewep-online/goppy/plugins/http"
 )
 
 func main() {
-
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTPDebug(),
 		http.WithHTTP(),
-		database.WithMySQL(),
-		database.WithSQLite(),
 	)
 	app.Plugins(
 		plugins.Plugin{
@@ -34,17 +27,12 @@ func main() {
 		},
 	)
 	app.Run()
-
 }
 
-type Controller struct {
-	db database.MySQL
-}
+type Controller struct{}
 
-func NewController(v database.MySQL) *Controller {
-	return &Controller{
-		db: v,
-	}
+func NewController() *Controller {
+	return &Controller{}
 }
 
 func (v *Controller) Users(ctx http.Ctx) {
@@ -54,13 +42,6 @@ func (v *Controller) Users(ctx http.Ctx) {
 
 func (v *Controller) User(ctx http.Ctx) {
 	id, _ := ctx.Param("id").Int()
-
-	err := v.db.Pool("main").Ping()
-	if err != nil {
-		ctx.Log().Errorf("db: %s", err.Error())
-	}
-
-	ctx.SetBody(400).ErrorJSON(fmt.Errorf("user not found"), "x1000", http.ErrCtx{"id": id})
-
+	ctx.SetBody(200).String("user id: %d", id)
 	ctx.Log().Infof("user - %d", id)
 }
