@@ -18,8 +18,8 @@ type ConfigMysql struct {
 
 //List getting all configs
 func (v *ConfigMysql) List() (list []schema.ItemInterface) {
-	for _, item := range v.Pool {
-		list = append(list, item)
+	for _, vv := range v.Pool {
+		list = append(list, vv)
 	}
 	return
 }
@@ -71,7 +71,7 @@ type (
 
 	//MySQL connection MySQL interface
 	MySQL interface {
-		Pool(name string) orm.StmtInterface
+		Pool(name string) *orm.Stmt
 	}
 )
 
@@ -79,16 +79,16 @@ func (v *mysqlProvider) Up() error {
 	if err := v.conn.Reconnect(); err != nil {
 		return err
 	}
-	for _, item := range v.conf.Pool {
-		p, err := v.conn.Pool(item.Name)
+	for _, vv := range v.conf.Pool {
+		p, err := v.conn.Pool(vv.Name)
 		if err != nil {
-			return fmt.Errorf("pool `%s`: %w", item.Name, err)
+			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
 		if err = p.Ping(); err != nil {
-			return fmt.Errorf("pool `%s`: %w", item.Name, err)
+			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
 		v.log.WithFields(
-			logger.Fields{item.Name: fmt.Sprintf("%s:%d", item.Host, item.Port)},
+			logger.Fields{vv.Name: fmt.Sprintf("%s:%d", vv.Host, vv.Port)},
 		).Infof("MySQL connect")
 	}
 	return nil

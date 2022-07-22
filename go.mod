@@ -7,7 +7,7 @@ require (
 	github.com/deweppro/go-errors v0.0.4
 	github.com/deweppro/go-http v1.4.3
 	github.com/deweppro/go-logger v1.3.0
-	github.com/deweppro/go-orm v1.0.6
+	github.com/deweppro/go-orm v1.1.0
 	github.com/mailru/easyjson v0.7.7
 	github.com/oschwald/geoip2-golang v1.7.0
 	gopkg.in/yaml.v3 v3.0.1
