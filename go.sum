@@ -3,8 +3,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/deweppro/go-algorithms v1.2.0 h1:fBS+GNQaeSDSmvFWdmkKLcKXo2DhX5M0AJaCxEqGedY=
 github.com/deweppro/go-algorithms v1.2.0/go.mod h1:zYdfRdlpaXgdT36OgvdjH1qtTZFWEeBi3KUQmWltMPI=
-github.com/deweppro/go-app v1.5.3 h1:/8anw7+ngjtAmk2NKDd/+zFGB7WFmiXyYekym5kqd7U=
-github.com/deweppro/go-app v1.5.3/go.mod h1:rZ95OfFGvRnm5ndIJI+DOtoOuVrgy3NeQ2vwmbmi0Tk=
+github.com/deweppro/go-app v1.5.4 h1:Dqg6fk4lGP2z2NtlhmT5qdDpGuYwzvRMzsEpVgvnh68=
+github.com/deweppro/go-app v1.5.4/go.mod h1:rZ95OfFGvRnm5ndIJI+DOtoOuVrgy3NeQ2vwmbmi0Tk=
 github.com/deweppro/go-chan-pool v1.1.2 h1:mm+gvwAFB5NijCiJDSx9RqrB2AWTembzL9Rf6XTv4BI=
 github.com/deweppro/go-chan-pool v1.1.2/go.mod h1:6meJsORhraeyvJNPy4hx8xgBNjp2xx3KGB/d5Q5a/I4=
 github.com/deweppro/go-errors v0.0.4 h1:TW91LRqHAkUauDJ5lzz73LziANH7mjli1tyvtwzXRCM=
@@ -13,8 +13,6 @@ github.com/deweppro/go-http v1.4.3 h1:bm4PY+SBoZ9KISdtrAx8rV/hKn6t+ggt5P12+hqlE3
 github.com/deweppro/go-http v1.4.3/go.mod h1:zta7HINyRd9nmSRtqxw6APOTXwDPBI42G9iZQwqtQVU=
 github.com/deweppro/go-logger v1.3.0 h1:KN6RQmb6IoNBxQ7zx7Y1AtptHeL//FRgvQyEF5PrcsE=
 github.com/deweppro/go-logger v1.3.0/go.mod h1:jxBBLyHmIvJ4erGUj5qeE6ir36ztyAL1pI+9GymOHVI=
-github.com/deweppro/go-orm v1.0.6 h1:HoM9SniQTI6oJ95EBEW4MX0vWhZPuVj5Qxp6l9B4oVU=
-github.com/deweppro/go-orm v1.0.6/go.mod h1:JEbxJLmXMjSOtlwhuJmrJKZRLhcJcexRvGZ6hgautaw=
 github.com/deweppro/go-orm v1.1.0 h1:CmW1OU+W6mn0Nk1MdoMf6PWxP12nIK/sXImboIwindw=
 github.com/deweppro/go-orm v1.1.0/go.mod h1:JEbxJLmXMjSOtlwhuJmrJKZRLhcJcexRvGZ6hgautaw=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
