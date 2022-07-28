@@ -1,0 +1,59 @@
+<html>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+
+var tick = 0;
+var last = 0;
+
+var socket = new WebSocket("ws://localhost:8088/ws");
+
+socket.onopen = function() {
+	log('Соединение установлено.');
+};
+
+socket.onclose = function(event) {
+	if (event.wasClean) {
+		log('Соединение закрыто чисто');    
+	} else {	
+		log('Обрыв соединения');
+	}
+	console.log(event)
+	log('Код: ' + event.code + ' причина: ' + event.reason);
+};
+
+socket.onmessage = function(event) {
+	log(event.data);
+};
+
+socket.onerror = function(error) {
+	log("Ошибка " + error.message);
+};
+
+function log(text) {
+	$('#test_div').append(text + '<br><hr>');
+	tick = tick + 1;
+	$('#tick_count').html(tick);
+}
+
+function approve() {
+	socket.send($('#data').val())
+}
+
+
+
+</script>
+<body>
+<a href="#" onclick="socket.close('1000')">Close socket</a>
+<br>
+<br>
+<input type="text" id="data" style="width: 400px"
+       value='{"id":1,"d":[1,2,3,4,5]}'><input
+        type="button" onclick="approve()" value="Send">
+<br>
+<br>
+
+
+<div id="tick_count"></div>
+<div id="test_div"></div>
+</body>
+</html>
