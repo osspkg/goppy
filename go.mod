@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/deweppro/go-app v1.5.4
 	github.com/deweppro/go-errors v0.0.4
-	github.com/deweppro/go-http v1.4.3
+	github.com/deweppro/go-http v1.4.4
 	github.com/deweppro/go-logger v1.3.0
 	github.com/deweppro/go-orm v1.1.0
 	github.com/google/uuid v1.3.0
