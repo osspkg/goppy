@@ -36,9 +36,9 @@ func easyjsonC8566e17DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer
 			continue
 		}
 		switch key {
-		case "id":
-			out.ID = uint(in.Uint())
 		case "e":
+			out.ID = uint(in.Uint())
+		case "err":
 			if in.IsNull() {
 				in.Skip()
 				out.Err = nil
@@ -67,18 +67,14 @@ func easyjsonC8566e17EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Wri
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"id\":"
+		const prefix string = ",\"e\":"
 		out.RawString(prefix[1:])
 		out.Uint(uint(in.ID))
 	}
-	{
-		const prefix string = ",\"e\":"
+	if in.Err != nil {
+		const prefix string = ",\"err\":"
 		out.RawString(prefix)
-		if in.Err == nil {
-			out.RawString("null")
-		} else {
-			out.String(string(*in.Err))
-		}
+		out.String(string(*in.Err))
 	}
 	{
 		const prefix string = ",\"d\":"

@@ -5,6 +5,7 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	nethttp "net/http"
 	"sync"
 	"sync/atomic"
@@ -17,34 +18,33 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type Message interface {
-	Decode(in interface{}) error
-	Encode(out interface{}) error
-}
-
 var (
 	poolEvent = sync.Pool{New: func() interface{} { return &event{} }}
 )
 
 //easyjson:json
 type event struct {
-	ID      uint            `json:"id"`
-	Err     *string         `json:"e"`
+	ID      uint            `json:"e"`
+	Err     *string         `json:"err,omitempty"`
 	Data    json.RawMessage `json:"d"`
 	Updated bool            `json:"-"`
+}
+
+func (v *event) EventID() uint {
+	return v.ID
 }
 
 func (v *event) Decode(in interface{}) error {
 	return json.Unmarshal(v.Data, in)
 }
 
-func (v *event) Encode(out interface{}) error {
-	b, err := json.Marshal(out)
+func (v *event) Encode(in interface{}) {
+	b, err := json.Marshal(in)
 	if err != nil {
-		return err
+		v.Error(err)
+		return
 	}
 	v.Body(b)
-	return nil
 }
 
 func (v *event) Reset() *event {
@@ -64,6 +64,15 @@ func (v *event) Body(b []byte) {
 	v.Err, v.Data, v.Updated = nil, append(v.Data[:0], b...), true
 }
 
+func eventModel(call func(ev *event)) {
+	m, ok := poolEvent.Get().(*event)
+	if !ok {
+		m = &event{}
+	}
+	call(m)
+	poolEvent.Put(m.Reset())
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const (
@@ -72,40 +81,47 @@ const (
 )
 
 type (
-	Connection interface {
-		UID() string
-		GetHeader(key string) string
+	conn struct {
+		cid       string
+		ctx       context.Context
+		cancel    context.CancelFunc
+		onClose   []func(cid string)
+		onError   func(cid string, msg string, err error)
+		sendC     chan []byte
+		conn      *websocket.Conn
+		headers   nethttp.Header
+		eventCall eventFn
+		wg        sync.WaitGroup
+		status    int64
 	}
 
-	conn struct {
-		uid     string
-		ctx     context.Context
-		cncl    context.CancelFunc
-		onClose []func(uid string)
-		onError func(uid string, msg string, err error)
-		sendC   chan []byte
-		conn    *websocket.Conn
-		headers nethttp.Header
-		handler call
-		wg      sync.WaitGroup
-		status  int64
+	Processor interface {
+		CID() string
+		GetHeader(key string) string
+		OnClose(cb func(cid string))
+		Encode(eventID uint, in interface{})
+	}
+
+	Eventer interface {
+		EventID() uint
+		Decode(in interface{}) error
 	}
 )
 
 func newConn(ctx context.Context) *conn {
 	c, cncl := context.WithCancel(ctx)
 	return &conn{
-		uid:     uuid.NewString(),
+		cid:     uuid.NewString(),
 		onClose: make([]func(string), 0),
 		sendC:   make(chan []byte, 128),
 		ctx:     c,
-		cncl:    cncl,
+		cancel:  cncl,
 		status:  on,
 	}
 }
 
-func (v *conn) UID() string {
-	return v.uid
+func (v *conn) CID() string {
+	return v.cid
 }
 
 func (v *conn) GetHeader(key string) string {
@@ -115,15 +131,15 @@ func (v *conn) GetHeader(key string) string {
 	return v.headers.Get(key)
 }
 
-func (v *conn) Handler(h call) {
-	v.handler = h
+func (v *conn) GetEventCall(e eventFn) {
+	v.eventCall = e
 }
 
-func (v *conn) OnClose(cb func(string)) {
+func (v *conn) OnClose(cb func(cid string)) {
 	v.onClose = append(v.onClose, cb)
 }
 
-func (v *conn) OnError(cb func(uid string, msg string, err error)) {
+func (v *conn) OnError(cb func(cid string, msg string, err error)) {
 	v.onError = cb
 }
 
@@ -132,25 +148,28 @@ func (v *conn) Close() {
 		return
 	}
 	for _, fn := range v.onClose {
-		fn(v.UID())
+		fn(v.CID())
 	}
 	if v.conn != nil {
-		v.cncl()
+		v.cancel()
 		v.wg.Wait()
 		if err := v.conn.Close(); err != nil {
-			v.onError(v.UID(), "[ws] close conn", err)
+			v.onError(v.CID(), "[ws] close conn", err)
 		}
 	}
 }
 
-func (v *conn) JSON(in interface{}) {
-	b, err := json.Marshal(in)
-	if err != nil {
-		v.onError(v.UID(), "[ws] marshal message", err)
-		return
-	}
-
-	v.Write(b)
+func (v *conn) Encode(eventID uint, in interface{}) {
+	eventModel(func(ev *event) {
+		ev.ID = eventID
+		ev.Encode(in)
+		b, err := ev.MarshalJSON()
+		if err != nil {
+			v.onError(v.CID(), fmt.Sprintf("[ws] encode message: %d", eventID), err)
+			return
+		}
+		v.Write(b)
+	})
 }
 
 func (v *conn) Write(b []byte) {
@@ -176,17 +195,17 @@ func (v *conn) pumpWrite() {
 		case <-v.ctx.Done():
 			m := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Bye bye!")
 			if err := v.conn.WriteMessage(websocket.CloseMessage, m); err != nil && err != websocket.ErrCloseSent {
-				v.onError(v.UID(), "[ws] send close", err)
+				v.onError(v.CID(), "[ws] send close", err)
 			}
 			return
 		case m := <-v.sendC:
 			if err := v.conn.WriteMessage(websocket.TextMessage, m); err != nil {
-				v.onError(v.UID(), "[ws] send message", err)
+				v.onError(v.CID(), "[ws] send message", err)
 				return
 			}
 		case <-ticker.C:
 			if err := v.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				v.onError(v.UID(), "[ws] send ping", err)
+				v.onError(v.CID(), "[ws] send ping", err)
 				return
 			}
 		}
@@ -202,25 +221,69 @@ func (v *conn) pumpRead() {
 		_, message, err := v.conn.ReadMessage()
 		if err != nil {
 			if !websocket.IsCloseError(err, 1000, 1001) {
-				v.onError(v.UID(), "[ws] read message", err)
+				v.onError(v.CID(), "[ws] read message", err)
 			}
 			return
 		}
-		v.handler(message, v)
+		go v.processor(message)
 	}
+}
+
+func (v *conn) processor(b []byte) {
+	eventModel(func(ev *event) {
+		var (
+			err error
+			msg string
+		)
+		defer func() {
+			if err != nil {
+				v.onError(v.CID(), "[ws] "+msg, err)
+			}
+		}()
+		if err = ev.UnmarshalJSON(b); err != nil {
+			msg = "decode message"
+			return
+		}
+		call, err := v.eventCall(ev.ID)
+		if err != nil {
+			ev.Error(err)
+			bb, er := ev.MarshalJSON()
+			if er != nil {
+				msg = fmt.Sprintf("[ws] encode message: %d", ev.ID)
+				err = errors.Wrap(err, er)
+				return
+			}
+			err = nil
+			v.Write(bb)
+			return
+		}
+		err = call(ev, v)
+		if err != nil {
+			ev.Error(err)
+			bb, er := ev.MarshalJSON()
+			if er != nil {
+				msg = fmt.Sprintf("[ws] call event handler: %d", ev.ID)
+				err = errors.Wrap(err, er)
+				return
+			}
+			err = nil
+			v.Write(bb)
+			return
+		}
+	})
 }
 
 func (v *conn) Upgrade(w nethttp.ResponseWriter, r *nethttp.Request, up websocket.Upgrader) (err error) {
 	v.conn, err = up.Upgrade(w, r, nil)
 	if err != nil {
-		v.onError(v.UID(), "[ws] upgrade", err)
+		v.onError(v.CID(), "[ws] upgrade", err)
 		v.Close()
 		return
 	}
 
 	v.headers = r.Header
 	if err = v.conn.SetReadDeadline(time.Now().Add(pongWait)); err != nil {
-		v.onError(v.UID(), "[ws] send pong", err)
+		v.onError(v.CID(), "[ws] send pong", err)
 		v.Close()
 		return
 	}
@@ -245,10 +308,9 @@ const (
 var (
 	ErrServAlreadyRunning = errors.New("server already running")
 	ErrServAlreadyStopped = errors.New("server already stopped")
-	ErrInvalidResponse    = errors.New("invalid response")
-	ErrUnknownMessageType = errors.New("unknown message type")
+	ErrUnknownEventID     = errors.New("unknown event id")
 
-	wsu = websocket.Upgrader{
+	wsu = &websocket.Upgrader{
 		EnableCompression: true,
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
@@ -296,7 +358,7 @@ func WithWebsocket(options ...OptionWS) plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(log logger.Logger) (*wsProvider, WebSocket) {
 			for _, option := range options {
-				option(&wsu)
+				option(wsu)
 			}
 			wsp := newWsProvider(log)
 			return wsp, wsp
@@ -308,20 +370,23 @@ type (
 	wsProvider struct {
 		status  int64
 		clients map[string]*conn
-		calls   map[uint]Handler
+		events  map[uint]Handler
+
+		cm sync.RWMutex
+		em sync.RWMutex
 
 		log logger.Logger
-		mux sync.RWMutex
 	}
 
-	Handler func(m Message, c Connection) error
-	call    func([]byte, *conn)
+	Handler func(d Eventer, c Processor) error
+	eventFn func(id uint) (Handler, error)
 
 	WebSocket interface {
 		Handling(ctx Ctx)
-		Event(t uint, call Handler)
-		Broadcast(t uint, b []byte)
+		Event(call Handler, eid ...uint)
+		Broadcast(t uint, m json.Marshaler)
 		CloseAll()
+		CountConn() int
 	}
 )
 
@@ -329,7 +394,7 @@ func newWsProvider(log logger.Logger) *wsProvider {
 	return &wsProvider{
 		status:  off,
 		clients: make(map[string]*conn),
-		calls:   make(map[uint]Handler),
+		events:  make(map[uint]Handler),
 		log:     log,
 	}
 }
@@ -350,104 +415,101 @@ func (v *wsProvider) Down() error {
 	return nil
 }
 
-func (v *wsProvider) Broadcast(t uint, b []byte) {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
+func (v *wsProvider) Broadcast(t uint, m json.Marshaler) {
+	eventModel(func(ev *event) {
+		ev.ID = t
 
-	m, ok := poolEvent.Get().(*event)
-	if !ok {
-		return
-	}
-	defer poolEvent.Put(m.Reset())
+		b, err := m.MarshalJSON()
+		if err != nil {
+			v.log.WithFields(logger.Fields{
+				"err": err.Error(),
+			}).Errorf("[ws] Broadcast error")
+			return
+		}
+		ev.Body(b)
 
-	m.ID = t
-	m.Body(b)
+		b, err = json.Marshal(ev)
+		if err != nil {
+			v.log.WithFields(logger.Fields{
+				"err": err.Error(),
+			}).Errorf("[ws] Broadcast error")
+			return
+		}
 
-	bb, err := json.Marshal(m)
-	if err != nil {
-		return
-	}
-
-	for _, c := range v.clients {
-		c.Write(bb)
-	}
+		v.cm.RLock()
+		for _, c := range v.clients {
+			c.Write(b)
+		}
+		v.cm.RUnlock()
+	})
 }
 
 func (v *wsProvider) CloseAll() {
-	v.mux.Lock()
-	defer v.mux.Unlock()
+	v.cm.Lock()
+	defer v.cm.Unlock()
 
 	for _, c := range v.clients {
 		c.Close()
 	}
 }
 
-func (v *wsProvider) Event(t uint, call Handler) {
-	v.mux.Lock()
-	defer v.mux.Unlock()
+func (v *wsProvider) Event(call Handler, eid ...uint) {
+	v.em.Lock()
+	defer v.em.Unlock()
 
-	v.calls[t] = call
+	for _, i := range eid {
+		v.events[i] = call
+	}
+}
+
+func (v *wsProvider) addConn(c *conn) {
+	v.cm.Lock()
+	v.clients[c.CID()] = c
+	v.cm.Unlock()
+}
+
+func (v *wsProvider) delConn(c *conn) {
+	v.cm.Lock()
+	delete(v.clients, c.CID())
+	v.cm.Unlock()
+}
+
+func (v *wsProvider) CountConn() int {
+	v.cm.Lock()
+	cc := len(v.clients)
+	v.cm.Unlock()
+	return cc
+}
+
+func (v *wsProvider) getEventHandler(id uint) (Handler, error) {
+	v.em.RLock()
+	defer v.em.RUnlock()
+	fn, ok := v.events[id]
+	if !ok {
+		return nil, ErrUnknownEventID
+	}
+	return fn, nil
 }
 
 func (v *wsProvider) Handling(ctx Ctx) {
 	c := newConn(ctx.Context())
 
-	c.OnError(func(uid string, msg string, err error) {
+	c.OnError(func(cid string, msg string, err error) {
 		if err == nil {
 			return
 		}
 		v.log.WithFields(logger.Fields{
-			"uid": uid,
+			"cid": cid,
 			"err": err.Error(),
 		}).Errorf(msg)
 	})
 
-	c.Handler(v.processor)
+	c.GetEventCall(v.getEventHandler)
 
-	v.mux.Lock()
-	v.clients[c.UID()] = c
-	v.mux.Unlock()
-
-	if err := c.Upgrade(ctx.Response(), ctx.Request(), wsu); err != nil {
+	v.addConn(c)
+	defer v.delConn(c)
+	if err := c.Upgrade(ctx.Response(), ctx.Request(), *wsu); err != nil {
 		ctx.SetBody(nethttp.StatusBadRequest).Error(err)
 		return
 	}
-
-	v.mux.Lock()
-	delete(v.clients, c.UID())
-	v.mux.Unlock()
-}
-
-func (v *wsProvider) processor(b []byte, c *conn) {
-	m, ok := poolEvent.Get().(*event)
-	if !ok {
-		return
-	}
-	defer poolEvent.Put(m.Reset())
-
-	if err := json.Unmarshal(b, m); err != nil {
-		m.Error(err)
-		c.JSON(m)
-		return
-	}
-
-	v.mux.RLock()
-	fn, ok := v.calls[m.ID]
-	if !ok {
-		v.mux.RUnlock()
-		m.Error(ErrUnknownMessageType)
-		c.JSON(m)
-		return
-	}
-	v.mux.RUnlock()
-
-	if err := fn(m, c); err != nil {
-		m.Error(err)
-	}
-
-	if !m.Updated {
-		m.Error(ErrInvalidResponse)
-	}
-
-	c.JSON(m)
 }
