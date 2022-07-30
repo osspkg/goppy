@@ -35,8 +35,8 @@ function log(text) {
 	$('#tick_count').html(tick);
 }
 
-function approve() {
-	socket.send($('#data').val())
+function ev(id) {
+	socket.send($('#data'+id).val())
 }
 
 
@@ -46,9 +46,17 @@ function approve() {
 <a href="#" onclick="socket.close('1000')">Close socket</a>
 <br>
 <br>
-<input type="text" id="data" style="width: 400px"
-       value='{"id":1,"d":[1,2,3,4,5]}'><input
-        type="button" onclick="approve()" value="Send">
+<input type="text" id="data1" style="width: 400px"
+       value='{"e":1,"d":[1,2,3,4,5]}'><input
+        type="button" onclick="ev(1)" value="Send">
+<br>
+<input type="text" id="data2" style="width: 400px"
+       value='{"e":11}'><input
+        type="button" onclick="ev(2)" value="Send">
+<br>
+<input type="text" id="data3" style="width: 400px"
+       value='{"e":13}'><input
+        type="button" onclick="ev(3)" value="Send">
 <br>
 <br>
 
