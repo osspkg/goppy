@@ -46,7 +46,7 @@ func easyjson124e5e3DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer,
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.Ctx = make(map[string]interface{})
+					out.Ctx = make(ErrCtx)
 				} else {
 					out.Ctx = nil
 				}
@@ -80,14 +80,20 @@ func easyjson124e5e3EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Writ
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if in.InternalCode != "" {
 		const prefix string = ",\"code\":"
+		first = false
 		out.RawString(prefix[1:])
 		out.String(string(in.InternalCode))
 	}
 	{
 		const prefix string = ",\"msg\":"
-		out.RawString(prefix)
+		if first {
+			first = false
+			out.RawString(prefix[1:])
+		} else {
+			out.RawString(prefix)
+		}
 		out.String(string(in.Message))
 	}
 	if len(in.Ctx) != 0 {

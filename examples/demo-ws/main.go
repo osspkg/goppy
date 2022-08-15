@@ -48,13 +48,13 @@ func NewController() *Controller {
 	return c
 }
 
-func (v *Controller) OneEvent(d http.Eventer, c http.Processor) error {
+func (v *Controller) OneEvent(ev http.Eventer, c http.Processor) error {
 	list := make([]int, 0)
-	if err := d.Decode(&list); err != nil {
+	if err := ev.Decode(&list); err != nil {
 		return err
 	}
 	list = append(list, 10, 19, 17, 15)
-	c.Encode(1, &list)
+	c.EncodeEvent(ev, &list)
 	return nil
 }
 
@@ -83,7 +83,7 @@ func (v *Controller) MultiEvent(d http.Eventer, c http.Processor) error {
 		v.list[c.CID()] = c
 		fmt.Println("add", c.CID())
 		c.OnClose(func(cid string) {
-			fmt.Println("del", cid)
+			fmt.Println("close", cid)
 			delete(v.list, cid)
 		})
 	case 13:

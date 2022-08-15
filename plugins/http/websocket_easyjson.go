@@ -38,6 +38,10 @@ func easyjsonC8566e17DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer
 		switch key {
 		case "e":
 			out.ID = uint(in.Uint())
+		case "d":
+			if data := in.Raw(); in.Ok() {
+				in.AddError((out.Data).UnmarshalJSON(data))
+			}
 		case "err":
 			if in.IsNull() {
 				in.Skip()
@@ -48,9 +52,9 @@ func easyjsonC8566e17DecodeGithubComDewepOnlineGoppyPluginsHttp(in *jlexer.Lexer
 				}
 				*out.Err = string(in.String())
 			}
-		case "d":
+		case "u":
 			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Data).UnmarshalJSON(data))
+				in.AddError((out.UID).UnmarshalJSON(data))
 			}
 		default:
 			in.SkipRecursive()
@@ -71,15 +75,20 @@ func easyjsonC8566e17EncodeGithubComDewepOnlineGoppyPluginsHttp(out *jwriter.Wri
 		out.RawString(prefix[1:])
 		out.Uint(uint(in.ID))
 	}
+	{
+		const prefix string = ",\"d\":"
+		out.RawString(prefix)
+		out.Raw((in.Data).MarshalJSON())
+	}
 	if in.Err != nil {
 		const prefix string = ",\"err\":"
 		out.RawString(prefix)
 		out.String(string(*in.Err))
 	}
-	{
-		const prefix string = ",\"d\":"
+	if len(in.UID) != 0 {
+		const prefix string = ",\"u\":"
 		out.RawString(prefix)
-		out.Raw((in.Data).MarshalJSON())
+		out.Raw((in.UID).MarshalJSON())
 	}
 	out.RawByte('}')
 }
