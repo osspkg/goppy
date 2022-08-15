@@ -8,7 +8,7 @@ install:
 	mkdir -p $(TOOLS_BIN)
 	GO111MODULE=off GOBIN=$(TOOLS_BIN) go get golang.org/x/tools/cmd/cover
 	GO111MODULE=off GOBIN=$(TOOLS_BIN) go get github.com/mattn/goveralls
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN) v1.38.0
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(TOOLS_BIN) v1.47.3
 
 lint:
 	$(TOOLS_BIN)/golangci-lint -v run ./...

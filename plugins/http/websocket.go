@@ -25,13 +25,22 @@ var (
 //easyjson:json
 type event struct {
 	ID      uint            `json:"e"`
-	Err     *string         `json:"err,omitempty"`
 	Data    json.RawMessage `json:"d"`
+	Err     *string         `json:"err,omitempty"`
+	UID     json.RawMessage `json:"u,omitempty"`
 	Updated bool            `json:"-"`
 }
 
 func (v *event) EventID() uint {
 	return v.ID
+}
+
+func (v *event) UniqueID() []byte {
+	if v.UID == nil {
+		return nil
+	}
+	result := make([]byte, 0, len(v.UID))
+	return append(result, v.UID...)
 }
 
 func (v *event) Decode(in interface{}) error {
@@ -48,7 +57,7 @@ func (v *event) Encode(in interface{}) {
 }
 
 func (v *event) Reset() *event {
-	v.ID, v.Err, v.Data, v.Updated = 0, nil, v.Data[:0], false
+	v.ID, v.Err, v.UID, v.Data, v.Updated = 0, nil, nil, v.Data[:0], false
 	return v
 }
 
@@ -100,10 +109,12 @@ type (
 		GetHeader(key string) string
 		OnClose(cb func(cid string))
 		Encode(eventID uint, in interface{})
+		EncodeEvent(event Eventer, in interface{})
 	}
 
 	Eventer interface {
 		EventID() uint
+		UniqueID() []byte
 		Decode(in interface{}) error
 	}
 )
@@ -163,9 +174,23 @@ func (v *conn) Encode(eventID uint, in interface{}) {
 	eventModel(func(ev *event) {
 		ev.ID = eventID
 		ev.Encode(in)
-		b, err := ev.MarshalJSON()
+		b, err := json.Marshal(ev)
 		if err != nil {
 			v.onError(v.CID(), fmt.Sprintf("[ws] encode message: %d", eventID), err)
+			return
+		}
+		v.Write(b)
+	})
+}
+
+func (v *conn) EncodeEvent(e Eventer, in interface{}) {
+	eventModel(func(ev *event) {
+		ev.ID = e.EventID()
+		ev.UID = e.UniqueID()
+		ev.Encode(in)
+		b, err := json.Marshal(ev)
+		if err != nil {
+			v.onError(v.CID(), fmt.Sprintf("[ws] encode message: %d", e.EventID()), err)
 			return
 		}
 		v.Write(b)
@@ -220,7 +245,7 @@ func (v *conn) pumpRead() {
 	for {
 		_, message, err := v.conn.ReadMessage()
 		if err != nil {
-			if !websocket.IsCloseError(err, 1000, 1001) {
+			if !websocket.IsCloseError(err, 1000, 1001, 1005) {
 				v.onError(v.CID(), "[ws] read message", err)
 			}
 			return
@@ -240,16 +265,16 @@ func (v *conn) processor(b []byte) {
 				v.onError(v.CID(), "[ws] "+msg, err)
 			}
 		}()
-		if err = ev.UnmarshalJSON(b); err != nil {
+		if err = json.Unmarshal(b, ev); err != nil {
 			msg = "decode message"
 			return
 		}
-		call, err := v.eventCall(ev.ID)
+		call, err := v.eventCall(ev.EventID())
 		if err != nil {
 			ev.Error(err)
-			bb, er := ev.MarshalJSON()
+			bb, er := json.Marshal(ev)
 			if er != nil {
-				msg = fmt.Sprintf("[ws] encode message: %d", ev.ID)
+				msg = fmt.Sprintf("[ws] encode message: %d", ev.EventID())
 				err = errors.Wrap(err, er)
 				return
 			}
@@ -260,9 +285,9 @@ func (v *conn) processor(b []byte) {
 		err = call(ev, v)
 		if err != nil {
 			ev.Error(err)
-			bb, er := ev.MarshalJSON()
+			bb, er := json.Marshal(ev)
 			if er != nil {
-				msg = fmt.Sprintf("[ws] call event handler: %d", ev.ID)
+				msg = fmt.Sprintf("[ws] call event handler: %d", ev.EventID())
 				err = errors.Wrap(err, er)
 				return
 			}
