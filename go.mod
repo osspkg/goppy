@@ -3,7 +3,7 @@ module github.com/dewep-online/goppy
 go 1.18
 
 require (
-	github.com/deweppro/go-app v1.5.4
+	github.com/deweppro/go-app v1.6.0
 	github.com/deweppro/go-errors v0.0.4
 	github.com/deweppro/go-http v1.4.4
 	github.com/deweppro/go-logger v1.3.0
