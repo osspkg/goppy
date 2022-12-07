@@ -6,7 +6,7 @@ import (
 	"github.com/deweppro/go-logger"
 )
 
-//Config config to initialize HTTP service
+// Config config to initialize HTTP service
 type Config struct {
 	Config map[string]servers.Config `yaml:"http"`
 }
@@ -19,7 +19,7 @@ func (v *Config) Default() {
 	}
 }
 
-//WithHTTP launch of HTTP service with default Router
+// WithHTTP launch of HTTP service with default Router
 func WithHTTP() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &Config{},

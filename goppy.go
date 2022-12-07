@@ -17,7 +17,7 @@ type goppy struct {
 	cfgs   []interface{}
 }
 
-//New constructor for init Goppy
+// New constructor for init Goppy
 func New() *goppy {
 	return &goppy{
 		app:  application.New(),
@@ -26,7 +26,7 @@ func New() *goppy {
 	}
 }
 
-//WithConfig set config path for goppy
+// WithConfig set config path for goppy
 func (v *goppy) WithConfig(filename string) {
 	v.config = filename
 }
@@ -41,7 +41,7 @@ func (v *goppy) resolve(arg interface{}, k reflect.Kind, call func(interface{}),
 	call(arg)
 }
 
-//Plugins setting the list of plugins to initialize
+// Plugins setting the list of plugins to initialize
 func (v *goppy) Plugins(args ...plugins.Plugin) {
 	for _, arg := range args {
 		v.resolve(arg.Config, reflect.Ptr, func(in interface{}) {
@@ -56,7 +56,7 @@ func (v *goppy) Plugins(args ...plugins.Plugin) {
 	}
 }
 
-//Run launching Goppy with initialization of all dependencies
+// Run launching Goppy with initialization of all dependencies
 func (v *goppy) Run() {
 	v.config = createTempConfig(v.config, v.cfgs...)
 
@@ -65,7 +65,7 @@ func (v *goppy) Run() {
 		Run()
 }
 
-//nolint: unparam
+// nolint: unparam
 func createTempConfig(filename string, cfgs ...interface{}) string {
 	if len(filename) == 0 {
 		filename = "./config.yaml"

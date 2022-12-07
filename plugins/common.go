@@ -1,13 +1,13 @@
 package plugins
 
-//Plugin plugin structure
+// Plugin plugin structure
 type Plugin struct {
 	Config  interface{}
 	Inject  interface{}
 	Resolve interface{}
 }
 
-//Defaulter interface for setting default values for a structure
+// Defaulter interface for setting default values for a structure
 type Defaulter interface {
 	Default()
 }

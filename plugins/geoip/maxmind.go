@@ -9,7 +9,7 @@ import (
 	"github.com/oschwald/geoip2-golang"
 )
 
-//MaxMindConfig MaxMind database config
+// MaxMindConfig MaxMind database config
 type MaxMindConfig struct {
 	DB string `yaml:"maxminddb"`
 }
@@ -18,7 +18,7 @@ func (v *MaxMindConfig) Default() {
 	v.DB = "./GeoIP2-City.mmdb"
 }
 
-//WithMaxMindGeoIP information resolver through local MaxMind database
+// WithMaxMindGeoIP information resolver through local MaxMind database
 func WithMaxMindGeoIP() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &MaxMindConfig{},

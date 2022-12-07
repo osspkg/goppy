@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/middlewares"
 	"github.com/dewep-online/goppy/plugins"
 	"github.com/dewep-online/goppy/plugins/http"
 )
@@ -23,7 +22,7 @@ func main() {
 			Inject: NewController,
 			Resolve: func(routes http.RouterPool, c *Controller, ws http.WebSocket) {
 				router := routes.Main()
-				router.Use(middlewares.ThrottlingMiddleware(100))
+				router.Use(http.ThrottlingMiddleware(100))
 
 				ws.Event(c.OneEvent, 1, 2)
 				ws.Event(c.MultiEvent, 11, 13)

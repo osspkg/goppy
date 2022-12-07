@@ -7,7 +7,7 @@ import (
 	"github.com/deweppro/go-logger"
 )
 
-//DebugConfig config to initialize HTTP debug service
+// DebugConfig config to initialize HTTP debug service
 type DebugConfig struct {
 	Config servers.Config `yaml:"debug"`
 }
@@ -16,7 +16,7 @@ func (v *DebugConfig) Default() {
 	v.Config = servers.Config{Addr: "127.0.0.1:12000"}
 }
 
-//WithHTTPDebug debug service over HTTP protocol with pprof enabled
+// WithHTTPDebug debug service over HTTP protocol with pprof enabled
 func WithHTTPDebug() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &DebugConfig{},

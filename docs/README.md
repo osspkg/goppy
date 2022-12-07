@@ -1,5 +1,4 @@
-# Goppy Microservice Toolkit 
-
+# Goppy Microservice Toolkit
 
 [![Release](https://img.shields.io/github/release/dewep-online/goppy.svg?style=flat-square)](https://github.com/dewep-online/goppy/releases/latest)
 ![GitHub](https://img.shields.io/github/license/dewep-online/goppy)
@@ -23,13 +22,13 @@ go get -u github.com/dewep-online/goppy
 
 ## Plugins
 
-| Plugin       | Comment                                                                                                                                                             | Import                                                                                              |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| **debug**    | Profiling application (pprof) with HTTP access.                                                                                                                     | `http.WithHTTPDebug()`                                                                              |
-| **http**     | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `http.WithHTTP()`  `http.WithWebsocket()` `http.WithHTTPClients()`                                  |
-| **database** | Multi connection pools with MySQL and SQLite databases (with initialization migration setup).                                                                       | `database.WithMySQL()` `database.WithSQLite()`                                                      |
-| **geoip**    | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `middlewares.CloudflareMiddleware()` `middlewares.MaxMindMiddleware()` |
-
+| Plugin       | Comment                                                                                                                                                             | Import                                                                                |
+|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| **debug**    | Profiling application (pprof) with HTTP access.                                                                                                                     | `http.WithHTTPDebug()`                                                                |
+| **http**     | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `http.WithHTTP()`  `http.WithWebsocket()` `http.WithHTTPClients()`                    |
+| **database** | Multi connection pools with MySQL and SQLite databases (with initialization migration setup).                                                                       | `database.WithMySQL()` `database.WithSQLite()`                                        |
+| **geoip**    | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `http.CloudflareMiddleware()` `http.MaxMindMiddleware()` |
+| **oauth**    | Authorization via OAuth provider. (Yandex, Google)                                                                                                                  | `auth.WithOAuth()`                                                                    |
 
 ## Quick Start
 
@@ -41,8 +40,8 @@ level: 4
 log: /dev/stdout
 
 http:
-    main:
-        addr: 127.0.0.1:8088
+  main:
+    addr: 127.0.0.1:8088
 ```
 
 Code:
@@ -52,7 +51,6 @@ package main
 
 import (
 	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/middlewares"
 	"github.com/dewep-online/goppy/plugins"
 	"github.com/dewep-online/goppy/plugins/http"
 )
@@ -68,10 +66,10 @@ func main() {
 			Inject: NewController,
 			Resolve: func(routes http.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(middlewares.ThrottlingMiddleware(100))
+				router.Use(http.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", middlewares.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},

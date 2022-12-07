@@ -6,13 +6,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	nethttp "net/http"
 	"net/url"
 	"strconv"
 	"strings"
 
-	"github.com/dewep-online/goppy/middlewares"
+	"github.com/dewep-online/goppy/internal"
+
 	"github.com/deweppro/go-http/pkg/httputil"
 	"github.com/deweppro/go-http/pkg/httputil/dec"
 	"github.com/deweppro/go-http/pkg/routes"
@@ -75,10 +75,10 @@ type (
 	}
 )
 
-//String getting the parameter as a string
+// String getting the parameter as a string
 func (v param) String() (string, error) { return v.val, v.err }
 
-//Int getting the parameter as a int64
+// Int getting the parameter as a int64
 func (v param) Int() (int64, error) {
 	if v.err != nil {
 		return 0, v.err
@@ -86,7 +86,7 @@ func (v param) Int() (int64, error) {
 	return strconv.ParseInt(v.val, 10, 64)
 }
 
-//Float getting the parameter as a float64
+// Float getting the parameter as a float64
 func (v param) Float() (float64, error) {
 	if v.err != nil {
 		return 0.0, v.err
@@ -94,7 +94,7 @@ func (v param) Float() (float64, error) {
 	return strconv.ParseFloat(v.val, 64)
 }
 
-//Param getting a parameter from URL by key
+// Param getting a parameter from URL by key
 func (v *ctx) Param(key string) Paramer {
 	val, err := httputil.VarsString(v.r, key)
 	return param{
@@ -103,28 +103,28 @@ func (v *ctx) Param(key string) Paramer {
 	}
 }
 
-//Log log entry interface
+// Log log entry interface
 func (v *ctx) Log() logger.LogWriter {
 	return v.l
 }
 
-//GetHead getting headers from a key request
+// GetHead getting headers from a key request
 func (v *ctx) GetHead(key string) string {
 	return v.r.Header.Get(key)
 }
 
-//SetHead setting response headers
+// SetHead setting response headers
 func (v *ctx) SetHead(key, value string) {
 	v.w.Header().Set(key, value)
 }
 
-//GetCookie getting cookies from a key request
+// GetCookie getting cookies from a key request
 func (v *ctx) GetCookie(key string) *nethttp.Cookie {
 	c, _ := v.r.Cookie(key) //nolint: errcheck
 	return c
 }
 
-//SetCookie setting cookies in response
+// SetCookie setting cookies in response
 func (v *ctx) SetCookie(value *nethttp.Cookie) {
 	nethttp.SetCookie(v.w, value)
 }
@@ -141,17 +141,16 @@ type (
 	}
 )
 
-//Raw getting the raw request body
+// Raw getting the raw request body
 func (v *bodyReader) Raw() []byte {
-	defer v.r.Body.Close() //nolint: errcheck
-	b, _ := ioutil.ReadAll(v.r.Body)
+	b, _ := internal.ReadAll(v.r.Body) //nolint:errcheck
 	return b
 }
 
-//JSON decoding the request body into a structure
+// JSON decoding the request body into a structure
 func (v *bodyReader) JSON(in interface{}) error { return dec.JSON(v.r, in) }
 
-//GetBody request body handler
+// GetBody request body handler
 func (v *ctx) GetBody() BodyReader {
 	return &bodyReader{r: v.r}
 }
@@ -182,19 +181,19 @@ type (
 	}
 )
 
-//Raw recording the response in raw format
+// Raw recording the response in raw format
 func (v *bodyWriter) Raw(b []byte) {
 	v.w.WriteHeader(v.code)
 	v.w.Write(b) //nolint: errcheck
 }
 
-//String recording the response in string format
+// String recording the response in string format
 func (v *bodyWriter) String(b string, args ...interface{}) {
 	v.w.WriteHeader(v.code)
 	fmt.Fprintf(v.w, b, args...) //nolint: errcheck
 }
 
-//JSON recording the response in json format
+// JSON recording the response in json format
 func (v *bodyWriter) JSON(in interface{}) {
 	b, err := json.Marshal(in)
 	if err != nil {
@@ -207,7 +206,7 @@ func (v *bodyWriter) JSON(in interface{}) {
 	v.w.Write(b) //nolint: errcheck
 }
 
-//Stream sending raw data in response with the definition of the content type by the file name
+// Stream sending raw data in response with the definition of the content type by the file name
 func (v *bodyWriter) Stream(in []byte, filename string) {
 	v.w.Header().Set("Content-Type", "application/octet-stream")
 	v.w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
@@ -215,7 +214,7 @@ func (v *bodyWriter) Stream(in []byte, filename string) {
 	v.w.Write(in) //nolint: errcheck
 }
 
-//ErrorJSON recording an error response
+// ErrorJSON recording an error response
 func (v *bodyWriter) ErrorJSON(err error, code string, ctx ErrCtx) {
 	if err == nil {
 		err = fmt.Errorf("unknown error")
@@ -238,24 +237,24 @@ func (v *bodyWriter) Error(err error) {
 	nethttp.Error(v.w, err.Error(), v.code)
 }
 
-//SetBody response body handler
+// SetBody response body handler
 func (v *ctx) SetBody(code int) BodyWriter {
 	return &bodyWriter{w: v.w, code: code}
 }
 
-//Context provider the request context
+// Context provider the request context
 func (v *ctx) Context() context.Context {
 	return v.r.Context()
 }
 
-//URL getting a URL from a request
+// URL getting a URL from a request
 func (v *ctx) URL() *url.URL {
 	uri := v.r.URL
 	uri.Host = v.r.Host
 	return uri
 }
 
-//Redirect redirecting to another URL
+// Redirect redirecting to another URL
 func (v *ctx) Redirect(uri string) {
 	nethttp.Redirect(v.w, v.r, uri, nethttp.StatusMovedPermanently)
 }
@@ -296,19 +295,19 @@ func newRouteProvider(configs map[string]servers.Config, log logger.Logger) *rou
 	return v
 }
 
-//All method to get all route handlers
+// All method to get all route handlers
 func (v *routeProvider) All(call func(name string, router Router)) {
 	for n, r := range v.pool {
 		call(n, r.route)
 	}
 }
 
-//Main method to get Main route handler
+// Main method to get Main route handler
 func (v *routeProvider) Main() Router {
 	return v.Get("main")
 }
 
-//Get method to get route handler by key
+// Get method to get route handler by key
 func (v *routeProvider) Get(name string) Router {
 	if r, ok := v.pool[name]; ok {
 		return r.route
@@ -350,8 +349,8 @@ type (
 
 	//Router router handler interface
 	Router interface {
-		Use(args ...middlewares.Middleware)
-		Collection(prefix string, args ...middlewares.Middleware) RouteCollector
+		Use(args ...Middleware)
+		Collection(prefix string, args ...Middleware) RouteCollector
 		NotFoundHandler(call func(ctx Ctx))
 
 		RouteCollector
@@ -374,7 +373,7 @@ func (v *route) Down() error {
 	return v.ws.Down()
 }
 
-func (v *route) Use(args ...middlewares.Middleware) {
+func (v *route) Use(args ...Middleware) {
 	for _, arg := range args {
 		arg := arg
 		v.r.Global(func(ctrlFunc routes.CtrlFunc) routes.CtrlFunc {
@@ -435,8 +434,8 @@ func (v *rc) Delete(path string, call func(ctx Ctx))  { v.Match(path, call, neth
 func (v *rc) Options(path string, call func(ctx Ctx)) { v.Match(path, call, nethttp.MethodOptions) }
 func (v *rc) Patch(path string, call func(ctx Ctx))   { v.Match(path, call, nethttp.MethodPatch) }
 
-//Collection route collection handler
-func (v *route) Collection(prefix string, args ...middlewares.Middleware) RouteCollector {
+// Collection route collection handler
+func (v *route) Collection(prefix string, args ...Middleware) RouteCollector {
 	prefix = strings.TrimRight(prefix, "/")
 	for _, arg := range args {
 		arg := arg
