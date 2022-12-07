@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/middlewares"
 	"github.com/dewep-online/goppy/plugins"
 	"github.com/dewep-online/goppy/plugins/database"
 	"github.com/dewep-online/goppy/plugins/http"
@@ -25,10 +24,10 @@ func main() {
 			Inject: NewController,
 			Resolve: func(routes http.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(middlewares.ThrottlingMiddleware(100))
+				router.Use(http.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", middlewares.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},

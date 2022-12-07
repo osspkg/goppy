@@ -3,12 +3,9 @@ package main
 import (
 	"net"
 
-	"github.com/dewep-online/goppy/middlewares"
-
-	"github.com/dewep-online/goppy/plugins/geoip"
-
 	"github.com/dewep-online/goppy"
 	"github.com/dewep-online/goppy/plugins"
+	"github.com/dewep-online/goppy/plugins/geoip"
 	"github.com/dewep-online/goppy/plugins/http"
 )
 
@@ -26,8 +23,8 @@ func main() {
 			Resolve: func(routes http.RouterPool, gip geoip.GeoIP) {
 				router := routes.Main()
 				router.Use(
-					middlewares.CloudflareMiddleware(),
-					middlewares.MaxMindMiddleware(gip),
+					http.CloudflareMiddleware(),
+					http.MaxMindMiddleware(gip),
 				)
 				router.Get("/", func(ctx http.Ctx) {
 					m := model{

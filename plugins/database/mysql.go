@@ -11,12 +11,12 @@ import (
 	"github.com/deweppro/go-orm/schema/mysql"
 )
 
-//ConfigMysql mysql config model
+// ConfigMysql mysql config model
 type ConfigMysql struct {
 	Pool []mysql.Item `yaml:"mysql"`
 }
 
-//List getting all configs
+// List getting all configs
 func (v *ConfigMysql) List() (list []schema.ItemInterface) {
 	for _, vv := range v.Pool {
 		list = append(list, vv)
@@ -50,7 +50,7 @@ func (v *ConfigMysql) Default() {
 	}
 }
 
-//WithMySQL launch MySQL connection pool
+// WithMySQL launch MySQL connection pool
 func WithMySQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},

@@ -431,7 +431,7 @@ func (v *wsProvider) Up() error {
 	return nil
 }
 
-//Down hub
+// Down hub
 func (v *wsProvider) Down() error {
 	if !atomic.CompareAndSwapInt64(&v.status, on, off) {
 		return ErrServAlreadyStopped

@@ -13,7 +13,7 @@ import (
 	"github.com/deweppro/go-orm/schema/sqlite"
 )
 
-//ConfigSqlite sqlite config model
+// ConfigSqlite sqlite config model
 type ConfigSqlite struct {
 	Pool []item `yaml:"sqlite"`
 }
@@ -38,7 +38,7 @@ func (v *ConfigSqlite) Default() {
 	}
 }
 
-//List getting all configs
+// List getting all configs
 func (v *ConfigSqlite) List() (list []schema.ItemInterface) {
 	for _, vv := range v.Pool {
 		list = append(list, vv)
@@ -46,16 +46,16 @@ func (v *ConfigSqlite) List() (list []schema.ItemInterface) {
 	return
 }
 
-//GetName getting config name
+// GetName getting config name
 func (i item) GetName() string { return i.Name }
 
-//GetDSN connection params
+// GetDSN connection params
 func (i item) GetDSN() string { return i.File }
 
-//Setup setting config connections params
+// Setup setting config connections params
 func (i item) Setup(_ schema.SetupInterface) {}
 
-//WithSQLite launch SQLite connection pool
+// WithSQLite launch SQLite connection pool
 func WithSQLite() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
