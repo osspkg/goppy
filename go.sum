@@ -5,8 +5,8 @@ cloud.google.com/go/compute/metadata v0.2.2/go.mod h1:jgHgmJd2RKBGzXqF5LR2EZMGxB
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/deweppro/go-algorithms v1.2.0 h1:fBS+GNQaeSDSmvFWdmkKLcKXo2DhX5M0AJaCxEqGedY=
 github.com/deweppro/go-algorithms v1.2.0/go.mod h1:zYdfRdlpaXgdT36OgvdjH1qtTZFWEeBi3KUQmWltMPI=
-github.com/deweppro/go-app v1.6.0 h1:CjPrGH4wHkZryJdDXkArxyt35sVAfM3amKMhYPIcn8I=
-github.com/deweppro/go-app v1.6.0/go.mod h1:rZ95OfFGvRnm5ndIJI+DOtoOuVrgy3NeQ2vwmbmi0Tk=
+github.com/deweppro/go-app v1.6.1 h1:NH7W/NDQmHLrFgXl9Zy3nGM91+w9q4vo9wfSfWHmAgg=
+github.com/deweppro/go-app v1.6.1/go.mod h1:1oMjMJH9hxas3/Nl73O2E+E5mJoMheqrZ1fmQ6M46EE=
 github.com/deweppro/go-auth v1.3.0 h1:DeV+F+dkVEXVI2kLcNPWq+0roTUlH/4uM3C8AXfMPm8=
 github.com/deweppro/go-auth v1.3.0/go.mod h1:4Ai0YqW14+D3PU57WTlkG89UVOEy7Xb3T389ZGtLgE0=
 github.com/deweppro/go-chan-pool v1.1.2 h1:mm+gvwAFB5NijCiJDSx9RqrB2AWTembzL9Rf6XTv4BI=
@@ -42,7 +42,7 @@ github.com/oschwald/geoip2-golang v1.8.0/go.mod h1:R7bRvYjOeaoenAp9sKRS8GX5bJWcZ
 github.com/oschwald/maxminddb-golang v1.10.0 h1:Xp1u0ZhqkSuopaKmk1WwHtjF0H9Hd9181uj2MQ5Vndg=
 github.com/oschwald/maxminddb-golang v1.10.0/go.mod h1:Y2ELenReaLAZ0b400URyGwvYxHV1dLIxBuyOsyYjHK0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
-github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
+github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/net v0.0.0-20190603091049-60506f45cf65/go.mod h1:HSz+uSET+XFnRR8LxR5pz3Of3rY3CfYBVs4xY44aLks=
 golang.org/x/net v0.3.0 h1:VWL6FNY2bEEmsGVKabSlHu5Irp34xmMRoqb/9lF9lxk=
