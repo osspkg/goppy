@@ -22,13 +22,14 @@ go get -u github.com/dewep-online/goppy
 
 ## Plugins
 
-| Plugin       | Comment                                                                                                                                                             | Import                                                                                |
-|--------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
-| **debug**    | Profiling application (pprof) with HTTP access.                                                                                                                     | `http.WithHTTPDebug()`                                                                |
-| **http**     | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `http.WithHTTP()`  `http.WithWebsocket()` `http.WithHTTPClients()`                    |
-| **database** | Multi connection pools with MySQL and SQLite databases (with initialization migration setup).                                                                       | `database.WithMySQL()` `database.WithSQLite()`                                        |
-| **geoip**    | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `http.CloudflareMiddleware()` `http.MaxMindMiddleware()` |
-| **oauth**    | Authorization via OAuth provider. (Yandex, Google)                                                                                                                  | `auth.WithOAuth()`                                                                    |
+| Plugin         | Comment                                                                                                                                                             | Import                                                                                              |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
+| **debug**      | Profiling application (pprof) with HTTP access.                                                                                                                     | `http.WithHTTPDebug()`                                                                              |
+| **http**       | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `http.WithHTTP()`  `http.WithWebsocketServer()` `http.WithWebsocketClient()` `http.WithHTTPClient()` |
+| **unixsocket** | Requests via unix socket.                                                                                                                                           | `unix.WithServer()`  `unix.WithClient()` |
+| **database**   | Multi connection pools with MySQL and SQLite databases (with initialization migration setup).                                                                       | `database.WithMySQL()` `database.WithSQLite()`                                                      |
+| **geoip**      | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `http.CloudflareMiddleware()` `http.MaxMindMiddleware()`               |
+| **oauth**      | Authorization via OAuth provider. (Yandex, Google)                                                                                                                  | `auth.WithOAuth()`                                                                                  |
 
 ## Quick Start
 
