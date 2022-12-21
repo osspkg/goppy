@@ -49,7 +49,6 @@ linters:
     - gocyclo
     - ineffassign
     - goimports
-    - nakedret
     - unparam
     - unused
     - deadcode

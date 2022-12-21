@@ -6,11 +6,11 @@ import (
 )
 
 func TestUnit_NewClient(t *testing.T) {
-	cc := &ClientConfig{}
+	cc := &HTTPClientConfig{}
 	cc.Default()
-	tc := newClient(cc.Config)
+	tc := newHTTPClient(cc.Config)
 
-	resp := tc.Create(func(rb RequestBind) {
+	resp := tc.Create(func(rb HTTPRequestBind) {
 		rb.URI("https://raw.githubusercontent.com/dewep-online/fdns-filters/master/domains.txt")
 	})
 	if resp.Err() != nil {
@@ -23,7 +23,7 @@ func TestUnit_NewClient(t *testing.T) {
 		t.Fail()
 	}
 
-	resp = tc.Create(func(rb RequestBind) {
+	resp = tc.Create(func(rb HTTPRequestBind) {
 		rb.URI("https://fdns.dewep.online/adblock-rules.json")
 	})
 	if resp.Err() != nil {

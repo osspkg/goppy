@@ -15,15 +15,16 @@ func main() {
 	app.WithConfig("./config.yaml")
 	app.Plugins(
 		http.WithHTTP(),
-		http.WithWebsocket(),
+		http.WithWebsocketServer(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller, ws http.WebSocket) {
+			Resolve: func(routes http.RouterPool, c *Controller, ws http.WebsocketServer) {
 				router := routes.Main()
 				router.Use(http.ThrottlingMiddleware(100))
 
+				ws.Event(c.Event99, 99)
 				ws.Event(c.OneEvent, 1, 2)
 				ws.Event(c.MultiEvent, 11, 13)
 
@@ -35,25 +36,36 @@ func main() {
 }
 
 type Controller struct {
-	list map[string]http.Processor
+	list map[string]http.WebsocketServerProcessor
 	mux  sync.RWMutex
 }
 
 func NewController() *Controller {
 	c := &Controller{
-		list: make(map[string]http.Processor),
+		list: make(map[string]http.WebsocketServerProcessor),
 	}
 	go c.Timer()
 	return c
 }
 
-func (v *Controller) OneEvent(ev http.Eventer, c http.Processor) error {
+func (v *Controller) Event99(ev http.WebsocketEventer, c http.WebsocketServerProcessor) error {
+	var data string
+	if err := ev.Decode(&data); err != nil {
+		return err
+	}
+	c.EncodeEvent(ev, &data)
+	fmt.Println(c.CID(), "Event99", ev.EventID(), ev.UniqueID())
+	return nil
+}
+
+func (v *Controller) OneEvent(ev http.WebsocketEventer, c http.WebsocketServerProcessor) error {
 	list := make([]int, 0)
 	if err := ev.Decode(&list); err != nil {
 		return err
 	}
 	list = append(list, 10, 19, 17, 15)
 	c.EncodeEvent(ev, &list)
+	fmt.Println(c.CID(), "OneEvent", ev.EventID(), ev.UniqueID())
 	return nil
 }
 
@@ -73,7 +85,7 @@ func (v *Controller) Timer() {
 	}
 }
 
-func (v *Controller) MultiEvent(d http.Eventer, c http.Processor) error {
+func (v *Controller) MultiEvent(d http.WebsocketEventer, c http.WebsocketServerProcessor) error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
 

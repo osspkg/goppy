@@ -2,9 +2,6 @@ package http
 
 import (
 	"bytes"
-	"crypto/sha1"
-	"crypto/sha256"
-	"crypto/sha512"
 	"encoding/json"
 	"net"
 	"net/http"
@@ -17,11 +14,11 @@ import (
 )
 
 type (
-	ClientConfig struct {
-		Config *ClientConfigItem `yaml:"httpcli"`
+	HTTPClientConfig struct {
+		Config *HTTPClientConfigItem `yaml:"httpcli"`
 	}
 
-	ClientConfigItem struct {
+	HTTPClientConfigItem struct {
 		Proxy               string        `yaml:"proxy"`
 		Timeout             time.Duration `yaml:"timeout"`
 		KeepAlive           time.Duration `yaml:"keepalive"`
@@ -30,9 +27,9 @@ type (
 	}
 )
 
-func (c *ClientConfig) Default() {
+func (c *HTTPClientConfig) Default() {
 	if c.Config == nil {
-		c.Config = &ClientConfigItem{
+		c.Config = &HTTPClientConfigItem{
 			Proxy:               "",
 			Timeout:             5 * time.Second,
 			KeepAlive:           60 * time.Second,
@@ -44,12 +41,12 @@ func (c *ClientConfig) Default() {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// WithHTTPClients init pool http clients
-func WithHTTPClients() plugins.Plugin {
+// WithHTTPClient init pool http clients
+func WithHTTPClient() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &ClientConfig{},
-		Inject: func(conf *ClientConfig) Client {
-			return newClient(conf.Config)
+		Config: &HTTPClientConfig{},
+		Inject: func(conf *HTTPClientConfig) HTTPClient {
+			return newHTTPClient(conf.Config)
 		},
 	}
 }
@@ -57,12 +54,12 @@ func WithHTTPClients() plugins.Plugin {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type (
-	cli struct {
+	httpCli struct {
 		cli *http.Client
 	}
 
-	Client interface {
-		Create(call func(rb RequestBind)) ResponseBind
+	HTTPClient interface {
+		Create(call func(rb HTTPRequestBind)) HTTPResponseBind
 	}
 )
 
@@ -79,8 +76,8 @@ func createProxy(proxy string) func(r *http.Request) (*url.URL, error) {
 	return http.ProxyURL(u)
 }
 
-func newClient(c *ClientConfigItem) Client {
-	return &cli{
+func newHTTPClient(c *HTTPClientConfigItem) HTTPClient {
+	return &httpCli{
 		cli: &http.Client{
 			Transport: &http.Transport{
 				Proxy: createProxy(c.Proxy),
@@ -96,17 +93,17 @@ func newClient(c *ClientConfigItem) Client {
 	}
 }
 
-func (c *cli) Create(call func(rb RequestBind)) ResponseBind {
-	req := newCliReq()
+func (c *httpCli) Create(call func(rb HTTPRequestBind)) HTTPResponseBind {
+	req := newHTTPClientRequest()
 	call(req)
 
 	if req.e != nil {
-		return newCliRes(0, nil, nil, req.e)
+		return newHTTPClientResponse(0, nil, nil, req.e)
 	}
 
 	hreq, err := http.NewRequest(req.m, req.u, bytes.NewReader(req.b))
 	if err != nil {
-		return newCliRes(0, nil, nil, err)
+		return newHTTPClientResponse(0, nil, nil, err)
 	}
 
 	req.Header("Connection", "keep-alive")
@@ -120,17 +117,17 @@ func (c *cli) Create(call func(rb RequestBind)) ResponseBind {
 
 	hres, err := c.cli.Do(hreq)
 	if err != nil {
-		return newCliRes(0, nil, nil, err)
+		return newHTTPClientResponse(0, nil, nil, err)
 	}
 
 	b, err := internal.ReadAll(hres.Body)
-	return newCliRes(hres.StatusCode, b, hres.Header.Clone(), err)
+	return newHTTPClientResponse(hres.StatusCode, b, hres.Header.Clone(), err)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type (
-	cliReq struct {
+	httpClientRequest struct {
 		m string
 		u string
 		b []byte
@@ -139,7 +136,7 @@ type (
 		e error
 	}
 
-	RequestBind interface {
+	HTTPRequestBind interface {
 		Method(v string)
 		URI(v string)
 		Body(v []byte)
@@ -148,14 +145,14 @@ type (
 		JSON(v interface{})
 	}
 
-	cliRes struct {
+	httpClientResponse struct {
 		c int
 		b []byte
 		h http.Header
 		e error
 	}
 
-	ResponseBind interface {
+	HTTPResponseBind interface {
 		Code() int
 		Body() []byte
 		Headers() http.Header
@@ -164,67 +161,42 @@ type (
 	}
 )
 
-func newCliReq() *cliReq {
-	return &cliReq{
+func newHTTPClientRequest() *httpClientRequest {
+	return &httpClientRequest{
 		m: http.MethodGet,
 		h: make(http.Header),
 	}
 }
-func (c *cliReq) Method(v string) { c.m = v }
-func (c *cliReq) URI(v string)    { c.u = v }
-func (c *cliReq) Body(v []byte) {
+func (c *httpClientRequest) Method(v string) { c.m = v }
+func (c *httpClientRequest) URI(v string)    { c.u = v }
+func (c *httpClientRequest) Body(v []byte) {
 	if len(c.b) > 0 {
 		return
 	}
 	c.b = v
 }
-func (c *cliReq) Header(k, v string)    { c.h.Set(k, v) }
-func (c *cliReq) Signature(v Signature) { c.s = v }
-func (c *cliReq) JSON(v interface{}) {
+func (c *httpClientRequest) Header(k, v string)    { c.h.Set(k, v) }
+func (c *httpClientRequest) Signature(v Signature) { c.s = v }
+func (c *httpClientRequest) JSON(v interface{}) {
 	c.Header("Content-Type", "application/json; charset=utf-8")
 	c.b, c.e = json.Marshal(v)
 }
 
-func newCliRes(c int, b []byte, h http.Header, e error) *cliRes {
-	return &cliRes{
+func newHTTPClientResponse(c int, b []byte, h http.Header, e error) *httpClientResponse {
+	return &httpClientResponse{
 		c: c,
 		b: b,
 		h: h,
 		e: e,
 	}
 }
-func (c *cliRes) Code() int            { return c.c }
-func (c *cliRes) Body() []byte         { return c.b }
-func (c *cliRes) Headers() http.Header { return c.h }
-func (c *cliRes) Err() error           { return c.e }
-func (c *cliRes) JSON(v interface{}) error {
+func (c *httpClientResponse) Code() int            { return c.c }
+func (c *httpClientResponse) Body() []byte         { return c.b }
+func (c *httpClientResponse) Headers() http.Header { return c.h }
+func (c *httpClientResponse) Err() error           { return c.e }
+func (c *httpClientResponse) JSON(v interface{}) error {
 	if c.e != nil {
 		return c.e
 	}
 	return json.Unmarshal(c.b, v)
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-type Signature interface {
-	ID() string
-	Algorithm() string
-	Create(b []byte) []byte
-	CreateString(b []byte) string
-	Validate(b []byte, ex string) bool
-}
-
-// NewSHA1 create sign sha1
-func NewSHA1(id, secret string) Signature {
-	return signature.NewCustomSignature(id, secret, "hmac-sha1", sha1.New)
-}
-
-// NewSHA256 create sign sha256
-func NewSHA256(id, secret string) Signature {
-	return signature.NewCustomSignature(id, secret, "hmac-sha256", sha256.New)
-}
-
-// NewSHA512 create sign sha512
-func NewSHA512(id, secret string) Signature {
-	return signature.NewCustomSignature(id, secret, "hmac-sha512", sha512.New)
 }
