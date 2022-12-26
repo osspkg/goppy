@@ -3,7 +3,7 @@ module github.com/dewep-online/goppy
 go 1.18
 
 require (
-	github.com/deweppro/go-app v1.6.2
+	github.com/deweppro/go-app v1.6.3
 	github.com/deweppro/go-auth v1.3.0
 	github.com/deweppro/go-errors v0.0.4
 	github.com/deweppro/go-http v1.4.4
@@ -20,6 +20,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.2 // indirect
 	github.com/deweppro/go-algorithms v1.2.0 // indirect
 	github.com/deweppro/go-chan-pool v1.1.2 // indirect
+	github.com/deweppro/go-utils v0.0.1 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
