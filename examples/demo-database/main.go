@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/database"
-	"github.com/dewep-online/goppy/plugins/http"
+	"github.com/deweppro/goppy"
+	"github.com/deweppro/goppy/plugins"
+	"github.com/deweppro/goppy/plugins/database"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
@@ -14,20 +14,20 @@ func main() {
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTPDebug(),
-		http.WithHTTP(),
+		web.WithHTTPDebug(),
+		web.WithHTTP(),
 		database.WithMySQL(),
 		database.WithSQLite(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller) {
+			Resolve: func(routes web.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(web.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},
@@ -46,12 +46,12 @@ func NewController(v database.MySQL) *Controller {
 	}
 }
 
-func (v *Controller) Users(ctx http.Ctx) {
+func (v *Controller) Users(ctx web.Context) {
 	data := []int64{1, 2, 3, 4}
-	ctx.SetBody(200).JSON(data)
+	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx http.Ctx) {
+func (v *Controller) User(ctx web.Context) {
 	id, _ := ctx.Param("id").Int()
 
 	err := v.db.Pool("main").Ping()
@@ -59,7 +59,7 @@ func (v *Controller) User(ctx http.Ctx) {
 		ctx.Log().Errorf("db: %s", err.Error())
 	}
 
-	ctx.SetBody(400).ErrorJSON(fmt.Errorf("user not found"), "x1000", http.ErrCtx{"id": id})
+	ctx.ErrorJSON(400, fmt.Errorf("user not found"), web.ErrCtx{"id": id})
 
 	ctx.Log().Infof("user - %d", id)
 }

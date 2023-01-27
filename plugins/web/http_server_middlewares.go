@@ -1,4 +1,4 @@
-package http
+package web
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/dewep-online/goppy/plugins/geoip"
+	"github.com/deweppro/goppy/plugins/geoip"
 )
 
 // Middleware type of middleware
@@ -34,9 +34,7 @@ func CloudflareMiddleware() Middleware {
 	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-
 			ctx = geoip.SetCountryName(ctx, r.Header.Get("CF-IPCountry"))
-
 			cip := net.ParseIP(r.Header.Get("CF-Connecting-IP"))
 			if len(cip) == 0 {
 				host, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -45,9 +43,7 @@ func CloudflareMiddleware() Middleware {
 				}
 			}
 			ctx = geoip.SetClientIP(ctx, cip)
-
 			ctx = geoip.SetProxyIPs(ctx, parseXForwardedFor(r.Header.Get("X-Forwarded-For"), cip))
-
 			call(w, r.WithContext(ctx))
 		}
 	}
@@ -62,7 +58,6 @@ func MaxMindMiddleware(resolver geoIP) Middleware {
 	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-
 			cip := geoip.GetClientIP(r)
 			if len(cip) == 0 {
 				host, _, err := net.SplitHostPort(r.RemoteAddr)
@@ -71,14 +66,11 @@ func MaxMindMiddleware(resolver geoIP) Middleware {
 				}
 				ctx = geoip.SetClientIP(ctx, cip)
 			}
-
 			country, _ := resolver.Country(cip) //nolint: errcheck
 			ctx = geoip.SetCountryName(ctx, country)
-
 			if ips := geoip.GetProxyIPs(r); len(ips) == 0 {
 				ctx = geoip.SetProxyIPs(ctx, parseXForwardedFor(r.Header.Get("X-Forwarded-For"), cip))
 			}
-
 			call(w, r.WithContext(ctx))
 		}
 	}

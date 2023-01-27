@@ -1,0 +1,4 @@
+env: dev
+pid: ""
+level: 4
+log: /dev/stdout

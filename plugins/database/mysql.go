@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/deweppro/go-logger"
-	"github.com/deweppro/go-orm"
-	"github.com/deweppro/go-orm/schema"
-	"github.com/deweppro/go-orm/schema/mysql"
+	"github.com/deweppro/go-sdk/log"
+	"github.com/deweppro/go-sdk/orm"
+	"github.com/deweppro/go-sdk/orm/schema"
+	"github.com/deweppro/go-sdk/orm/schema/mysql"
+	"github.com/deweppro/goppy/plugins"
 )
 
 // ConfigMysql mysql config model
@@ -54,10 +54,10 @@ func (v *ConfigMysql) Default() {
 func WithMySQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
-		Inject: func(conf *ConfigMysql, log logger.Logger) (*mysqlProvider, MySQL) {
+		Inject: func(conf *ConfigMysql, l log.Logger) (*mysqlProvider, MySQL) {
 			conn := mysql.New(conf)
-			o := orm.NewDB(conn, orm.Plugins{Logger: log})
-			return &mysqlProvider{conn: conn, conf: *conf, log: log}, o
+			o := orm.New(conn, orm.UsePluginLogger(l))
+			return &mysqlProvider{conn: conn, conf: *conf, log: l}, o
 		},
 	}
 }
@@ -66,12 +66,12 @@ type (
 	mysqlProvider struct {
 		conn schema.Connector
 		conf ConfigMysql
-		log  logger.Logger
+		log  log.Logger
 	}
 
 	//MySQL connection MySQL interface
 	MySQL interface {
-		Pool(name string) *orm.Stmt
+		Pool(name string) orm.Stmt
 	}
 )
 
@@ -88,7 +88,7 @@ func (v *mysqlProvider) Up() error {
 			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
 		v.log.WithFields(
-			logger.Fields{vv.Name: fmt.Sprintf("%s:%d", vv.Host, vv.Port)},
+			log.Fields{vv.Name: fmt.Sprintf("%s:%d", vv.Host, vv.Port)},
 		).Infof("MySQL connect")
 	}
 	return nil

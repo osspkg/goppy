@@ -1,31 +1,28 @@
 package main
 
 import (
-	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/auth"
-	"github.com/dewep-online/goppy/plugins/http"
+	"github.com/deweppro/goppy"
+	"github.com/deweppro/goppy/plugins"
+	"github.com/deweppro/goppy/plugins/auth"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTP(),
+		web.WithHTTP(),
 		auth.WithOAuth(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller, oa auth.OAuth) {
+			Resolve: func(routes web.RouterPool, c *Controller, oa auth.OAuth) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(web.ThrottlingMiddleware(100))
 
-				router.Get("/oauth/r/google", oa.GoogleRequestHandler)
-				router.Get("/oauth/c/google", oa.GoogleCallbackHandler(c.CallBack))
-
-				router.Get("/oauth/r/yandex", oa.YandexRequestHandler)
-				router.Get("/oauth/c/yandex", oa.YandexCallbackHandler(c.CallBack))
+				router.Get("/oauth/r/{code}", oa.RequestHandler("code"))
+				router.Get("/oauth/c/{code}", oa.CallbackHandler("code", c.CallBack))
 			},
 		},
 	)
@@ -39,7 +36,6 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) CallBack(ctx http.Ctx, user auth.OAuthUser, code auth.ProviderCode) {
-	ctx.SetBody(200).
-		String("code: %s, email: %s, name: %s, ico: %s", code, user.GetEmail(), user.GetName(), user.GetIcon())
+func (v *Controller) CallBack(ctx web.Context, user auth.OAuthUser, code auth.Code) {
+	ctx.String(200, "code: %s, email: %s, name: %s, ico: %s", code, user.GetEmail(), user.GetName(), user.GetIcon())
 }

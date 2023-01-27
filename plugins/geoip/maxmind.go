@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/deweppro/go-logger"
+	"github.com/deweppro/goppy/plugins"
 	"github.com/oschwald/geoip2-golang"
 )
 
@@ -22,7 +21,7 @@ func (v *MaxMindConfig) Default() {
 func WithMaxMindGeoIP() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &MaxMindConfig{},
-		Inject: func(conf *MaxMindConfig, log logger.Logger) (*maxmind, GeoIP) {
+		Inject: func(conf *MaxMindConfig) (*maxmind, GeoIP) {
 			mmdb := newMMDB(conf)
 			return mmdb, mmdb
 		},
