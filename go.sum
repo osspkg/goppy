@@ -5,8 +5,8 @@ cloud.google.com/go/compute/metadata v0.2.2/go.mod h1:jgHgmJd2RKBGzXqF5LR2EZMGxB
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/deweppro/go-algorithms v1.2.0 h1:fBS+GNQaeSDSmvFWdmkKLcKXo2DhX5M0AJaCxEqGedY=
 github.com/deweppro/go-algorithms v1.2.0/go.mod h1:zYdfRdlpaXgdT36OgvdjH1qtTZFWEeBi3KUQmWltMPI=
-github.com/deweppro/go-app v1.6.2 h1:TmesfZ3NaOAvZ0G5pLndOlJrCoXU9zyqu9ESIncj2Zg=
-github.com/deweppro/go-app v1.6.2/go.mod h1:1oMjMJH9hxas3/Nl73O2E+E5mJoMheqrZ1fmQ6M46EE=
+github.com/deweppro/go-app v1.6.3 h1:IZr8Zyq+RtpOQDZxUIRCTCppN9w3c/xG+9YUX+ECPnA=
+github.com/deweppro/go-app v1.6.3/go.mod h1:1Zj2Mfj/vPXe3PfrWQ5MAM9l2TSVLbp5i6OCyKD4mO4=
 github.com/deweppro/go-auth v1.3.0 h1:DeV+F+dkVEXVI2kLcNPWq+0roTUlH/4uM3C8AXfMPm8=
 github.com/deweppro/go-auth v1.3.0/go.mod h1:4Ai0YqW14+D3PU57WTlkG89UVOEy7Xb3T389ZGtLgE0=
 github.com/deweppro/go-chan-pool v1.1.2 h1:mm+gvwAFB5NijCiJDSx9RqrB2AWTembzL9Rf6XTv4BI=
@@ -19,6 +19,8 @@ github.com/deweppro/go-logger v1.3.0 h1:KN6RQmb6IoNBxQ7zx7Y1AtptHeL//FRgvQyEF5Pr
 github.com/deweppro/go-logger v1.3.0/go.mod h1:jxBBLyHmIvJ4erGUj5qeE6ir36ztyAL1pI+9GymOHVI=
 github.com/deweppro/go-orm v1.1.0 h1:CmW1OU+W6mn0Nk1MdoMf6PWxP12nIK/sXImboIwindw=
 github.com/deweppro/go-orm v1.1.0/go.mod h1:JEbxJLmXMjSOtlwhuJmrJKZRLhcJcexRvGZ6hgautaw=
+github.com/deweppro/go-utils v0.0.1 h1:yBISU0cvDqj2MjJGf/WXMft76zGT7ETCHJST52pYkSw=
+github.com/deweppro/go-utils v0.0.1/go.mod h1:wH2zpJsk1kc1MOALmxxfZaVomKkRX9K6U1m5Rs2VvHA=
 github.com/go-sql-driver/mysql v1.6.0 h1:BCTh4TKNUYmOmMUcQ3IipzF5prigylS7XXjEkfCHuOE=
 github.com/go-sql-driver/mysql v1.6.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/golang/protobuf v1.3.1/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
