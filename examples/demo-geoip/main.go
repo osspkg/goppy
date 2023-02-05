@@ -3,10 +3,10 @@ package main
 import (
 	"net"
 
-	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/geoip"
-	"github.com/dewep-online/goppy/plugins/http"
+	"github.com/deweppro/goppy"
+	"github.com/deweppro/goppy/plugins"
+	"github.com/deweppro/goppy/plugins/geoip"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
@@ -14,25 +14,25 @@ func main() {
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTPDebug(),
-		http.WithHTTP(),
+		web.WithHTTPDebug(),
+		web.WithHTTP(),
 		geoip.WithMaxMindGeoIP(),
 	)
 	app.Plugins(
 		plugins.Plugin{
-			Resolve: func(routes http.RouterPool, gip geoip.GeoIP) {
+			Resolve: func(routes web.RouterPool, gip geoip.GeoIP) {
 				router := routes.Main()
 				router.Use(
-					http.CloudflareMiddleware(),
-					http.MaxMindMiddleware(gip),
+					web.CloudflareMiddleware(),
+					web.MaxMindMiddleware(gip),
 				)
-				router.Get("/", func(ctx http.Ctx) {
+				router.Get("/", func(ctx web.Context) {
 					m := model{
 						ClientIP: geoip.GetClientIP(ctx).String(),
 						Country:  geoip.GetCountryName(ctx),
 						ProxyIPs: geoip.GetProxyIPs(ctx),
 					}
-					ctx.SetBody(200).JSON(&m)
+					ctx.JSON(200, &m)
 				})
 			},
 		},

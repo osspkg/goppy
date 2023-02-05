@@ -7,7 +7,7 @@ http:
     main:
         addr: 127.0.0.1:8080
 
-oauth_providers:
+oauth:
     - code: google
       client_id: '****************.apps.googleusercontent.com'
       client_secret: '****************'

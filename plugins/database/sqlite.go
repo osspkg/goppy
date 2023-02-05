@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/deweppro/go-logger"
-	"github.com/deweppro/go-orm"
-	"github.com/deweppro/go-orm/schema"
-	"github.com/deweppro/go-orm/schema/sqlite"
+	"github.com/deweppro/go-sdk/log"
+	"github.com/deweppro/go-sdk/orm"
+	"github.com/deweppro/go-sdk/orm/schema"
+	"github.com/deweppro/go-sdk/orm/schema/sqlite"
+	"github.com/deweppro/goppy/plugins"
 )
 
 // ConfigSqlite sqlite config model
@@ -59,10 +59,10 @@ func (i item) Setup(_ schema.SetupInterface) {}
 func WithSQLite() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
-		Inject: func(conf *ConfigSqlite, log logger.Logger) (*sqliteProvider, SQLite) {
-			conn := sqlite.New(conf)
-			o := orm.NewDB(conn, orm.Plugins{Logger: log})
-			return &sqliteProvider{conn: conn, conf: *conf, log: log}, o
+		Inject: func(c *ConfigSqlite, l log.Logger) (*sqliteProvider, SQLite) {
+			conn := sqlite.New(c)
+			o := orm.New(conn, orm.UsePluginLogger(l))
+			return &sqliteProvider{conn: conn, conf: *c, log: l}, o
 		},
 	}
 }
@@ -71,12 +71,12 @@ type (
 	sqliteProvider struct {
 		conn schema.Connector
 		conf ConfigSqlite
-		log  logger.Logger
+		log  log.Logger
 	}
 
 	//SQLite connection SQLite interface
 	SQLite interface {
-		Pool(name string) *orm.Stmt
+		Pool(name string) orm.Stmt
 	}
 )
 
@@ -95,7 +95,7 @@ func (v *sqliteProvider) Up() error {
 		if err = v.migration(p, vv.InitMigration); err != nil {
 			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
-		v.log.WithFields(logger.Fields{vv.Name: vv.File}).Infof("SQLite connect")
+		v.log.WithFields(log.Fields{vv.Name: vv.File}).Infof("SQLite connect")
 	}
 	return nil
 }

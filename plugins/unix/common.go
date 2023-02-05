@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/deweppro/go-errors"
+	"github.com/deweppro/go-sdk/errors"
 )
 
 var (
@@ -15,8 +15,7 @@ var (
 	cmddelimstring = " "
 	cmddelim       = byte(' ')
 
-	//ErrInvalidCommand if command is not supported
-	ErrInvalidCommand = errors.New("command not found")
+	errInvalidCommand = errors.New("command not found")
 )
 
 func readBytes(v io.Reader) ([]byte, error) {

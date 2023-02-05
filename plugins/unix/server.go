@@ -7,10 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/deweppro/go-errors"
-
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/deweppro/go-logger"
+	"github.com/deweppro/go-sdk/errors"
+	"github.com/deweppro/go-sdk/log"
+	"github.com/deweppro/goppy/plugins"
 )
 
 type (
@@ -26,8 +25,8 @@ func (v *Config) Default() {
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &Config{},
-		Inject: func(conf *Config, log logger.Logger) (*srv, Server) {
-			s := newServer(conf, log)
+		Inject: func(c *Config, l log.Logger) (*srv, Server) {
+			s := newServer(c, l)
 			return s, s
 		},
 	}
@@ -37,7 +36,7 @@ type (
 	srv struct {
 		config   *Config
 		sock     net.Listener
-		log      logger.Logger
+		log      log.Logger
 		commands map[string]Handler
 		mux      sync.RWMutex
 	}
@@ -50,21 +49,21 @@ type (
 	}
 )
 
-func newServer(conf *Config, log logger.Logger) *srv {
+func newServer(c *Config, l log.Logger) *srv {
 	return &srv{
-		config:   conf,
-		log:      log,
+		config:   c,
+		log:      l,
 		commands: make(map[string]Handler),
 	}
 }
 
 func (v *srv) Up() (err error) {
 	if err = os.Remove(v.config.Path); err != nil && !os.IsNotExist(err) {
-		err = errors.WrapMessage(err, "remove unix socket [unix:%s]", v.config.Path)
+		err = errors.Wrapf(err, "remove unix socket [unix:%s]", v.config.Path)
 		return
 	}
 	if v.sock, err = net.Listen("unix", v.config.Path); err != nil {
-		err = errors.WrapMessage(err, "init unix socket [unix:%s]", v.config.Path)
+		err = errors.Wrapf(err, "init unix socket [unix:%s]", v.config.Path)
 		return
 	}
 
@@ -90,7 +89,7 @@ func (v *srv) logError(err error, msg string) {
 		return
 	}
 
-	v.log.WithFields(logger.Fields{
+	v.log.WithFields(log.Fields{
 		"err": err.Error(),
 	}).Errorf(msg)
 }
@@ -130,7 +129,7 @@ func (v *srv) pump(rw io.ReadWriteCloser) {
 	h, ok := v.commands[cmd]
 	v.mux.RUnlock()
 	if !ok {
-		v.logError(writeError(rw, ErrInvalidCommand), "write unix socket error")
+		v.logError(writeError(rw, errInvalidCommand), "write unix socket error")
 		return
 	}
 

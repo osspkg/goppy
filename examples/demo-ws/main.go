@@ -5,24 +5,24 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/http"
+	"github.com/deweppro/goppy"
+	"github.com/deweppro/goppy/plugins"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTP(),
-		http.WithWebsocketServer(),
+		web.WithHTTP(),
+		web.WithWebsocketServer(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller, ws http.WebsocketServer) {
+			Resolve: func(routes web.RouterPool, c *Controller, ws web.WebsocketServer) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(web.ThrottlingMiddleware(100))
 
 				ws.Event(c.Event99, 99)
 				ws.Event(c.OneEvent, 1, 2)
@@ -36,36 +36,36 @@ func main() {
 }
 
 type Controller struct {
-	list map[string]http.WebsocketServerProcessor
+	list map[string]web.WebsocketServerProcessor
 	mux  sync.RWMutex
 }
 
 func NewController() *Controller {
 	c := &Controller{
-		list: make(map[string]http.WebsocketServerProcessor),
+		list: make(map[string]web.WebsocketServerProcessor),
 	}
 	go c.Timer()
 	return c
 }
 
-func (v *Controller) Event99(ev http.WebsocketEventer, c http.WebsocketServerProcessor) error {
+func (v *Controller) Event99(ev web.WebsocketEventer, c web.WebsocketServerProcessor) error {
 	var data string
 	if err := ev.Decode(&data); err != nil {
 		return err
 	}
 	c.EncodeEvent(ev, &data)
-	fmt.Println(c.CID(), "Event99", ev.EventID(), ev.UniqueID())
+	fmt.Println(c.ConnectID(), "Event99", ev.EventID(), ev.UniqueID())
 	return nil
 }
 
-func (v *Controller) OneEvent(ev http.WebsocketEventer, c http.WebsocketServerProcessor) error {
+func (v *Controller) OneEvent(ev web.WebsocketEventer, c web.WebsocketServerProcessor) error {
 	list := make([]int, 0)
 	if err := ev.Decode(&list); err != nil {
 		return err
 	}
 	list = append(list, 10, 19, 17, 15)
 	c.EncodeEvent(ev, &list)
-	fmt.Println(c.CID(), "OneEvent", ev.EventID(), ev.UniqueID())
+	fmt.Println(c.ConnectID(), "OneEvent", ev.EventID(), ev.UniqueID())
 	return nil
 }
 
@@ -76,30 +76,49 @@ func (v *Controller) Timer() {
 	for {
 		select {
 		case tt := <-t.C:
-			v.mux.RLock()
-			for _, p := range v.list {
-				p.Encode(12, tt.Format(time.RFC3339))
-			}
-			v.mux.RUnlock()
+			v.muxRLock(func() {
+				for _, p := range v.list {
+					p.Encode(12, tt.Format(time.RFC3339))
+					fmt.Println("Timer", p.ConnectID())
+				}
+			})
 		}
 	}
 }
 
-func (v *Controller) MultiEvent(d http.WebsocketEventer, c http.WebsocketServerProcessor) error {
-	v.mux.Lock()
-	defer v.mux.Unlock()
-
+func (v *Controller) MultiEvent(d web.WebsocketEventer, c web.WebsocketServerProcessor) error {
 	switch d.EventID() {
 	case 11:
-		v.list[c.CID()] = c
-		fmt.Println("add", c.CID())
-		c.OnClose(func(cid string) {
-			fmt.Println("close", cid)
-			delete(v.list, cid)
+		v.muxLock(func() {
+			v.list[c.ConnectID()] = c
+			fmt.Println("MultiEvent Add", c.ConnectID())
 		})
+
+		c.OnClose(func(cid string) {
+			v.muxLock(func() {
+				delete(v.list, cid)
+				fmt.Println("MultiEvent Close", cid)
+			})
+		})
+
 	case 13:
-		fmt.Println("del", c.CID())
-		delete(v.list, c.CID())
+		v.muxLock(func() {
+			delete(v.list, c.ConnectID())
+			fmt.Println("MultiEvent Del", c.ConnectID())
+		})
+
 	}
 	return nil
+}
+
+func (v *Controller) muxLock(cb func()) {
+	v.mux.Lock()
+	cb()
+	v.mux.Unlock()
+}
+
+func (v *Controller) muxRLock(cb func()) {
+	v.mux.RLock()
+	cb()
+	v.mux.RUnlock()
 }

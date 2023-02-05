@@ -1,30 +1,40 @@
 package main
 
 import (
-	"github.com/dewep-online/goppy"
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/dewep-online/goppy/plugins/http"
+	"fmt"
+	"os"
+
+	"github.com/deweppro/go-sdk/console"
+	"github.com/deweppro/goppy"
+	"github.com/deweppro/goppy/plugins"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
 	app := goppy.New()
 	app.WithConfig("./config.yaml")
 	app.Plugins(
-		http.WithHTTP(),
+		web.WithHTTP(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller) {
+			Resolve: func(routes web.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(web.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},
 	)
+	app.Command(func(s console.CommandSetter) {
+		s.Setup("env", "show env")
+		s.ExecFunc(func(args []string) {
+			fmt.Println(args, os.Environ())
+		})
+	})
 	app.Run()
 }
 
@@ -34,13 +44,13 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Users(ctx http.Ctx) {
+func (v *Controller) Users(ctx web.Context) {
 	data := []int64{1, 2, 3, 4}
-	ctx.SetBody(200).JSON(data)
+	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx http.Ctx) {
+func (v *Controller) User(ctx web.Context) {
 	id, _ := ctx.Param("id").Int()
-	ctx.SetBody(200).String("user id: %d", id)
+	ctx.String(200, "user id: %d", id)
 	ctx.Log().Infof("user - %d", id)
 }

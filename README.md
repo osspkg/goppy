@@ -1,9 +1,9 @@
 # Goppy Microservice Toolkit 
 
-[![Release](https://img.shields.io/github/release/dewep-online/goppy.svg?style=flat-square)](https://github.com/dewep-online/goppy/releases/latest) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/dewep-online/goppy)](https://goreportcard.com/report/github.com/dewep-online/goppy) 
-[![CI](https://github.com/dewep-online/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/dewep-online/goppy/actions/workflows/ci.yml)
-[![Codeql](https://github.com/dewep-online/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/dewep-online/goppy/actions/workflows/codeql.yml)
+[![Release](https://img.shields.io/github/release/dewep-online/goppy.svg?style=flat-square)](https://github.com/deweppro/goppy/releases/latest) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/deweppro/goppy)](https://goreportcard.com/report/github.com/deweppro/goppy) 
+[![CI](https://github.com/deweppro/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/deweppro/goppy/actions/workflows/ci.yml)
+[![Codeql](https://github.com/deweppro/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/deweppro/goppy/actions/workflows/codeql.yml)
 ![GitHub](https://img.shields.io/github/license/dewep-online/goppy)
 
 ## Features
@@ -37,7 +37,7 @@
 
 ## Community
 
-[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/dewep-online/goppy/discussions)
+[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/deweppro/goppy/discussions)
 
 ## License
 

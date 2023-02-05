@@ -4,8 +4,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/dewep-online/goppy/plugins"
-	"github.com/deweppro/go-errors"
+	"github.com/deweppro/go-sdk/errors"
+	"github.com/deweppro/goppy/plugins"
 )
 
 func WithClient() plugins.Plugin {
@@ -67,7 +67,7 @@ func newClient(path string) *cli {
 func (v *cli) Exec(name string, b []byte) ([]byte, error) {
 	conn, err := net.Dial("unix", v.path)
 	if err != nil {
-		return nil, errors.WrapMessage(err, "open connect [unix:%s]", v.path)
+		return nil, errors.Wrapf(err, "open connect [unix:%s]", v.path)
 	}
 	defer conn.Close() //nolint: errcheck
 	if err = writeBytes(conn, append([]byte(name+cmddelimstring), b...)); err != nil {

@@ -1,3 +1,4 @@
+
 run:
   concurrency: 1
   deadline: 2m
@@ -29,29 +30,24 @@ linters-settings:
   misspell:
     locale: US
   gosimple:
-    go: "1.18"
+    go: "1.17"
     checks: ["all"]
   prealloc:
     simple: true
     range-loops: true
     for-loops: false
-  unparam:
-    check-exported: false
 
 linters:
   disable-all: true
   enable:
     - govet
     - gofmt
-    - gosimple
     - errcheck
     - misspell
     - gocyclo
     - ineffassign
     - goimports
-    - unparam
-    - unused
-    - deadcode
+    - gosimple
     - prealloc
-    - durationcheck
   fast: false
+
