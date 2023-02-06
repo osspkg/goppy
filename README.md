@@ -19,6 +19,8 @@
 ## Guide 
 
 [![guide](https://img.shields.io/badge/giude-goppy.ru-green)](https://goppy.ru)
+[![wiki](https://img.shields.io/badge/wiki-github-red)](https://github.com/deweppro/goppy/wiki)
+
 
 ## Contribute
 
