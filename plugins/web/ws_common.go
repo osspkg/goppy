@@ -88,8 +88,9 @@ func pumpWrite(p processor) {
 	for {
 		select {
 		case <-p.done():
-			m := websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Bye bye!")
-			if err := p.connect().WriteMessage(websocket.CloseMessage, m); err != nil && err != websocket.ErrCloseSent {
+			err := p.connect().WriteMessage(websocket.CloseMessage,
+				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Bye bye!"))
+			if err != nil && !errors.Is(err, websocket.ErrCloseSent) {
 				p.errLog(p.ConnectID(), err, "[ws] send close")
 			}
 			return
