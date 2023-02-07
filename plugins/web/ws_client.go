@@ -82,7 +82,10 @@ func (v *wscProvider) errLog(cid string, err error, msg string, args ...interfac
 	}).Errorf(msg, args...)
 }
 
-func (v *wscProvider) Create(ctx context.Context, url string, opts ...func(WebsocketClientOption)) (WebsocketClientConn, error) {
+func (v *wscProvider) Create(
+	ctx context.Context, url string,
+	opts ...func(WebsocketClientOption),
+) (WebsocketClientConn, error) {
 	cc := newWSCConnect(url, v.errLog, ctx, v.ctx, opts)
 
 	cc.OnClose(func(cid string) {
@@ -115,7 +118,6 @@ type (
 		onOpen, onClose []func(cid string)
 		erw             func(cid string, err error, msg string, args ...interface{})
 
-		wg sync.WaitGroup
 		cm sync.RWMutex
 		em sync.RWMutex
 	}
@@ -320,6 +322,12 @@ func (v *wscConn) Run() (err error) {
 		v.cid = resp.Header.Get("Sec-WebSocket-Accept")
 	}
 
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			v.errLog(v.ConnectID(), err, "close body connect [%s]", v.url)
+		}
+	}()
+
 	rwlock(&v.cm, func() {
 		for _, fn := range v.onOpen {
 			fn(v.ConnectID())
@@ -336,5 +344,5 @@ func (v *wscConn) Run() (err error) {
 		}
 	})
 
-	return
+	return nil
 }

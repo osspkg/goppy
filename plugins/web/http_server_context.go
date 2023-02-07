@@ -197,7 +197,7 @@ func (v *_ctx) Cookie() Cookie {
 /**********************************************************************************************************************/
 
 func (v *_ctx) BindBytes(in *[]byte) error {
-	b, err := ioutil.ReadAll(v.r.Body) //nolint:errcheck
+	b, err := ioutil.ReadAll(v.r.Body)
 	if err != nil {
 		return err
 	}
@@ -243,18 +243,30 @@ func (v *_ctx) ErrorJSON(code int, err error, ctx ErrCtx) {
 	b, _ := json.Marshal(&model) //nolint: errcheck
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
-	v.w.Write(b) //nolint: errcheck
+	if _, err = v.w.Write(b); err != nil {
+		v.l.WithFields(log.Fields{
+			"err": err.Error(),
+		}).Errorf("ErrorJSON response")
+	}
 }
 
 func (v *_ctx) Bytes(code int, b []byte) {
 	v.w.WriteHeader(code)
-	v.w.Write(b) //nolint: errcheck
+	if _, err := v.w.Write(b); err != nil {
+		v.l.WithFields(log.Fields{
+			"err": err.Error(),
+		}).Errorf("Bytes response")
+	}
 }
 
 // String recording the response in string format
 func (v *_ctx) String(code int, b string, args ...interface{}) {
 	v.w.WriteHeader(code)
-	fmt.Fprintf(v.w, b, args...) //nolint: errcheck
+	if _, err := fmt.Fprintf(v.w, b, args...); err != nil {
+		v.l.WithFields(log.Fields{
+			"err": err.Error(),
+		}).Errorf("String response")
+	}
 }
 
 // JSON recording the response in json format
@@ -266,7 +278,11 @@ func (v *_ctx) JSON(code int, in interface{}) {
 	}
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
-	v.w.Write(b) //nolint: errcheck
+	if _, err = v.w.Write(b); err != nil {
+		v.l.WithFields(log.Fields{
+			"err": err.Error(),
+		}).Errorf("JSON response")
+	}
 }
 
 // Stream sending raw data in response with the definition of the content type by the file name
@@ -275,7 +291,11 @@ func (v *_ctx) Stream(code int, in []byte, filename string) {
 	v.w.Header().Set("Content-Type", contentType)
 	v.w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	v.w.WriteHeader(code)
-	v.w.Write(in) //nolint: errcheck
+	if _, err := v.w.Write(in); err != nil {
+		v.l.WithFields(log.Fields{
+			"err": err.Error(),
+		}).Errorf("Stream response")
+	}
 }
 
 /**********************************************************************************************************************/

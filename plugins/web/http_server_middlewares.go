@@ -1,7 +1,6 @@
 package web
 
 import (
-	"bytes"
 	"net"
 	"net/http"
 	"strings"
@@ -83,7 +82,7 @@ func parseXForwardedFor(ff string, skip net.IP) []net.IP {
 			continue
 		}
 		ip := net.ParseIP(strings.TrimSpace(v))
-		if !bytes.Equal(skip, ip) && ip != nil {
+		if !skip.Equal(ip) && ip != nil {
 			result = append(result, ip)
 		}
 	}

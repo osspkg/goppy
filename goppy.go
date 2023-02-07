@@ -52,7 +52,8 @@ func (v *_app) Plugins(args ...plugins.Plugin) {
 		}, "Plugin.Config can only be a reference to an object")
 		reflectResolve(arg.Inject, reflect.Func, func(in interface{}) {
 			v.plugins = append(v.plugins, in)
-		}, "Plugin.Inject can only be a function that accepts dependencies and returns a reference to the initialized service")
+		}, "Plugin.Inject can only be a function that accepts "+
+			"dependencies and returns a reference to the initialized service")
 		reflectResolve(arg.Resolve, reflect.Func, func(in interface{}) {
 			v.plugins = append(v.plugins, in)
 		}, "Plugin.Resolve can only be a function that accepts dependencies")
@@ -97,7 +98,6 @@ func parseConfigFlag() string {
 	return *conf
 }
 
-// nolint: unparam
 func generateConfig(filename string, configs ...interface{}) string {
 	if len(filename) == 0 {
 		filename = parseConfigFlag()
