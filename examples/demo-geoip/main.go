@@ -23,8 +23,8 @@ func main() {
 			Resolve: func(routes web.RouterPool, gip geoip.GeoIP) {
 				router := routes.Main()
 				router.Use(
-					web.CloudflareMiddleware(),
-					web.MaxMindMiddleware(gip),
+					geoip.CloudflareMiddleware(),
+					geoip.MaxMindMiddleware(gip),
 				)
 				router.Get("/", func(ctx web.Context) {
 					m := model{

@@ -41,3 +41,7 @@ func (p Plugins) Inject(list ...interface{}) Plugins {
 type Defaulter interface {
 	Default()
 }
+
+type Validator interface {
+	Validate() error
+}
