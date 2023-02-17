@@ -2,6 +2,7 @@ package goppy
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"reflect"
 
@@ -69,6 +70,8 @@ func (v *_app) Command(call func(s console.CommandSetter)) {
 func (v *_app) Run() {
 	v.config = generateConfig(v.config, v.configs...)
 
+	console.FatalIfErr(validateConfig(v.config, v.configs...), "config model validate")
+
 	v.console.RootCommand(console.NewCommand(func(s console.CommandSetter) {
 		s.Setup("root", "run app as service")
 		s.ExecFunc(func(_ []string) {
@@ -96,6 +99,31 @@ func parseConfigFlag() string {
 	conf := flag.String("config", "./config.yaml", "path to the config file")
 	flag.Parse()
 	return *conf
+}
+
+func validateConfig(filename string, configs ...interface{}) error {
+	if len(filename) == 0 {
+		filename = parseConfigFlag()
+	}
+	if _, err := os.Stat(filename); err != nil {
+		return err
+	}
+	defType := reflect.TypeOf(new(plugins.Validator)).Elem()
+	for _, cfg := range configs {
+		if reflect.TypeOf(cfg).AssignableTo(defType) {
+			if err := app.Sources(filename).Decode(cfg); err != nil {
+				return fmt.Errorf("decode config %T error: %w", cfg, err)
+			}
+			vv, ok := cfg.(plugins.Validator)
+			if !ok {
+				continue
+			}
+			if err := vv.Validate(); err != nil {
+				return fmt.Errorf("validate config %T error: %w", cfg, err)
+			}
+		}
+	}
+	return nil
 }
 
 func generateConfig(filename string, configs ...interface{}) string {
