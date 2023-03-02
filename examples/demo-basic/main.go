@@ -29,11 +29,8 @@ func main() {
 			},
 		},
 	)
-	app.Command(func(s console.CommandSetter) {
-		s.Setup("env", "show env")
-		s.ExecFunc(func(args []string) {
-			fmt.Println(args, os.Environ())
-		})
+	app.Command("env", func(s console.CommandSetter) {
+		fmt.Println(os.Environ())
 	})
 	app.Run()
 }
