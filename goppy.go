@@ -1,7 +1,6 @@
 package goppy
 
 import (
-	"flag"
 	"fmt"
 	"os"
 	"reflect"
@@ -16,16 +15,17 @@ import (
 type (
 	_app struct {
 		application app.App
-		console     *console.Console
+		commands    map[string]interface{}
 		config      string
 		plugins     []interface{}
 		configs     []interface{}
+		args        *console.Args
 	}
 
 	Goppy interface {
 		WithConfig(filename string)
 		Plugins(args ...plugins.Plugin)
-		Command(call func(s console.CommandSetter))
+		Command(name string, call interface{})
 		Run()
 	}
 )
@@ -34,9 +34,10 @@ type (
 func New() Goppy {
 	return &_app{
 		application: app.New(),
-		console:     console.New("<app>", ""),
+		commands:    make(map[string]interface{}),
 		plugins:     make([]interface{}, 0, 100),
 		configs:     make([]interface{}, 0, 100),
+		args:        console.NewArgs().Parse(os.Args[1:]),
 	}
 }
 
@@ -61,28 +62,31 @@ func (v *_app) Plugins(args ...plugins.Plugin) {
 	}
 }
 
-func (v *_app) Command(call func(s console.CommandSetter)) {
-	newCmd := console.NewCommand(call)
-	v.console.AddCommand(newCmd)
+func (v *_app) Command(name string, call interface{}) {
+	v.commands[name] = call
 }
 
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
-	v.config = generateConfig(v.config, v.configs...)
+	v.config = v.parseConfigFlag(v.config)
+	console.FatalIfErr(recoveryConfig(v.config, v.configs...), "config recovery")
+	console.FatalIfErr(validateConfig(v.config, v.configs...), "config validate")
 
-	console.FatalIfErr(validateConfig(v.config, v.configs...), "config model validate")
-
-	v.console.RootCommand(console.NewCommand(func(s console.CommandSetter) {
-		s.Setup("root", "run app as service")
-		s.ExecFunc(func(_ []string) {
+	if params := v.args.Next(); len(params) > 0 {
+		if cmd, ok := v.commands[params[0]]; ok {
 			v.application.
 				ConfigFile(v.config, v.configs...).
 				Modules(v.plugins...).
-				Run()
-		})
-	}))
+				Invoke(cmd)
+			return
+		}
+		console.Fatalf("<%s> command not found", params[0])
+	}
 
-	v.console.Exec()
+	v.application.
+		ConfigFile(v.config, v.configs...).
+		Modules(v.plugins...).
+		Run()
 }
 
 func reflectResolve(arg interface{}, k reflect.Kind, call func(interface{}), comment string) {
@@ -95,30 +99,36 @@ func reflectResolve(arg interface{}, k reflect.Kind, call func(interface{}), com
 	call(arg)
 }
 
-func parseConfigFlag() string {
-	conf := flag.String("config", "./config.yaml", "path to the config file")
-	flag.Parse()
+func (v *_app) parseConfigFlag(filename string) string {
+	if len(filename) == 0 {
+		filename = "./config.yaml"
+	}
+	conf := v.args.Get("config")
+	if len(*conf) == 0 {
+		conf = &filename
+	}
 	return *conf
 }
 
 func validateConfig(filename string, configs ...interface{}) error {
-	if len(filename) == 0 {
-		filename = parseConfigFlag()
+	_, err := os.Stat(filename)
+	if err == nil {
+		return nil
 	}
-	if _, err := os.Stat(filename); err != nil {
+	if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
 	defType := reflect.TypeOf(new(plugins.Validator)).Elem()
 	for _, cfg := range configs {
 		if reflect.TypeOf(cfg).AssignableTo(defType) {
-			if err := app.Sources(filename).Decode(cfg); err != nil {
+			if err = app.Sources(filename).Decode(cfg); err != nil {
 				return fmt.Errorf("decode config %T error: %w", cfg, err)
 			}
 			vv, ok := cfg.(plugins.Validator)
 			if !ok {
 				continue
 			}
-			if err := vv.Validate(); err != nil {
+			if err = vv.Validate(); err != nil {
 				return fmt.Errorf("validate config %T error: %w", cfg, err)
 			}
 		}
@@ -126,31 +136,36 @@ func validateConfig(filename string, configs ...interface{}) error {
 	return nil
 }
 
-func generateConfig(filename string, configs ...interface{}) string {
-	if len(filename) == 0 {
-		filename = parseConfigFlag()
+func recoveryConfig(filename string, configs ...interface{}) error {
+	_, err := os.Stat(filename)
+	if err == nil {
+		return nil
 	}
-	if _, err := os.Stat(filename); !errors.Is(err, os.ErrNotExist) {
-		return filename
+	if !errors.Is(err, os.ErrNotExist) {
+		return err
 	}
-	//nolint: errcheck
-	b, _ := yaml.Marshal(&app.Config{
+	b, err := yaml.Marshal(&app.Config{
 		Env:     "dev",
 		Level:   4,
 		LogFile: "/dev/stdout",
 	})
+	if err != nil {
+		return err
+	}
 	defType := reflect.TypeOf(new(plugins.Defaulter)).Elem()
 	for _, cfg := range configs {
 		if reflect.TypeOf(cfg).AssignableTo(defType) {
 			reflect.ValueOf(cfg).MethodByName("Default").Call([]reflect.Value{})
 		}
-		if bb, err := yaml.Marshal(cfg); err == nil {
+		if bb, err0 := yaml.Marshal(cfg); err0 == nil {
 			b = append(b, '\n')
 			b = append(b, bb...)
+		} else {
+			return err0
 		}
 	}
-	if err := os.WriteFile(filename, b, 0755); err != nil {
-		panic(err)
+	if err = os.WriteFile(filename, b, 0755); err != nil {
+		return err
 	}
-	return filename
+	return nil
 }
