@@ -19,17 +19,19 @@ go get -u github.com/deweppro/goppy
 - Application customization via plugins
 - Built-in dependency container
 - Data binding for JSON
+- Command support
+- Database support and automatic migration
 
 ## Plugins
 
-| Plugin         | Comment                                                                                                                                                             | Import                                                                                              |
-|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------|
-| **debug**      | Profiling application (pprof) with HTTP access.                                                                                                                     | `http.WithHTTPDebug()`                                                                              |
-| **http**       | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `http.WithHTTP()`  `http.WithWebsocketServer()` `http.WithWebsocketClient()` `http.WithHTTPClient()` |
-| **unixsocket** | Requests via unix socket.                                                                                                                                           | `unix.WithServer()`  `unix.WithClient()` |
-| **database**   | Multi connection pools with MySQL and SQLite databases (with initialization migration setup).                                                                       | `database.WithMySQL()` `database.WithSQLite()`                                                      |
-| **geoip**      | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `http.CloudflareMiddleware()` `http.MaxMindMiddleware()`               |
-| **oauth**      | Authorization via OAuth provider. (Yandex, Google)                                                                                                                  | `auth.WithOAuth()`                                                                                  |
+| Plugin         | Comment                                                                                                                                                             | Import                                                                                               |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------|
+| **debug**      | Profiling application (pprof) with HTTP access.                                                                                                                     | `web.WithHTTPDebug()`                                                                                |
+| **http**       | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `web.WithHTTP()`  `web.WithWebsocketServer()` `web.WithWebsocketClient()` `web.WithHTTPClient()` |
+| **unixsocket** | Requests via unix socket.                                                                                                                                           | `unix.WithServer()`  `unix.WithClient()`                                                             |
+| **database**   | Multiple connection pools with MySQL and SQLite databases (with automatic migration setup).                                                                         | `database.WithMySQL()` `database.WithSQLite()`                                                       |
+| **geoip**      | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `geoip.CloudflareMiddleware()` `geoip.MaxMindMiddleware()`                |
+| **oauth**      | Authorization via OAuth provider (Yandex, Google). JWT Cookie.                                                                                                      | `auth.WithOAuth()` `auth.WithJWT()` `auth.JWTGuardMiddleware()`                                      |
 
 ## Quick Start
 
@@ -37,12 +39,12 @@ Config:
 
 ```yaml
 env: dev
-level: 4
+level: 4 # 0-Fatal, 1-Error, 2-Warning, 3-Info, 4-Debug
 log: /dev/stdout
 
 http:
   main:
-    addr: 127.0.0.1:8088
+    addr: 127.0.0.1:8080
 ```
 
 Code:
@@ -51,30 +53,37 @@ Code:
 package main
 
 import (
+	"fmt"
+	"os"
+
+	"github.com/deweppro/go-sdk/console"
 	"github.com/deweppro/goppy"
 	"github.com/deweppro/goppy/plugins"
-	"github.com/deweppro/goppy/plugins/http"
+	"github.com/deweppro/goppy/plugins/web"
 )
 
 func main() {
 	app := goppy.New()
-	app.WithConfig("./config.yaml")
+	app.WithConfig("./config.yaml") // Reassigned via the `--config` argument when run via the console.
 	app.Plugins(
-		http.WithHTTP(),
+		web.WithHTTP(),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes http.RouterPool, c *Controller) {
+			Resolve: func(routes web.RouterPool, c *Controller) {
 				router := routes.Main()
-				router.Use(http.ThrottlingMiddleware(100))
+				router.Use(web.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", http.ThrottlingMiddleware(100))
+				api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
 				api.Get("/user/{id}", c.User)
 			},
 		},
 	)
+	app.Command("env", func(s console.CommandSetter) {
+		fmt.Println(os.Environ())
+	})
 	app.Run()
 }
 
@@ -84,14 +93,15 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Users(ctx http.Ctx) {
+func (v *Controller) Users(ctx web.Context) {
 	data := []int64{1, 2, 3, 4}
-	ctx.SetBody(200).JSON(data)
+	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx http.Ctx) {
+func (v *Controller) User(ctx web.Context) {
 	id, _ := ctx.Param("id").Int()
-	ctx.SetBody(200).String("user id: %d", id)
+	ctx.String(200, "user id: %d", id)
 	ctx.Log().Infof("user - %d", id)
 }
+
 ```

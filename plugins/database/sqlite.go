@@ -1,10 +1,7 @@
 package database
 
 import (
-	"context"
-	"database/sql"
 	"fmt"
-	"os"
 
 	"github.com/deweppro/go-sdk/log"
 	"github.com/deweppro/go-sdk/orm"
@@ -15,24 +12,29 @@ import (
 
 // ConfigSqlite sqlite config model
 type ConfigSqlite struct {
-	Pool []item `yaml:"sqlite"`
-}
-
-type item struct {
-	Name          string   `yaml:"name"`
-	File          string   `yaml:"file"`
-	InitMigration []string `yaml:"init_migration"`
+	Pool    []sqlite.Item       `yaml:"sqlite"`
+	Migrate []ConfigMigrateItem `yaml:"sqlite_migrate"`
 }
 
 func (v *ConfigSqlite) Default() {
 	if len(v.Pool) == 0 {
-		v.Pool = []item{
+		v.Pool = []sqlite.Item{
 			{
-				Name: "main",
-				File: "./sqlite.db",
-				InitMigration: []string{
-					"./migration.sql",
-				},
+				Name:        "main",
+				File:        "./sqlite.db",
+				Cache:       "private",
+				Mode:        "rwc",
+				Journal:     "TRUNCATE",
+				LockingMode: "EXCLUSIVE",
+				OtherParams: "",
+			},
+		}
+	}
+	if len(v.Migrate) == 0 {
+		v.Migrate = []ConfigMigrateItem{
+			{
+				Pool: "main",
+				Dir:  "./migrations",
 			},
 		}
 	}
@@ -46,23 +48,15 @@ func (v *ConfigSqlite) List() (list []schema.ItemInterface) {
 	return
 }
 
-// GetName getting config name
-func (i item) GetName() string { return i.Name }
-
-// GetDSN connection params
-func (i item) GetDSN() string { return i.File }
-
-// Setup setting config connections params
-func (i item) Setup(_ schema.SetupInterface) {}
-
 // WithSQLite launch SQLite connection pool
 func WithSQLite() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
-		Inject: func(c *ConfigSqlite, l log.Logger) (*sqliteProvider, SQLite) {
+		Inject: func(c *ConfigSqlite, l log.Logger) (*sqliteProvider, *migrate, SQLite) {
 			conn := sqlite.New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
-			return &sqliteProvider{conn: conn, conf: *c, log: l}, o
+			m := newMigrate(o, c.Migrate, l)
+			return &sqliteProvider{conn: conn, conf: *c, log: l}, m, o
 		},
 	}
 }
@@ -77,6 +71,7 @@ type (
 	//SQLite connection SQLite interface
 	SQLite interface {
 		Pool(name string) orm.Stmt
+		Dialect() string
 	}
 )
 
@@ -92,9 +87,6 @@ func (v *sqliteProvider) Up() error {
 		if err = p.Ping(); err != nil {
 			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
 		}
-		if err = v.migration(p, vv.InitMigration); err != nil {
-			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
-		}
 		v.log.WithFields(log.Fields{vv.Name: vv.File}).Infof("SQLite connect")
 	}
 	return nil
@@ -102,47 +94,4 @@ func (v *sqliteProvider) Up() error {
 
 func (v *sqliteProvider) Down() error {
 	return v.conn.Close()
-}
-
-const sqliteMaster = "select count(*) from `sqlite_master`;"
-
-func (v *sqliteProvider) migration(conn *sql.DB, mig []string) error {
-	ctx := context.TODO()
-	var count int
-	checkDB := func() error {
-		row := conn.QueryRowContext(ctx, sqliteMaster)
-		if err := row.Scan(&count); err != nil {
-			return err
-		}
-		if err := row.Err(); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	if err := checkDB(); err != nil {
-		return err
-	}
-
-	if count == 0 {
-		for _, filename := range mig {
-			b, err := os.ReadFile(filename)
-			if err != nil {
-				return fmt.Errorf("read init migration `%s`: %w", filename, err)
-			}
-			if _, err = conn.ExecContext(ctx, string(b)); err != nil {
-				return fmt.Errorf("exec init migration `%s`: %w", filename, err)
-			}
-		}
-	}
-
-	if err := checkDB(); err != nil {
-		return err
-	}
-
-	if count == 0 {
-		return fmt.Errorf("empty database")
-	}
-
-	return nil
 }
