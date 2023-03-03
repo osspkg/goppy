@@ -104,7 +104,7 @@ func (v *_app) parseConfigFlag(filename string) string {
 		filename = "./config.yaml"
 	}
 	conf := v.args.Get("config")
-	if len(*conf) == 0 {
+	if conf == nil || len(*conf) == 0 {
 		conf = &filename
 	}
 	return *conf

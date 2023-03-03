@@ -4,6 +4,7 @@
 *.so
 *.dylib
 *.db
+*.db-journal
 *.mmdb
 *.test
 *.out

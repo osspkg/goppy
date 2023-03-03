@@ -3,7 +3,7 @@ module github.com/deweppro/goppy
 go 1.17
 
 require (
-	github.com/deweppro/go-sdk v1.1.1
+	github.com/deweppro/go-sdk v1.1.2
 	github.com/deweppro/go-static v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/mailru/easyjson v0.7.7

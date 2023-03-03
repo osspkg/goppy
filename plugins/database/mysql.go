@@ -13,7 +13,8 @@ import (
 
 // ConfigMysql mysql config model
 type ConfigMysql struct {
-	Pool []mysql.Item `yaml:"mysql"`
+	Pool    []mysql.Item        `yaml:"mysql"`
+	Migrate []ConfigMigrateItem `yaml:"mysql_migrate"`
 }
 
 // List getting all configs
@@ -40,13 +41,22 @@ func (v *ConfigMysql) Default() {
 				InterpolateParams: false,
 				Timezone:          "UTC",
 				TxIsolationLevel:  "",
-				Charset:           "utf8mb4,utf8",
+				Charset:           "utf8mb4",
+				Collation:         "utf8mb4_unicode_ci",
 				Timeout:           time.Second * 5,
 				ReadTimeout:       time.Second * 5,
 				WriteTimeout:      time.Second * 5,
+				OtherParams:       "",
 			},
 		}
-
+	}
+	if len(v.Migrate) == 0 {
+		v.Migrate = []ConfigMigrateItem{
+			{
+				Pool: "main",
+				Dir:  "./migrations",
+			},
+		}
 	}
 }
 
@@ -54,10 +64,11 @@ func (v *ConfigMysql) Default() {
 func WithMySQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
-		Inject: func(conf *ConfigMysql, l log.Logger) (*mysqlProvider, MySQL) {
-			conn := mysql.New(conf)
+		Inject: func(c *ConfigMysql, l log.Logger) (*mysqlProvider, *migrate, MySQL) {
+			conn := mysql.New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
-			return &mysqlProvider{conn: conn, conf: *conf, log: l}, o
+			m := newMigrate(o, c.Migrate, l)
+			return &mysqlProvider{conn: conn, conf: *c, log: l}, m, o
 		},
 	}
 }
@@ -72,6 +83,7 @@ type (
 	//MySQL connection MySQL interface
 	MySQL interface {
 		Pool(name string) orm.Stmt
+		Dialect() string
 	}
 )
 
