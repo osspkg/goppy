@@ -37,13 +37,20 @@ func (v *ConfigMigrate) Default() {
 	}
 }
 
-type migrate struct {
-	conn orm.Database
-	conf []ConfigMigrateItem
-	log  log.Logger
-}
+type (
+	migrate struct {
+		conn orm.Database
+		conf []ConfigMigrateItem
+		log  log.Logger
+	}
 
-func newMigrate(conn orm.Database, conf []ConfigMigrateItem, log log.Logger) *migrate {
+	dbm interface {
+		Pool(name string) orm.Stmt
+		Dialect() string
+	}
+)
+
+func newMigrate(conn dbm, conf []ConfigMigrateItem, log log.Logger) *migrate {
 	return &migrate{
 		conn: conn,
 		conf: conf,
@@ -51,17 +58,13 @@ func newMigrate(conn orm.Database, conf []ConfigMigrateItem, log log.Logger) *mi
 	}
 }
 
-func (v *migrate) Up(ctx app.Context) error {
+func (v *migrate) Run(ctx app.Context) error {
 	switch v.conn.Dialect() {
 	case schema.MySQLDialect:
 		return v.mysql(ctx.Context())
 	case schema.SQLiteDialect:
 		return v.sqlite(ctx.Context())
 	}
-	return nil
-}
-
-func (v *migrate) Down() error {
 	return nil
 }
 

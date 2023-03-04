@@ -1,13 +1,18 @@
 package database
 
 import (
+	"context"
 	"fmt"
+	"sync"
 	"time"
 
+	"github.com/deweppro/go-sdk/app"
+	"github.com/deweppro/go-sdk/errors"
 	"github.com/deweppro/go-sdk/log"
 	"github.com/deweppro/go-sdk/orm"
 	"github.com/deweppro/go-sdk/orm/schema"
 	"github.com/deweppro/go-sdk/orm/schema/mysql"
+	"github.com/deweppro/go-sdk/routine"
 	"github.com/deweppro/goppy/plugins"
 )
 
@@ -64,48 +69,118 @@ func (v *ConfigMysql) Default() {
 func WithMySQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
-		Inject: func(c *ConfigMysql, l log.Logger) (*mysqlProvider, *migrate, MySQL) {
+		Inject: func(c *ConfigMysql, l log.Logger) (*mysqlProvider, MySQL) {
 			conn := mysql.New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
 			m := newMigrate(o, c.Migrate, l)
-			return &mysqlProvider{conn: conn, conf: *c, log: l}, m, o
+			p := &mysqlProvider{
+				conn:    conn,
+				orm:     o,
+				migrate: m,
+				conf:    *c,
+				log:     l,
+				list:    make(map[string]orm.Stmt),
+				active:  false,
+			}
+			return p, p
 		},
 	}
 }
 
 type (
 	mysqlProvider struct {
-		conn schema.Connector
-		conf ConfigMysql
-		log  log.Logger
+		conn    schema.Connector
+		orm     orm.Database
+		migrate *migrate
+		conf    ConfigMysql
+		log     log.Logger
+		list    map[string]orm.Stmt
+		mux     sync.RWMutex
+		active  bool
 	}
 
 	//MySQL connection MySQL interface
 	MySQL interface {
 		Pool(name string) orm.Stmt
-		Dialect() string
 	}
 )
 
-func (v *mysqlProvider) Up() error {
-	if err := v.conn.Reconnect(); err != nil {
-		return err
-	}
-	for _, vv := range v.conf.Pool {
-		p, err := v.conn.Pool(vv.Name)
-		if err != nil {
-			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
+func (v *mysqlProvider) Up(ctx app.Context) error {
+	routine.Interval(ctx.Context(), time.Second*5, func(ctx context.Context) {
+		if v.active {
+			v.mux.RLock()
+			for name, stmt := range v.list {
+				if err := stmt.Ping(); err != nil {
+					v.log.WithFields(
+						log.Fields{"err": fmt.Errorf("pool `%s`: %w", name, err).Error()},
+					).Errorf("MySQL check connect")
+					v.active = false
+				}
+			}
+			v.mux.RUnlock()
 		}
-		if err = p.Ping(); err != nil {
-			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
+
+		if !v.active {
+			if err := v.updateConnect(); err == nil {
+				v.updateList()
+				v.active = true
+			} else {
+				v.log.WithFields(
+					log.Fields{"err": err.Error()},
+				).Errorf("MySQL update connections")
+			}
 		}
-		v.log.WithFields(
-			log.Fields{vv.Name: fmt.Sprintf("%s:%d", vv.Host, vv.Port)},
-		).Infof("MySQL connect")
+	})
+	if !v.active {
+		return errors.New("Failed to connect to database")
 	}
-	return nil
+	return v.migrate.Run(ctx)
 }
 
 func (v *mysqlProvider) Down() error {
 	return v.conn.Close()
+}
+
+func (v *mysqlProvider) updateList() {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
+	for _, vv := range v.conf.Pool {
+		v.list[vv.Name] = v.orm.Pool(vv.Name)
+	}
+}
+
+func (v *mysqlProvider) updateConnect() error {
+	if err := v.conn.Reconnect(); err != nil {
+		return err
+	}
+	var errs error
+	for _, vv := range v.conf.Pool {
+		p, err := v.conn.Pool(vv.Name)
+		if err != nil {
+			errs = errors.Wrap(errs, fmt.Errorf("pool `%s`: %w", vv.Name, err))
+			continue
+		}
+		if err = p.Ping(); err != nil {
+			errs = errors.Wrap(errs, fmt.Errorf("pool `%s`: %w", vv.Name, err))
+			continue
+		}
+		v.log.WithFields(
+			log.Fields{vv.Name: fmt.Sprintf("%s:%d", vv.Host, vv.Port)},
+		).Infof("MySQL update connections")
+	}
+	return errs
+}
+
+func (v *mysqlProvider) Pool(name string) orm.Stmt {
+	v.mux.RLock()
+	defer v.mux.RUnlock()
+	if s, ok := v.list[name]; ok {
+		return s
+	}
+	return v.orm.Pool(name)
+}
+
+func (v *mysqlProvider) Dialect() string {
+	return v.orm.Dialect()
 }

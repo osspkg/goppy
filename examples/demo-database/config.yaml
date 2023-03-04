@@ -5,39 +5,42 @@ log: /dev/stdout
 
 debug:
     addr: 127.0.0.1:12000
-    read_timeout: 0s
-    write_timeout: 0s
-    idle_timeout: 0s
-    shutdown_timeout: 0s
 
 http:
     main:
-        addr: 127.0.0.1:8088
-        read_timeout: 0s
-        write_timeout: 0s
-        idle_timeout: 0s
-        shutdown_timeout: 0s
+        addr: 127.0.0.1:8082
 
 mysql:
     - name: main
       host: 127.0.0.1
       port: 3306
-      schema: test_database
+      schema: test
       user: test
       password: test
-      maxidleconn: 5
-      maxopenconn: 5
-      maxconnttl: 50s
-      interpolateparams: false
       timezone: UTC
       txisolevel: ""
-      charset: utf8mb4,utf8
+      charset: utf8mb4
+      collation: utf8mb4_unicode_ci
+      maxidleconn: 5
+      maxopenconn: 5
+      interpolateparams: false
+      maxconnttl: 50s
       timeout: 5s
       readtimeout: 5s
       writetimeout: 5s
+      other_params: ""
+mysql_migrate:
+    - pool: main
+      dir: ./migrations
 
 sqlite:
     - name: main
       file: ./sqlite.db
-      init_migration:
-        - ./migration.sql
+      cache: private
+      mode: rwc
+      journal: WAL
+      locking_mode: EXCLUSIVE
+      other_params: "auto_vacuum=incremental"
+sqlite_migrate:
+    - pool: main
+      dir: ./migrations

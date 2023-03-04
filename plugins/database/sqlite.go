@@ -1,12 +1,19 @@
 package database
 
 import (
+	"context"
 	"fmt"
+	"sync"
+	"time"
 
+	"github.com/deweppro/go-sdk/app"
+	"github.com/deweppro/go-sdk/errors"
+	"github.com/deweppro/go-sdk/file"
 	"github.com/deweppro/go-sdk/log"
 	"github.com/deweppro/go-sdk/orm"
 	"github.com/deweppro/go-sdk/orm/schema"
 	"github.com/deweppro/go-sdk/orm/schema/sqlite"
+	"github.com/deweppro/go-sdk/routine"
 	"github.com/deweppro/goppy/plugins"
 )
 
@@ -24,9 +31,9 @@ func (v *ConfigSqlite) Default() {
 				File:        "./sqlite.db",
 				Cache:       "private",
 				Mode:        "rwc",
-				Journal:     "TRUNCATE",
+				Journal:     "WAL",
 				LockingMode: "EXCLUSIVE",
-				OtherParams: "",
+				OtherParams: "auto_vacuum=incremental",
 			},
 		}
 	}
@@ -52,46 +59,138 @@ func (v *ConfigSqlite) List() (list []schema.ItemInterface) {
 func WithSQLite() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
-		Inject: func(c *ConfigSqlite, l log.Logger) (*sqliteProvider, *migrate, SQLite) {
+		Inject: func(c *ConfigSqlite, l log.Logger) (*sqliteProvider, SQLite) {
 			conn := sqlite.New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
 			m := newMigrate(o, c.Migrate, l)
-			return &sqliteProvider{conn: conn, conf: *c, log: l}, m, o
+			p := &sqliteProvider{
+				conn:    conn,
+				orm:     o,
+				migrate: m,
+				conf:    *c,
+				log:     l,
+				list:    make(map[string]orm.Stmt),
+				active:  false,
+			}
+			return p, p
 		},
 	}
 }
 
 type (
 	sqliteProvider struct {
-		conn schema.Connector
-		conf ConfigSqlite
-		log  log.Logger
+		conn    schema.Connector
+		orm     orm.Database
+		migrate *migrate
+		conf    ConfigSqlite
+		log     log.Logger
+		list    map[string]orm.Stmt
+		mux     sync.RWMutex
+		active  bool
 	}
 
 	//SQLite connection SQLite interface
 	SQLite interface {
 		Pool(name string) orm.Stmt
-		Dialect() string
 	}
 )
 
-func (v *sqliteProvider) Up() error {
-	if err := v.conn.Reconnect(); err != nil {
-		return err
-	}
-	for _, vv := range v.conf.Pool {
-		p, err := v.conn.Pool(vv.Name)
-		if err != nil {
-			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
+func (v *sqliteProvider) Up(ctx app.Context) error {
+	routine.Interval(ctx.Context(), time.Second*5, func(_ context.Context) {
+		var recovery bool
+		if v.active {
+			v.mux.RLock()
+			for name, stmt := range v.list {
+				if err := stmt.Ping(); err != nil {
+					v.log.WithFields(
+						log.Fields{"err": fmt.Errorf("pool `%s`: %w", name, err).Error()},
+					).Errorf("SQLite check connect")
+					v.active = false
+				}
+			}
+			v.mux.RUnlock()
+
+			for _, item := range v.conf.Pool {
+				if !file.Exist(item.File) {
+					v.log.WithFields(
+						log.Fields{"err": fmt.Sprintf("pool `%s`: [%s] file is missing", item.Name, item.File)},
+					).Errorf("SQLite check connect")
+					v.active = false
+					recovery = true
+				}
+			}
 		}
-		if err = p.Ping(); err != nil {
-			return fmt.Errorf("pool `%s`: %w", vv.Name, err)
+
+		if !v.active {
+			if err := v.updateConnect(); err == nil {
+				v.updateList()
+				v.active = true
+
+				if recovery {
+					v.log.Infof("SQLite recovery migration")
+					if err = v.migrate.Run(ctx); err != nil {
+						v.log.WithFields(
+							log.Fields{"err": err.Error()},
+						).Errorf("SQLite recovery migration")
+					}
+				}
+			} else {
+				v.log.WithFields(
+					log.Fields{"err": err.Error()},
+				).Errorf("SQLite update connections")
+			}
 		}
-		v.log.WithFields(log.Fields{vv.Name: vv.File}).Infof("SQLite connect")
+	})
+	if !v.active {
+		return errors.New("Failed to connect to database")
 	}
-	return nil
+	return v.migrate.Run(ctx)
 }
 
 func (v *sqliteProvider) Down() error {
 	return v.conn.Close()
+}
+
+func (v *sqliteProvider) updateList() {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
+	for _, vv := range v.conf.Pool {
+		v.list[vv.Name] = v.orm.Pool(vv.Name)
+	}
+}
+
+func (v *sqliteProvider) updateConnect() error {
+	if err := v.conn.Reconnect(); err != nil {
+		return err
+	}
+	var errs error
+	for _, vv := range v.conf.Pool {
+		p, err := v.conn.Pool(vv.Name)
+		if err != nil {
+			errs = errors.Wrap(errs, fmt.Errorf("pool `%s`: %w", vv.Name, err))
+			continue
+		}
+		if err = p.Ping(); err != nil {
+			errs = errors.Wrap(errs, fmt.Errorf("pool `%s`: %w", vv.Name, err))
+			continue
+		}
+		v.log.WithFields(
+			log.Fields{vv.Name: vv.File},
+		).Infof("SQLite update connections")
+	}
+	return errs
+}
+
+func (v *sqliteProvider) Pool(name string) orm.Stmt {
+	v.mux.RLock()
+	defer v.mux.RUnlock()
+	if s, ok := v.list[name]; ok {
+		return s
+	}
+	return v.orm.Pool(name)
+}
+
+func (v *sqliteProvider) Dialect() string {
+	return v.orm.Dialect()
 }

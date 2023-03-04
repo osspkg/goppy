@@ -37,12 +37,17 @@ func main() {
 }
 
 type Controller struct {
-	db database.MySQL
+	mdb database.MySQL
+	sdb database.SQLite
 }
 
-func NewController(v database.MySQL) *Controller {
+func NewController(
+	m database.MySQL,
+	s database.SQLite,
+) *Controller {
 	return &Controller{
-		db: v,
+		mdb: m,
+		sdb: s,
 	}
 }
 
@@ -54,9 +59,16 @@ func (v *Controller) Users(ctx web.Context) {
 func (v *Controller) User(ctx web.Context) {
 	id, _ := ctx.Param("id").Int()
 
-	err := v.db.Pool("main").Ping()
+	err := v.mdb.Pool("main").Ping()
 	if err != nil {
-		ctx.Log().Errorf("db: %s", err.Error())
+		ctx.ErrorJSON(500, err, web.ErrCtx{"id": id})
+		return
+	}
+
+	err = v.sdb.Pool("main").Ping()
+	if err != nil {
+		ctx.ErrorJSON(500, err, web.ErrCtx{"id": id})
+		return
 	}
 
 	ctx.ErrorJSON(400, fmt.Errorf("user not found"), web.ErrCtx{"id": id})
