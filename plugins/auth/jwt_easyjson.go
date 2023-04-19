@@ -36,6 +36,8 @@ func easyjson171edd05DecodeGithubComDewepproGoppyPluginsAuth(in *jlexer.Lexer, o
 			continue
 		}
 		switch key {
+		case "kid":
+			out.Kid = string(in.String())
 		case "alg":
 			out.Alg = string(in.String())
 		case "iat":
@@ -57,8 +59,13 @@ func easyjson171edd05EncodeGithubComDewepproGoppyPluginsAuth(out *jwriter.Writer
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"alg\":"
+		const prefix string = ",\"kid\":"
 		out.RawString(prefix[1:])
+		out.String(string(in.Kid))
+	}
+	{
+		const prefix string = ",\"alg\":"
+		out.RawString(prefix)
 		out.String(string(in.Alg))
 	}
 	{
