@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/deweppro/goppy/plugins/web"
 )
@@ -14,17 +15,24 @@ const (
 	jwtHeader  = "jwth"
 )
 
-type jwtContext string
+type (
+	jwtContext string
 
-type ctx interface {
-	Context() context.Context
-}
+	ctx interface {
+		Context() context.Context
+	}
 
-func setJWTPayload(ctx context.Context, value []byte) context.Context {
+	JWTGuardMiddlewareConfig struct {
+		AcceptHeader bool
+		AcceptCookie string
+	}
+)
+
+func setJWTPayloadContext(ctx context.Context, value []byte) context.Context {
 	return context.WithValue(ctx, jwtContext(jwtPayload), value)
 }
 
-func GetJWTPayload(c ctx, payload interface{}) error {
+func GetJWTPayloadContext(c ctx, payload interface{}) error {
 	value, ok := c.Context().Value(jwtContext(jwtPayload)).([]byte)
 	if !ok {
 		return fmt.Errorf("jwt payload not found")
@@ -32,11 +40,11 @@ func GetJWTPayload(c ctx, payload interface{}) error {
 	return json.Unmarshal(value, payload)
 }
 
-func setJWTHeader(ctx context.Context, value *JWTHeader) context.Context {
+func setJWTHeaderContext(ctx context.Context, value *JWTHeader) context.Context {
 	return context.WithValue(ctx, jwtContext(jwtHeader), *value)
 }
 
-func GetJWTHeader(c ctx, payload interface{}) *JWTHeader {
+func GetJWTHeaderContext(c ctx, payload interface{}) *JWTHeader {
 	value, ok := c.Context().Value(jwtContext(jwtPayload)).(JWTHeader)
 	if !ok {
 		return nil
@@ -44,26 +52,40 @@ func GetJWTHeader(c ctx, payload interface{}) *JWTHeader {
 	return &value
 }
 
-func JWTGuardMiddleware(j JWT) web.Middleware {
+func JWTGuardMiddleware(j JWT, c JWTGuardMiddlewareConfig) web.Middleware {
 	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
+			val := ""
 
-			c, err := r.Cookie(j.CookieName())
-			if err != nil {
+			if len(val) == 0 && c.AcceptHeader {
+				val = r.Header.Get("Authorization")
+				if len(val) > 7 && strings.HasPrefix(val, "Bearer ") {
+					val = val[6:]
+				}
+			}
+
+			if len(val) == 0 && len(c.AcceptCookie) > 0 {
+				cv, err := r.Cookie(c.AcceptCookie)
+				if err == nil && len(cv.Value) > 0 {
+					val = cv.Value
+				}
+			}
+
+			if len(val) == 0 {
 				http.Error(w, "authorization required", http.StatusUnauthorized)
 				return
 			}
 
 			var raw json.RawMessage
-			h, err := j.Verify(c.Value, &raw)
+			h, err := j.Verify(val, &raw)
 			if err != nil {
 				http.Error(w, "authorization required", http.StatusUnauthorized)
 				return
 			}
 
-			ctx = setJWTHeader(ctx, h)
-			ctx = setJWTPayload(ctx, raw)
+			ctx = setJWTHeaderContext(ctx, h)
+			ctx = setJWTPayloadContext(ctx, raw)
 
 			call(w, r.WithContext(ctx))
 		}

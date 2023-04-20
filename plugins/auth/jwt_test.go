@@ -22,7 +22,7 @@ func TestUnit_newJWT(t *testing.T) {
 	require.NoError(t, err)
 
 	payload1 := demoJwtPayload{ID: 159}
-	token, err := j.Sign(&payload1)
+	token, err := j.Sign(&payload1, time.Hour)
 	require.NoError(t, err)
 
 	payload2 := demoJwtPayload{}
@@ -30,13 +30,8 @@ func TestUnit_newJWT(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, payload1, payload2)
-	<-time.After(time.Second)
-
-	token, err = j.Extend(token)
-	require.NoError(t, err)
 
 	head2, err := j.Verify(token, &payload2)
 	require.NoError(t, err)
-
-	require.NotEqual(t, head1, head2)
+	require.Equal(t, head1, head2)
 }
