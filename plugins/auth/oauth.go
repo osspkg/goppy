@@ -3,19 +3,19 @@ package auth
 import (
 	"net/http"
 
-	oauth "github.com/deweppro/go-sdk/auth"
+	"github.com/deweppro/go-sdk/auth/oauth"
 	"github.com/deweppro/goppy/plugins"
 	"github.com/deweppro/goppy/plugins/web"
 )
 
 // ConfigOAuth oauth config model
 type ConfigOAuth struct {
-	Providers []oauth.ConfigOAuthItem `yaml:"oauth"`
+	Providers []oauth.ConfigItem `yaml:"oauth"`
 }
 
 func (v *ConfigOAuth) Default() {
 	if len(v.Providers) == 0 {
-		v.Providers = []oauth.ConfigOAuthItem{
+		v.Providers = []oauth.ConfigItem{
 			{
 				Code:         oauth.CodeGoogle,
 				ClientID:     "****************.apps.googleusercontent.com",
@@ -31,10 +31,10 @@ func WithOAuth() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigOAuth{},
 		Inject: func(conf *ConfigOAuth) OAuth {
-			cc := &oauth.ConfigOAuth{Provider: make([]oauth.ConfigOAuthItem, 0, len(conf.Providers))}
+			cc := &oauth.Config{Provider: make([]oauth.ConfigItem, 0, len(conf.Providers))}
 			cc.Provider = append(cc.Provider, conf.Providers...)
 			return &oauthService{
-				oa: oauth.NewOAuth(cc),
+				oa: oauth.New(cc),
 			}
 		},
 	}
@@ -74,7 +74,7 @@ func (v *oauthService) RequestHandler(code string) func(web.Context) {
 
 func (v *oauthService) CallbackHandler(code string, handler func(web.Context, OAuthUser, Code)) func(web.Context) {
 	return func(ctx web.Context) {
-		v.oa.CallBack(code, func(_ http.ResponseWriter, _ *http.Request, u oauth.UserOAuth) {
+		v.oa.CallBack(code, func(_ http.ResponseWriter, _ *http.Request, u oauth.User) {
 			handler(ctx, u, Code(code))
 		})(ctx.Response(), ctx.Request())
 	}
