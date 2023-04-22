@@ -64,6 +64,8 @@ func (v *migrate) Run(ctx app.Context) error {
 		return v.mysql(ctx.Context())
 	case schema.SQLiteDialect:
 		return v.sqlite(ctx.Context())
+	case schema.PgSQLDialect:
+		return v.pgsql(ctx.Context())
 	}
 	return nil
 }
@@ -121,6 +123,38 @@ func saveMigration(ctx context.Context, stmt orm.Stmt, query, name string) error
 			}
 			return nil
 		})
+	})
+}
+
+const (
+	pgsqlMigrateList  = `SELECT "name" FROM "__migrations__";`
+	pgsqlMigrateSave  = `INSERT INTO "__migrations__" ("name", "timestamp") VALUES ($1, $2);`
+	pgsqlMigrateIndex = `CREATE SEQUENCE __migrations___id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;`
+	pgsqlMigrateTable = `CREATE TABLE "__migrations__" (
+		"id" integer DEFAULT nextval('__migrations___id_seq') NOT NULL,
+		"name" text NOT NULL,
+		"timestamp" integer NOT NULL,
+		CONSTRAINT "__migrations___pkey" PRIMARY KEY ("id")
+	) WITH (oids = false);`
+	pgsqlMigrateCheck = `SELECT "tablename" FROM "pg_catalog"."pg_tables" WHERE tablename='__migrations__';`
+)
+
+func (v *migrate) pgsql(ctx context.Context) error {
+	return v.executor(ctx, func(stmt orm.Stmt) (map[string]struct{}, error) {
+		if !hasTable(ctx, stmt, pgsqlMigrateCheck) {
+			if err := createTable(ctx, stmt, pgsqlMigrateIndex); err != nil {
+				return nil, err
+			}
+			if err := createTable(ctx, stmt, pgsqlMigrateTable); err != nil {
+				return nil, err
+			}
+			if !hasTable(ctx, stmt, pgsqlMigrateCheck) {
+				return nil, fmt.Errorf("cant create migration table")
+			}
+		}
+		return listMigrations(ctx, stmt, pgsqlMigrateList)
+	}, func(stmt orm.Stmt, name string) error {
+		return saveMigration(ctx, stmt, pgsqlMigrateSave, name)
 	})
 }
 

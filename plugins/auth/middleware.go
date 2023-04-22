@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/deweppro/go-sdk/auth/jwt"
 	"github.com/deweppro/goppy/plugins/web"
 )
 
@@ -40,12 +41,12 @@ func GetJWTPayloadContext(c ctx, payload interface{}) error {
 	return json.Unmarshal(value, payload)
 }
 
-func setJWTHeaderContext(ctx context.Context, value *JWTHeader) context.Context {
+func setJWTHeaderContext(ctx context.Context, value *jwt.Header) context.Context {
 	return context.WithValue(ctx, jwtContext(jwtHeader), *value)
 }
 
-func GetJWTHeaderContext(c ctx, payload interface{}) *JWTHeader {
-	value, ok := c.Context().Value(jwtContext(jwtPayload)).(JWTHeader)
+func GetJWTHeaderContext(c ctx, payload interface{}) *jwt.Header {
+	value, ok := c.Context().Value(jwtContext(jwtPayload)).(jwt.Header)
 	if !ok {
 		return nil
 	}
