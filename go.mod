@@ -3,7 +3,7 @@ module github.com/deweppro/goppy
 go 1.17
 
 require (
-	github.com/deweppro/go-sdk v1.2.0
+	github.com/deweppro/go-sdk v1.2.1
 	github.com/deweppro/go-static v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/mailru/easyjson v0.7.7
@@ -16,10 +16,10 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deweppro/go-algorithms v1.2.1 // indirect
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
+	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	github.com/lib/pq v1.10.8 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/mattn/go-sqlite3 v1.14.16 // indirect
 	github.com/oschwald/maxminddb-golang v1.10.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
