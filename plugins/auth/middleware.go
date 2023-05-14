@@ -45,7 +45,7 @@ func setJWTHeaderContext(ctx context.Context, value *jwt.Header) context.Context
 	return context.WithValue(ctx, jwtContext(jwtHeader), *value)
 }
 
-func GetJWTHeaderContext(c ctx, payload interface{}) *jwt.Header {
+func GetJWTHeaderContext(c ctx) *jwt.Header {
 	value, ok := c.Context().Value(jwtContext(jwtPayload)).(jwt.Header)
 	if !ok {
 		return nil
@@ -59,7 +59,7 @@ func JWTGuardMiddleware(j JWT, c JWTGuardMiddlewareConfig) web.Middleware {
 			ctx := r.Context()
 			val := ""
 
-			if len(val) == 0 && c.AcceptHeader {
+			if c.AcceptHeader {
 				val = r.Header.Get("Authorization")
 				if len(val) > 7 && strings.HasPrefix(val, "Bearer ") {
 					val = val[6:]
