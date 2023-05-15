@@ -20,8 +20,8 @@ func (v *ConfigJWT) Default() {
 	if len(v.JWT) == 0 {
 		for i := 0; i < 5; i++ {
 			v.JWT = append(v.JWT, jwt.Config{
-				ID:        random.String(6),
-				Key:       random.String(32),
+				ID:        random.String(8),
+				Key:       random.String(33),
 				Algorithm: jwt.AlgHS256,
 			})
 		}
