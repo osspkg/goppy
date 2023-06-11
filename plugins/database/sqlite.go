@@ -8,7 +8,7 @@ import (
 
 	"github.com/deweppro/go-sdk/app"
 	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/go-sdk/file"
+	"github.com/deweppro/go-sdk/iofile"
 	"github.com/deweppro/go-sdk/log"
 	"github.com/deweppro/go-sdk/orm"
 	"github.com/deweppro/go-sdk/orm/schema"
@@ -111,7 +111,7 @@ func (v *sqliteProvider) Up(ctx app.Context) error {
 			v.mux.RUnlock()
 
 			for _, item := range v.conf.Pool {
-				if !file.Exist(item.File) {
+				if !iofile.Exist(item.File) {
 					v.log.WithFields(
 						log.Fields{"err": fmt.Sprintf("pool `%s`: [%s] file is missing", item.Name, item.File)},
 					).Errorf("SQLite check connect")

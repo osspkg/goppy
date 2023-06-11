@@ -19,8 +19,12 @@ var (
 	errServAlreadyRunning = errors.New("server already running")
 	errServAlreadyStopped = errors.New("server already stopped")
 	errOneOpenConnect     = errors.New("connection can be started once")
+)
 
-	wsu = websocket.Upgrader{
+/**********************************************************************************************************************/
+
+func newWebsocketUpgrader() websocket.Upgrader {
+	return websocket.Upgrader{
 		EnableCompression: true,
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
@@ -28,7 +32,7 @@ var (
 			return true
 		},
 	}
-)
+}
 
 /**********************************************************************************************************************/
 

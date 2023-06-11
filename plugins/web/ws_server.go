@@ -34,10 +34,11 @@ func WebsocketServerOptionBuffer(read, write int) WebsocketServerOption {
 func WithWebsocketServer(options ...WebsocketServerOption) plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(l log.Logger) (*wssProvider, WebsocketServer) {
+			wsu := newWebsocketUpgrader()
 			for _, option := range options {
 				option(wsu)
 			}
-			wsp := newWsServerProvider(l)
+			wsp := newWsServerProvider(l, wsu)
 			return wsp, wsp
 		},
 	}
@@ -48,6 +49,7 @@ type (
 		status  int64
 		clients map[string]*wssConn
 		events  map[uint]WebsocketServerHandler
+		upgrade websocket.Upgrader
 
 		ctx    context.Context
 		cancel context.CancelFunc
@@ -69,7 +71,7 @@ type (
 	}
 )
 
-func newWsServerProvider(l log.Logger) *wssProvider {
+func newWsServerProvider(l log.Logger, wu websocket.Upgrader) *wssProvider {
 	c, cancel := context.WithCancel(context.TODO())
 
 	return &wssProvider{
@@ -79,6 +81,7 @@ func newWsServerProvider(l log.Logger) *wssProvider {
 		ctx:     c,
 		cancel:  cancel,
 		log:     l,
+		upgrade: wu,
 	}
 }
 
@@ -89,7 +92,6 @@ func (v *wssProvider) Up() error {
 	return nil
 }
 
-// Down hub
 func (v *wssProvider) Down() error {
 	if !atomic.CompareAndSwapInt64(&v.status, on, off) {
 		return errServAlreadyStopped
@@ -174,7 +176,7 @@ func (v *wssProvider) errLog(cid string, err error, msg string, args ...interfac
 func (v *wssProvider) Handling(ctx Context) {
 	cid := ctx.Header().Get("Sec-Websocket-Key")
 
-	wsc, err := wsu.Upgrade(ctx.Response(), ctx.Request(), nil)
+	wsc, err := v.upgrade.Upgrade(ctx.Response(), ctx.Request(), nil)
 	if err != nil {
 		v.errLog(cid, err, "[ws] upgrade")
 		ctx.Error(http.StatusBadRequest, err)
