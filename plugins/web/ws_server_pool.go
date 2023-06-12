@@ -48,6 +48,14 @@ func (v *wssPool) Create(name string) WebsocketServer {
 	}
 	p := newWsServerProvider(v.log, u)
 	v.pool[name] = p
+
+	if err := p.Up(); err != nil {
+		v.log.WithFields(log.Fields{
+			"err":  err,
+			"name": name,
+		}).Errorf("Create Websocket Server in pool")
+	}
+
 	return p
 }
 

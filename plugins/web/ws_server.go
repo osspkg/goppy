@@ -5,7 +5,6 @@ package web
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -328,34 +327,22 @@ func (v *wssConn) dataBus() <-chan []byte {
 
 func (v *wssConn) dataHandler(b []byte) {
 	eventModel(func(ev *event) {
-		var (
-			err error
-			msg string
-		)
-		defer func() {
-			if err != nil {
-				v.errLog(v.cid, err, "[ws] "+msg)
-			}
-		}()
-		if err = json.Unmarshal(b, ev); err != nil {
-			msg = "decode message"
+		if err := json.Unmarshal(b, ev); err != nil {
+			v.errLog(v.cid, err, "[ws] decode message")
 			return
 		}
 		call, ok := v.event(ev.EventID())
 		if !ok {
 			return
 		}
-		err = call(ev, v)
-		if err != nil {
+		if err := call(ev, v); err != nil {
 			ev.Error(err)
-			bb, er := json.Marshal(ev)
-			if er != nil {
-				msg = fmt.Sprintf("[ws] call event handler: %d", ev.EventID())
-				err = errors.Wrap(err, er)
+			if bb, er := json.Marshal(ev); er != nil {
+				v.errLog(v.cid, errors.Wrap(err, er), "[ws] call event handler: %d", ev.EventID())
 				return
+			} else {
+				v.Write(bb)
 			}
-			err = nil
-			v.Write(bb)
 			return
 		}
 	})

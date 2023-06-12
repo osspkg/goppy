@@ -1,5 +1,7 @@
 package web
 
+//go:generate easyjson
+
 import (
 	"encoding/json"
 	"sync"
