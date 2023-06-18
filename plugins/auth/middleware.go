@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/deweppro/go-sdk/auth/jwt"
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/go-sdk/auth/jwt"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 const (

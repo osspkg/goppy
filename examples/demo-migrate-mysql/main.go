@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/deweppro/goppy"
-	"github.com/deweppro/goppy/plugins/database"
+	"github.com/osspkg/goppy"
+	"github.com/osspkg/goppy/plugins/database"
 )
 
 func main() {

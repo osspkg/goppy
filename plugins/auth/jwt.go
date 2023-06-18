@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/deweppro/go-sdk/auth/jwt"
-	"github.com/deweppro/go-sdk/random"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/auth/jwt"
+	"github.com/osspkg/go-sdk/random"
+	"github.com/osspkg/goppy/plugins"
 )
 
 type (

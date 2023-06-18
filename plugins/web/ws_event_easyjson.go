@@ -17,7 +17,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson3146fba7DecodeGithubComDewepproGoppyPluginsWeb(in *jlexer.Lexer, out *event) {
+func easyjson3146fba7DecodeGithubComOsspkgGoppyPluginsWeb(in *jlexer.Lexer, out *event) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -66,7 +66,7 @@ func easyjson3146fba7DecodeGithubComDewepproGoppyPluginsWeb(in *jlexer.Lexer, ou
 		in.Consumed()
 	}
 }
-func easyjson3146fba7EncodeGithubComDewepproGoppyPluginsWeb(out *jwriter.Writer, in event) {
+func easyjson3146fba7EncodeGithubComOsspkgGoppyPluginsWeb(out *jwriter.Writer, in event) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -96,23 +96,23 @@ func easyjson3146fba7EncodeGithubComDewepproGoppyPluginsWeb(out *jwriter.Writer,
 // MarshalJSON supports json.Marshaler interface
 func (v event) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3146fba7EncodeGithubComDewepproGoppyPluginsWeb(&w, v)
+	easyjson3146fba7EncodeGithubComOsspkgGoppyPluginsWeb(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v event) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3146fba7EncodeGithubComDewepproGoppyPluginsWeb(w, v)
+	easyjson3146fba7EncodeGithubComOsspkgGoppyPluginsWeb(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *event) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3146fba7DecodeGithubComDewepproGoppyPluginsWeb(&r, v)
+	easyjson3146fba7DecodeGithubComOsspkgGoppyPluginsWeb(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *event) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3146fba7DecodeGithubComDewepproGoppyPluginsWeb(l, v)
+	easyjson3146fba7DecodeGithubComOsspkgGoppyPluginsWeb(l, v)
 }

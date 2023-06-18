@@ -3,9 +3,9 @@ package web
 import (
 	"sync"
 
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/goppy/plugins"
 )
 
 func WithWebsocketServerPool(options ...WebsocketServerOption) plugins.Plugin {

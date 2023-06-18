@@ -6,14 +6,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/deweppro/go-sdk/app"
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/go-sdk/orm"
-	"github.com/deweppro/go-sdk/orm/schema"
-	"github.com/deweppro/go-sdk/orm/schema/postgresql"
-	"github.com/deweppro/go-sdk/routine"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/app"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/go-sdk/orm"
+	"github.com/osspkg/go-sdk/orm/schema"
+	"github.com/osspkg/go-sdk/orm/schema/postgresql"
+	"github.com/osspkg/go-sdk/routine"
+	"github.com/osspkg/goppy/plugins"
 )
 
 // ConfigPgsql pgsql config model

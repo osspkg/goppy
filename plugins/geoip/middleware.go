@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 const (

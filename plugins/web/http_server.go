@@ -1,9 +1,9 @@
 package web
 
 import (
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/go-sdk/webutil"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/go-sdk/webutil"
+	"github.com/osspkg/goppy/plugins"
 )
 
 // ConfigHttp config to initialize HTTP service

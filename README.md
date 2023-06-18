@@ -1,10 +1,10 @@
 # Goppy Microservice Toolkit 
 
-[![Release](https://img.shields.io/github/release/dewep-online/goppy.svg?style=flat-square)](https://github.com/deweppro/goppy/releases/latest) 
-[![Go Report Card](https://goreportcard.com/badge/github.com/deweppro/goppy)](https://goreportcard.com/report/github.com/deweppro/goppy) 
-[![CI](https://github.com/deweppro/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/deweppro/goppy/actions/workflows/ci.yml)
-[![Codeql](https://github.com/deweppro/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/deweppro/goppy/actions/workflows/codeql.yml)
-![GitHub](https://img.shields.io/github/license/dewep-online/goppy)
+[![Release](https://img.shields.io/github/release/osspkg/goppy.svg?style=flat-square)](https://github.com/osspkg/goppy/releases/latest) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/osspkg/goppy)](https://goreportcard.com/report/github.com/osspkg/goppy) 
+[![CI](https://github.com/osspkg/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/osspkg/goppy/actions/workflows/ci.yml)
+[![Codeql](https://github.com/osspkg/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/osspkg/goppy/actions/workflows/codeql.yml)
+![GitHub](https://img.shields.io/github/license/osspkg/goppy)
 
 ## Features
 
@@ -19,7 +19,7 @@
 ## Guide 
 
 [![guide](https://img.shields.io/badge/giude-goppy.ru-green)](https://goppy.ru)
-[![wiki](https://img.shields.io/badge/wiki-github-red)](https://github.com/deweppro/goppy/wiki)
+[![wiki](https://img.shields.io/badge/wiki-github-red)](https://github.com/osspkg/goppy/wiki)
 
 
 ## Contribute
@@ -39,7 +39,7 @@
 
 ## Community
 
-[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/deweppro/goppy/discussions)
+[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/osspkg/goppy/discussions)
 
 ## License
 

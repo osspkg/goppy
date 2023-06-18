@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/deweppro/goppy"
-	"github.com/deweppro/goppy/plugins"
-	"github.com/deweppro/goppy/plugins/auth"
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/goppy"
+	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/plugins/auth"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 func main() {

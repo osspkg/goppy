@@ -8,11 +8,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	context2 "github.com/deweppro/go-sdk/context"
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/goppy/plugins"
 	"github.com/gorilla/websocket"
+	context2 "github.com/osspkg/go-sdk/context"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/goppy/plugins"
 )
 
 func WithWebsocketClient() plugins.Plugin {

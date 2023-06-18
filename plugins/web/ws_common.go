@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/deweppro/go-sdk/errors"
 	"github.com/gorilla/websocket"
+	"github.com/osspkg/go-sdk/errors"
 )
 
 const (

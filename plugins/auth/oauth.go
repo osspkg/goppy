@@ -3,9 +3,9 @@ package auth
 import (
 	"net/http"
 
-	"github.com/deweppro/go-sdk/auth/oauth"
-	"github.com/deweppro/goppy/plugins"
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/go-sdk/auth/oauth"
+	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 // ConfigOAuth oauth config model

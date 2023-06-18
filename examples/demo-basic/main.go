@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/deweppro/go-sdk/console"
-	"github.com/deweppro/goppy"
-	"github.com/deweppro/goppy/plugins"
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/go-sdk/console"
+	"github.com/osspkg/goppy"
+	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 func main() {

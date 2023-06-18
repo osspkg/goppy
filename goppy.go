@@ -5,10 +5,10 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/deweppro/go-sdk/app"
-	"github.com/deweppro/go-sdk/console"
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/app"
+	"github.com/osspkg/go-sdk/console"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/goppy/plugins"
 	"gopkg.in/yaml.v3"
 )
 

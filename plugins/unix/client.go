@@ -4,8 +4,8 @@ import (
 	"net"
 	"sync"
 
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/goppy/plugins"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/goppy/plugins"
 )
 
 func WithClient() plugins.Plugin {

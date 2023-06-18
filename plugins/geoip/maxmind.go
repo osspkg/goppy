@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/deweppro/goppy/plugins"
 	"github.com/oschwald/geoip2-golang"
+	"github.com/osspkg/goppy/plugins"
 )
 
 // MaxMindConfig MaxMind database config

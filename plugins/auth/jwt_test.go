@@ -3,7 +3,7 @@ package auth_test
 import (
 	"testing"
 
-	"github.com/deweppro/goppy/plugins/auth"
+	"github.com/osspkg/goppy/plugins/auth"
 	"github.com/stretchr/testify/require"
 )
 

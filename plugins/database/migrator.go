@@ -8,11 +8,11 @@ import (
 	"sort"
 	"time"
 
-	"github.com/deweppro/go-sdk/app"
-	"github.com/deweppro/go-sdk/errors"
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/go-sdk/orm"
-	"github.com/deweppro/go-sdk/orm/schema"
+	"github.com/osspkg/go-sdk/app"
+	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/go-sdk/orm"
+	"github.com/osspkg/go-sdk/orm/schema"
 )
 
 type (

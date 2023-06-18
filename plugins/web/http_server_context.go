@@ -10,10 +10,10 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/deweppro/go-sdk/ioutil"
-	"github.com/deweppro/go-sdk/log"
-	"github.com/deweppro/go-sdk/webutil"
-	"github.com/deweppro/go-static"
+	"github.com/osspkg/go-sdk/ioutil"
+	"github.com/osspkg/go-sdk/log"
+	"github.com/osspkg/go-sdk/webutil"
+	"github.com/osspkg/go-static"
 )
 
 type (

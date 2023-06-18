@@ -1,13 +1,13 @@
 # Goppy Microservice Toolkit
 
-[![Release](https://img.shields.io/github/release/deweppro/goppy.svg?style=flat-square)](https://github.com/deweppro/goppy/releases/latest)
-![GitHub](https://img.shields.io/github/license/deweppro/goppy)
-[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/deweppro/goppy/discussions)
+[![Release](https://img.shields.io/github/release/osspkg/goppy.svg?style=flat-square)](https://github.com/osspkg/goppy/releases/latest)
+![GitHub](https://img.shields.io/github/license/osspkg/goppy)
+[![Forum](https://img.shields.io/badge/community-forum-red)](https://github.com/osspkg/goppy/discussions)
 
 ## Installation
 
 ```bash
-go get -u github.com/deweppro/goppy
+go get -u github.com/osspkg/goppy
 ```
 
 ## Features
@@ -56,10 +56,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/deweppro/go-sdk/console"
-	"github.com/deweppro/goppy"
-	"github.com/deweppro/goppy/plugins"
-	"github.com/deweppro/goppy/plugins/web"
+	"github.com/osspkg/go-sdk/console"
+	"github.com/osspkg/goppy"
+	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/plugins/web"
 )
 
 func main() {
