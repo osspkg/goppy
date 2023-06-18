@@ -11,6 +11,10 @@ setup:
 lint:
 	devtool lint
 
+.PHONY: license
+license:
+	devtool license
+
 .PHONY: build
 build:
 	devtool build --arch=amd64
