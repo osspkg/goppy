@@ -15,6 +15,7 @@ import (
 
 	"github.com/osspkg/go-sdk/app"
 	"github.com/osspkg/go-sdk/errors"
+	"github.com/osspkg/go-sdk/iofile"
 	"github.com/osspkg/go-sdk/log"
 	"github.com/osspkg/go-sdk/orm"
 	"github.com/osspkg/go-sdk/orm/schema"
@@ -122,8 +123,8 @@ func listMigrations(ctx context.Context, stmt orm.Stmt, query string) (map[strin
 func saveMigration(ctx context.Context, stmt orm.Stmt, query, name string) error {
 	return stmt.ExecContext("save migration", ctx, func(q orm.Executor) {
 		q.SQL(query, name, time.Now().Unix())
-		q.Bind(func(result orm.Result) error {
-			if result.RowsAffected != 1 {
+		q.Bind(func(rowsAffected, lastInsertId int64) error {
+			if rowsAffected != 1 {
 				return fmt.Errorf("cant save migration [%s]", name)
 			}
 			return nil
@@ -223,6 +224,10 @@ func (v *migrate) executor(ctx context.Context,
 	save func(stmt orm.Stmt, name string) error,
 ) error {
 	for _, migrateItem := range v.conf {
+		if !iofile.Exist(migrateItem.Dir) {
+			continue
+		}
+
 		stmt := v.conn.Pool(migrateItem.Pool)
 
 		exist, err := call(stmt)
