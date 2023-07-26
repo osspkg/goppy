@@ -106,10 +106,21 @@ type (
 	//Router router handler interface
 	Router interface {
 		Use(args ...Middleware)
-		Collection(prefix string, args ...Middleware) RouteCollector
 		NotFoundHandler(call func(ctx Context))
-
 		RouteCollector
+	}
+
+	//RouteCollector interface of the router collection
+	RouteCollector interface {
+		Get(path string, call func(ctx Context))
+		Head(path string, call func(ctx Context))
+		Post(path string, call func(ctx Context))
+		Put(path string, call func(ctx Context))
+		Delete(path string, call func(ctx Context))
+		Options(path string, call func(ctx Context))
+		Patch(path string, call func(ctx Context))
+		Match(path string, call func(ctx Context), methods ...string)
+		Collection(prefix string, args ...Middleware) RouteCollector
 	}
 )
 
@@ -156,28 +167,29 @@ func (v *route) Delete(path string, call func(ctx Context))  { v.Match(path, cal
 func (v *route) Options(path string, call func(ctx Context)) { v.Match(path, call, http.MethodOptions) }
 func (v *route) Patch(path string, call func(ctx Context))   { v.Match(path, call, http.MethodPatch) }
 
-type (
-	//RouteCollector interface of the router collection
-	RouteCollector interface {
-		Get(path string, call func(ctx Context))
-		Head(path string, call func(ctx Context))
-		Post(path string, call func(ctx Context))
-		Put(path string, call func(ctx Context))
-		Delete(path string, call func(ctx Context))
-		Options(path string, call func(ctx Context))
-		Patch(path string, call func(ctx Context))
-		Match(path string, call func(ctx Context), methods ...string)
+// Collection route collection handler
+func (v *route) Collection(prefix string, args ...Middleware) RouteCollector {
+	prefix = "/" + strings.Trim(prefix, "/")
+	for _, arg := range args {
+		arg := arg
+		v.route.Middlewares(prefix, arg)
 	}
+	return &rc{
+		p: prefix,
+		r: v,
+	}
+}
 
-	rc struct {
-		prefix string
-		route  *route
-	}
-)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type rc struct {
+	p string
+	r *route
+}
 
 func (v *rc) Match(path string, call func(ctx Context), methods ...string) {
-	path = strings.TrimLeft(path, "/")
-	v.route.Match(v.prefix+"/"+path, call, methods...)
+	path = strings.TrimRight(v.p, "/") + "/" + strings.Trim(path, "/")
+	v.r.Match(path, call, methods...)
 }
 
 func (v *rc) Get(path string, call func(ctx Context))     { v.Match(path, call, http.MethodGet) }
@@ -188,16 +200,11 @@ func (v *rc) Delete(path string, call func(ctx Context))  { v.Match(path, call, 
 func (v *rc) Options(path string, call func(ctx Context)) { v.Match(path, call, http.MethodOptions) }
 func (v *rc) Patch(path string, call func(ctx Context))   { v.Match(path, call, http.MethodPatch) }
 
-// Collection route collection handler
-func (v *route) Collection(prefix string, args ...Middleware) RouteCollector {
-	prefix = strings.TrimRight(prefix, "/")
+func (v *rc) Collection(prefix string, args ...Middleware) RouteCollector {
+	v.p = strings.TrimRight(v.p, "/") + "/" + strings.Trim(prefix, "/")
 	for _, arg := range args {
 		arg := arg
-		v.route.Middlewares(prefix, arg)
+		v.r.route.Middlewares(v.p, arg)
 	}
-
-	return &rc{
-		prefix: prefix,
-		route:  v,
-	}
+	return v
 }
