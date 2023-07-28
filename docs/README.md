@@ -56,15 +56,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/osspkg/go-sdk/console"
 	"github.com/osspkg/goppy"
 	"github.com/osspkg/goppy/plugins"
 	"github.com/osspkg/goppy/plugins/web"
 )
 
 func main() {
+	// Specify the path to the config via the argument: `--config`.
+	// Specify the path to the pidfile via the argument: `--pid`.
 	app := goppy.New()
-	app.WithConfig("./config.yaml") // Reassigned via the `--config` argument when run via the console.
 	app.Plugins(
 		web.WithHTTP(),
 	)
@@ -81,7 +81,7 @@ func main() {
 			},
 		},
 	)
-	app.Command("env", func(s console.CommandSetter) {
+	app.Command("env", func() {
 		fmt.Println(os.Environ())
 	})
 	app.Run()

@@ -17,7 +17,6 @@ import (
 
 func main() {
 	app := goppy.New()
-	app.WithConfig("./config.yaml") // Reassigned via the `--config` argument when run via the console.
 	app.Plugins(
 		web.WithHTTP(),
 	)
