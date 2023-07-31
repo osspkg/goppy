@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"net"
 
-	geoip2 "github.com/oschwald/geoip2-golang"
+	"github.com/oschwald/geoip2-golang"
 	"github.com/osspkg/goppy/plugins"
 )
 

@@ -21,14 +21,12 @@ type (
 	_app struct {
 		application app.App
 		commands    map[string]interface{}
-		config      string
 		plugins     []interface{}
 		configs     []interface{}
 		args        *console.Args
 	}
 
 	Goppy interface {
-		WithConfig(filename string)
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
 		Run()
@@ -38,17 +36,14 @@ type (
 // New constructor for init Goppy
 func New() Goppy {
 	return &_app{
-		application: app.New(),
-		commands:    make(map[string]interface{}),
-		plugins:     make([]interface{}, 0, 100),
-		configs:     make([]interface{}, 0, 100),
-		args:        console.NewArgs().Parse(os.Args[1:]),
+		application: app.New().ExitFunc(func(code int) {
+			os.Exit(code)
+		}),
+		commands: make(map[string]interface{}),
+		plugins:  make([]interface{}, 0, 100),
+		configs:  make([]interface{}, 0, 100),
+		args:     console.NewArgs().Parse(os.Args[1:]),
 	}
-}
-
-// WithConfig set config path for goppy
-func (v *_app) WithConfig(filename string) {
-	v.config = filename
 }
 
 // Plugins setting the list of plugins to initialize
@@ -73,25 +68,25 @@ func (v *_app) Command(name string, call interface{}) {
 
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
-	v.config = v.parseConfigFlag(v.config)
-	console.FatalIfErr(recoveryConfig(v.config, v.configs...), "config recovery")
-	console.FatalIfErr(validateConfig(v.config, v.configs...), "config validate")
+	apps := v.application.Modules(v.plugins...)
+
+	config := v.parseConfigFlag()
+	console.FatalIfErr(recoveryConfig(config, v.configs...), "config recovery")
+	console.FatalIfErr(validateConfig(config, v.configs...), "config validate")
+	apps.ConfigFile(config, v.configs...)
+
+	pid, err := v.parsePIDFileFlag()
+	console.FatalIfErr(err, "check pid file")
+	apps.PidFile(pid)
 
 	if params := v.args.Next(); len(params) > 0 {
 		if cmd, ok := v.commands[params[0]]; ok {
-			v.application.
-				ConfigFile(v.config, v.configs...).
-				Modules(v.plugins...).
-				Invoke(cmd)
+			apps.Invoke(cmd)
 			return
 		}
 		console.Fatalf("<%s> command not found", params[0])
 	}
-
-	v.application.
-		ConfigFile(v.config, v.configs...).
-		Modules(v.plugins...).
-		Run()
+	apps.Run()
 }
 
 func reflectResolve(arg interface{}, k reflect.Kind, call func(interface{}), comment string) {
@@ -104,18 +99,33 @@ func reflectResolve(arg interface{}, k reflect.Kind, call func(interface{}), com
 	call(arg)
 }
 
-func (v *_app) parseConfigFlag(filename string) string {
-	if len(filename) == 0 {
-		filename = "./config.yaml"
-	}
+func (v *_app) parseConfigFlag() string {
 	conf := v.args.Get("config")
 	if conf == nil || len(*conf) == 0 {
-		conf = &filename
+		return ""
 	}
 	return *conf
 }
 
+func (v *_app) parsePIDFileFlag() (string, error) {
+	pid := v.args.Get("pid")
+	if pid == nil || len(*pid) == 0 {
+		return "", nil
+	}
+	file, err := os.Create(*pid)
+	if err != nil {
+		return "", err
+	}
+	if err = file.Close(); err != nil {
+		return "", err
+	}
+	return *pid, nil
+}
+
 func validateConfig(filename string, configs ...interface{}) error {
+	if len(filename) == 0 {
+		return nil
+	}
 	_, err := os.Stat(filename)
 	if err == nil {
 		return nil
@@ -142,6 +152,9 @@ func validateConfig(filename string, configs ...interface{}) error {
 }
 
 func recoveryConfig(filename string, configs ...interface{}) error {
+	if len(filename) == 0 {
+		return nil
+	}
 	_, err := os.Stat(filename)
 	if err == nil {
 		return nil
