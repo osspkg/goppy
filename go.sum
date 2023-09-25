@@ -30,8 +30,8 @@ github.com/osspkg/go-algorithms v1.2.6 h1:/eIZ1XlxZ2LRxtbOG4REA5KcR17F5E64+Y2cud
 github.com/osspkg/go-algorithms v1.2.6/go.mod h1:Zdclm/CKhDrUD34kIm9PL4VDbiey/jXAHY36nfc0r5Q=
 github.com/osspkg/go-sdk v1.3.6 h1:VcB5o3+c1uwkD2B0v4ZxOeaN/SN0QUr3Fktt8S3Le0M=
 github.com/osspkg/go-sdk v1.3.6/go.mod h1:/ZzPlvttlMyTLiDomDGJt7sqFz/RmkWXzrK5tifci14=
-github.com/osspkg/go-static v1.3.2 h1:MST9eSG/gO6b1OjFlxoFfSLhdKRiaUA8lEUhh0KoUOg=
-github.com/osspkg/go-static v1.3.2/go.mod h1:PI0nuemvgmLuVgn3hIZMRFgQH6d1Iyn70Gs23Gl05qo=
+github.com/osspkg/go-static v1.3.3 h1:jqwE6zoucvgAAuh7MJ2spj2INhZeotq+LRlQzg1B5sg=
+github.com/osspkg/go-static v1.3.3/go.mod h1:PI0nuemvgmLuVgn3hIZMRFgQH6d1Iyn70Gs23Gl05qo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=

@@ -7,7 +7,7 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/oschwald/geoip2-golang v1.9.0
 	github.com/osspkg/go-sdk v1.3.6
-	github.com/osspkg/go-static v1.3.2
+	github.com/osspkg/go-static v1.3.3
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
 )
