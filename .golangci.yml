@@ -346,6 +346,12 @@ linters-settings:
     # Tab width in spaces.
     # Default: 1
     tab-width: 1
+  staticcheck:
+    # Deprecated: use the global `run.go` instead.
+    go: "1.15"
+    # SAxxxx checks in https://staticcheck.io/docs/configuration/options/#checks
+    # Default: ["*"]
+    checks: [ "*", "-SA1019" ]
 
 linters:
   disable-all: true
@@ -362,7 +368,6 @@ linters:
     - unused
     - prealloc
     - durationcheck
-#    - nolintlint
     - staticcheck
     - makezero
     - nilerr

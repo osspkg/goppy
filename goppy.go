@@ -10,10 +10,10 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/osspkg/go-sdk/app"
-	"github.com/osspkg/go-sdk/console"
-	"github.com/osspkg/go-sdk/errors"
 	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/sdk/app"
+	"github.com/osspkg/goppy/sdk/console"
+	"github.com/osspkg/goppy/sdk/errors"
 	"gopkg.in/yaml.v3"
 )
 

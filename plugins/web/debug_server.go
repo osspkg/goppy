@@ -6,9 +6,9 @@
 package web
 
 import (
-	"github.com/osspkg/go-sdk/log"
-	"github.com/osspkg/go-sdk/webutil"
 	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/sdk/log"
+	"github.com/osspkg/goppy/sdk/webutil"
 )
 
 // ConfigDebug config to initialize HTTP debug service
