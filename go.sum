@@ -28,8 +28,8 @@ github.com/oschwald/maxminddb-golang v1.11.0 h1:aSXMqYR/EPNjGE8epgqwDay+P30hCBZI
 github.com/oschwald/maxminddb-golang v1.11.0/go.mod h1:YmVI+H0zh3ySFR3w+oz8PCfglAFj3PuCmui13+P9zDg=
 github.com/osspkg/go-algorithms v1.2.6 h1:/eIZ1XlxZ2LRxtbOG4REA5KcR17F5E64+Y2cudJvfRU=
 github.com/osspkg/go-algorithms v1.2.6/go.mod h1:Zdclm/CKhDrUD34kIm9PL4VDbiey/jXAHY36nfc0r5Q=
-github.com/osspkg/go-sdk v1.3.6 h1:VcB5o3+c1uwkD2B0v4ZxOeaN/SN0QUr3Fktt8S3Le0M=
-github.com/osspkg/go-sdk v1.3.6/go.mod h1:/ZzPlvttlMyTLiDomDGJt7sqFz/RmkWXzrK5tifci14=
+github.com/osspkg/go-sdk v1.4.0 h1:VwJ8aJWeyfWGWc9qun7ZKAsfOLw+KnkpD9aGotmzZOU=
+github.com/osspkg/go-sdk v1.4.0/go.mod h1:5vH5xNT07Tcf+7howYLXffQTqXhGHWMSl8ToQmo2OWs=
 github.com/osspkg/go-static v1.3.2 h1:MST9eSG/gO6b1OjFlxoFfSLhdKRiaUA8lEUhh0KoUOg=
 github.com/osspkg/go-static v1.3.2/go.mod h1:PI0nuemvgmLuVgn3hIZMRFgQH6d1Iyn70Gs23Gl05qo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
