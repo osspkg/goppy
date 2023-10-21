@@ -6,19 +6,22 @@
 package web
 
 import (
+	"context"
 	"sync"
 
-	"github.com/osspkg/go-sdk/errors"
-	"github.com/osspkg/go-sdk/log"
+	ws "github.com/gorilla/websocket"
 	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/sdk/app"
+	"github.com/osspkg/goppy/sdk/log"
+	"github.com/osspkg/goppy/sdk/netutil/websocket"
 )
 
-func WithWebsocketServerPool(options ...WebsocketServerOption) plugins.Plugin {
+func WithWebsocketServerPool(options ...func(ws.Upgrader)) plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(l log.Logger) (*wssPool, WebsocketServerPool) {
 			wssp := &wssPool{
 				options: options,
-				pool:    make(map[string]*wssProvider, 10),
+				pool:    make(map[string]*websocket.Server, 10),
 				log:     l,
 			}
 			return wssp, wssp
@@ -28,9 +31,10 @@ func WithWebsocketServerPool(options ...WebsocketServerOption) plugins.Plugin {
 
 type (
 	wssPool struct {
-		options []WebsocketServerOption
-		pool    map[string]*wssProvider
+		options []func(ws.Upgrader)
+		pool    map[string]*websocket.Server
 		log     log.Logger
+		ctx     context.Context
 		mux     sync.Mutex
 	}
 
@@ -46,25 +50,13 @@ func (v *wssPool) Create(name string) WebsocketServer {
 	if p, ok := v.pool[name]; ok {
 		return p
 	}
-
-	u := newWebsocketUpgrader()
-	for _, option := range v.options {
-		option(u)
-	}
-	p := newWsServerProvider(v.log, u)
+	p := websocket.NewServer(v.log, v.ctx, v.options...)
 	v.pool[name] = p
-
-	if err := p.Up(); err != nil {
-		v.log.WithFields(log.Fields{
-			"err":  err,
-			"name": name,
-		}).Errorf("Create Websocket Server in pool")
-	}
-
 	return p
 }
 
-func (v *wssPool) Up() error {
+func (v *wssPool) Up(ctx app.Context) error {
+	v.ctx = ctx.Context()
 	return nil
 }
 
@@ -72,12 +64,9 @@ func (v *wssPool) Down() error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
 
-	var err error
 	for _, item := range v.pool {
-		if e := item.Down(); e != nil {
-			err = errors.Wrap(err, e)
-		}
+		item.CloseAll()
 	}
 
-	return err
+	return nil
 }

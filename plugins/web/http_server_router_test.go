@@ -13,9 +13,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/osspkg/go-sdk/ioutil"
-	"github.com/osspkg/go-sdk/log"
-	"github.com/osspkg/go-sdk/webutil"
+	"github.com/osspkg/goppy/sdk/ioutil"
+	"github.com/osspkg/goppy/sdk/log"
+	"github.com/osspkg/goppy/sdk/webutil"
 	"github.com/stretchr/testify/require"
 )
 

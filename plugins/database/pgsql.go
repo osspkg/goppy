@@ -11,14 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/osspkg/go-sdk/app"
-	"github.com/osspkg/go-sdk/errors"
-	"github.com/osspkg/go-sdk/log"
-	"github.com/osspkg/go-sdk/orm"
-	"github.com/osspkg/go-sdk/orm/schema"
-	"github.com/osspkg/go-sdk/orm/schema/postgresql"
-	"github.com/osspkg/go-sdk/routine"
 	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/sdk/app"
+	"github.com/osspkg/goppy/sdk/errors"
+	"github.com/osspkg/goppy/sdk/log"
+	"github.com/osspkg/goppy/sdk/orm"
+	"github.com/osspkg/goppy/sdk/orm/schema"
+	"github.com/osspkg/goppy/sdk/orm/schema/postgresql"
+	"github.com/osspkg/goppy/sdk/routine"
 )
 
 // ConfigPgsql pgsql config model

@@ -6,8 +6,8 @@
 package web
 
 import (
-	"github.com/osspkg/go-sdk/webutil"
 	"github.com/osspkg/goppy/plugins"
+	"github.com/osspkg/goppy/sdk/webutil"
 )
 
 // WithHTTPClient init pool http clients
