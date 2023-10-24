@@ -12,8 +12,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/osspkg/goppy/plugins/web"
-	"github.com/osspkg/goppy/sdk/auth/jwt"
+	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/sdk/auth/jwt"
 )
 
 const (

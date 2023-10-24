@@ -8,8 +8,8 @@ package auth_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/plugins/auth"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/plugins/auth"
 )
 
 func TestUnit_ConfigJWT(t *testing.T) {

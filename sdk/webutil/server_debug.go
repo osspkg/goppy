@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 // ServerDebug service model

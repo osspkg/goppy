@@ -11,8 +11,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/webutil"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/webutil"
 )
 
 func TestUnit_Route1(t *testing.T) {

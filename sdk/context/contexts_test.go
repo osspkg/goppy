@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/context"
+	"go.osspkg.com/goppy/sdk/context"
 )
 
 func TestUnit_Combine(t *testing.T) {

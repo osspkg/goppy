@@ -12,7 +12,7 @@ import (
 	"strings"
 	"sync/atomic"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 const (

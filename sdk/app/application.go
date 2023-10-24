@@ -6,9 +6,9 @@
 package app
 
 import (
-	"github.com/osspkg/goppy/sdk/console"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/syscall"
+	"go.osspkg.com/goppy/sdk/console"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/syscall"
 )
 
 type (

@@ -8,8 +8,8 @@ package acl_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/acl"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/acl"
 )
 
 func TestUnit_NewInConfigStorage(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/ioutil"
 	"golang.org/x/oauth2"
 )
 

@@ -11,9 +11,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/iosync"
-	"github.com/osspkg/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/ioutil"
 )
 
 var (

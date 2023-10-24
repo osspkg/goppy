@@ -9,8 +9,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/iosync"
 )
 
 func Interval(ctx context.Context, interval time.Duration, call func(context.Context)) {

@@ -11,8 +11,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	context2 "github.com/osspkg/goppy/sdk/context"
-	"github.com/osspkg/goppy/sdk/iosync"
+	context2 "go.osspkg.com/goppy/sdk/context"
+	"go.osspkg.com/goppy/sdk/iosync"
 )
 
 type (

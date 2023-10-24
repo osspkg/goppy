@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/webutil"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/webutil"
 )
 
 type (

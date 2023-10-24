@@ -10,10 +10,10 @@ import (
 	"sync"
 
 	ws "github.com/gorilla/websocket"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/netutil/websocket"
 )
 
 func WithWebsocketServerPool(options ...func(ws.Upgrader)) plugins.Plugin {

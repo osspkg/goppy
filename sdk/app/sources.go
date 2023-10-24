@@ -10,7 +10,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 	"gopkg.in/yaml.v3"
 )
 

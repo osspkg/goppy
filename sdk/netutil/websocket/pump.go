@@ -11,7 +11,7 @@ import (
 	"time"
 
 	ws "github.com/gorilla/websocket"
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 type (

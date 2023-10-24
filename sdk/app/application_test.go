@@ -8,8 +8,8 @@ package app_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/app"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/app"
 )
 
 func TestUnit_AppInvoke(t *testing.T) {

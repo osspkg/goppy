@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 func TestUnit_getRefAddr(t *testing.T) {
@@ -41,12 +41,12 @@ func TestUnit_getRefAddr(t *testing.T) {
 		{name: "Case1", args: reflect.TypeOf(a), want: "int"},
 		{name: "Case2", args: reflect.TypeOf(b), want: "string"},
 		{name: "Case3", args: reflect.TypeOf(c), want: "bool"},
-		{name: "Case4", args: reflect.TypeOf(d), want: "github.com/osspkg/goppy/sdk/app.aa", ok: true},
-		{name: "Case5", args: reflect.TypeOf(e), want: "github.com/osspkg/goppy/sdk/app.ff", ok: true},
+		{name: "Case4", args: reflect.TypeOf(d), want: "go.osspkg.com/goppy/sdk/app.aa", ok: true},
+		{name: "Case5", args: reflect.TypeOf(e), want: "go.osspkg.com/goppy/sdk/app.ff", ok: true},
 		{name: "Case6", args: reflect.TypeOf(f), want: "func(string) bool", ok: true},
 		{name: "Case7", args: reflect.TypeOf(g), want: "error"},
 		{name: "Case8", args: reflect.TypeOf(h), want: "[]string"},
-		{name: "Case9", args: reflect.TypeOf(j), want: "github.com/osspkg/goppy/sdk/app.bb", ok: true},
+		{name: "Case9", args: reflect.TypeOf(j), want: "go.osspkg.com/goppy/sdk/app.bb", ok: true},
 		{name: "Case10", args: reflect.TypeOf(k), want: "struct {}"},
 	}
 	for _, tt := range tests {

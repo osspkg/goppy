@@ -11,7 +11,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/clearsign"

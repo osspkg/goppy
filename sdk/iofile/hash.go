@@ -12,7 +12,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 func IsValidHash(filename string, h hash.Hash, valid string) error {

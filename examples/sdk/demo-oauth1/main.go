@@ -10,10 +10,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/auth/oauth"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/webutil"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/auth/oauth"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/webutil"
 )
 
 var (

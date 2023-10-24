@@ -8,8 +8,8 @@ package iosync_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/iosync"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/iosync"
 )
 
 func TestNewSwitch(t *testing.T) {

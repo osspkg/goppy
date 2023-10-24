@@ -8,7 +8,7 @@ package app
 import (
 	"os"
 
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 type _log struct {

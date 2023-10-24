@@ -5,7 +5,7 @@
 
 package app
 
-import "github.com/osspkg/goppy/sdk/errors"
+import "go.osspkg.com/goppy/sdk/errors"
 
 var (
 	errDepBuilderNotRunning = errors.New("dependencies builder is not running")

@@ -11,14 +11,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/orm"
-	"github.com/osspkg/goppy/sdk/orm/schema"
-	"github.com/osspkg/goppy/sdk/orm/schema/mysql"
-	"github.com/osspkg/goppy/sdk/routine"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/orm"
+	"go.osspkg.com/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/orm/schema/mysql"
+	"go.osspkg.com/goppy/sdk/routine"
 )
 
 // ConfigMysql mysql config model

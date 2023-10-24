@@ -8,9 +8,9 @@ package aesgcm_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/encryption/aesgcm"
-	"github.com/osspkg/goppy/sdk/random"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/encryption/aesgcm"
+	"go.osspkg.com/goppy/sdk/random"
 )
 
 func TestUnit_Codec(t *testing.T) {

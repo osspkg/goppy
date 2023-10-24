@@ -13,12 +13,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/iofile"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/orm"
-	"github.com/osspkg/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/iofile"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/orm"
+	"go.osspkg.com/goppy/sdk/orm/schema"
 )
 
 type (

@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go get -u github.com/osspkg/goppy
+go get -u go.osspkg.com/goppy
 ```
 
 ## Features
@@ -56,9 +56,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/web"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/web"
 )
 
 func main() {

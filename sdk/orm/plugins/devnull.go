@@ -8,7 +8,7 @@ package plugins
 import (
 	"io"
 
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 var (

@@ -11,11 +11,11 @@ import (
 	"net/http"
 	"time"
 
-	application "github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/iosync"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/netutil"
+	application "go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/netutil"
 )
 
 type (

@@ -8,8 +8,8 @@ package unixsocket
 import (
 	"net"
 
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/ioutil"
 )
 
 type Client struct {

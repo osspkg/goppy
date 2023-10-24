@@ -1,4 +1,4 @@
-module github.com/osspkg/goppy
+module go.osspkg.com/goppy
 
 go 1.18
 
@@ -9,9 +9,9 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	github.com/mattn/go-sqlite3 v1.14.17
 	github.com/oschwald/geoip2-golang v1.9.0
-	github.com/osspkg/go-algorithms v1.2.6
-	github.com/osspkg/go-static v1.3.3
 	github.com/stretchr/testify v1.8.4
+	go.osspkg.com/algorithms v1.3.0
+	go.osspkg.com/static v1.4.0
 	golang.org/x/crypto v0.14.0
 	golang.org/x/oauth2 v0.13.0
 	golang.org/x/sys v0.13.0

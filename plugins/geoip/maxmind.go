@@ -10,7 +10,7 @@ import (
 	"net"
 
 	"github.com/oschwald/geoip2-golang"
-	"github.com/osspkg/goppy/plugins"
+	"go.osspkg.com/goppy/plugins"
 )
 
 // MaxMindConfig MaxMind database config

@@ -9,8 +9,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/iofile"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/iofile"
 )
 
 func TestFile_EncodeDecode(t *testing.T) {

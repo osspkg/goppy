@@ -15,7 +15,7 @@ import (
 	"math/big"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 type (

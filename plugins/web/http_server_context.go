@@ -15,10 +15,10 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/osspkg/go-static"
-	"github.com/osspkg/goppy/sdk/ioutil"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/webutil"
+	"go.osspkg.com/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/webutil"
+	"go.osspkg.com/static"
 )
 
 type (

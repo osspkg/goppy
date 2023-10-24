@@ -13,8 +13,8 @@ import (
 	"time"
 
 	_ "github.com/lib/pq" //nolint: golint
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/orm/schema"
 )
 
 const (

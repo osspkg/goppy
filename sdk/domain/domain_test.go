@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/domain"
+	"go.osspkg.com/goppy/sdk/domain"
 )
 
 func TestUnit_Level(t *testing.T) {

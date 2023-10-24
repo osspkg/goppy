@@ -6,9 +6,9 @@
 package orm
 
 import (
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/orm/plugins"
-	"github.com/osspkg/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/orm/plugins"
+	"go.osspkg.com/goppy/sdk/orm/schema"
 )
 
 type (

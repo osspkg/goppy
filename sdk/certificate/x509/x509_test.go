@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/certificate/x509"
+	"go.osspkg.com/goppy/sdk/certificate/x509"
 )
 
 func TestUnit_X509(t *testing.T) {

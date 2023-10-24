@@ -22,7 +22,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonF642ad3eDecodeGithubComOsspkgGoppySdkNetutilWebsocket(in *jlexer.Lexer, out *event) {
+func easyjsonF642ad3eDecodeGoOsspkgComGoppySdkNetutilWebsocket(in *jlexer.Lexer, out *event) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -67,7 +67,7 @@ func easyjsonF642ad3eDecodeGithubComOsspkgGoppySdkNetutilWebsocket(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonF642ad3eEncodeGithubComOsspkgGoppySdkNetutilWebsocket(out *jwriter.Writer, in event) {
+func easyjsonF642ad3eEncodeGoOsspkgComGoppySdkNetutilWebsocket(out *jwriter.Writer, in event) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -92,23 +92,23 @@ func easyjsonF642ad3eEncodeGithubComOsspkgGoppySdkNetutilWebsocket(out *jwriter.
 // MarshalJSON supports json.Marshaler interface
 func (v event) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonF642ad3eEncodeGithubComOsspkgGoppySdkNetutilWebsocket(&w, v)
+	easyjsonF642ad3eEncodeGoOsspkgComGoppySdkNetutilWebsocket(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v event) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonF642ad3eEncodeGithubComOsspkgGoppySdkNetutilWebsocket(w, v)
+	easyjsonF642ad3eEncodeGoOsspkgComGoppySdkNetutilWebsocket(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *event) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonF642ad3eDecodeGithubComOsspkgGoppySdkNetutilWebsocket(&r, v)
+	easyjsonF642ad3eDecodeGoOsspkgComGoppySdkNetutilWebsocket(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *event) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonF642ad3eDecodeGithubComOsspkgGoppySdkNetutilWebsocket(l, v)
+	easyjsonF642ad3eDecodeGoOsspkgComGoppySdkNetutilWebsocket(l, v)
 }

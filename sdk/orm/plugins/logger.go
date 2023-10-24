@@ -6,7 +6,7 @@
 package plugins
 
 import (
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 var (

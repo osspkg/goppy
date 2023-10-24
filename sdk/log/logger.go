@@ -13,7 +13,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/iosync"
 )
 
 var nl = byte('\n')

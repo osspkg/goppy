@@ -8,7 +8,7 @@ package webutil
 import (
 	"net/http"
 
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 // RecoveryMiddleware recovery go panic and write to log
