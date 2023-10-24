@@ -13,10 +13,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/ioutil"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/webutil"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/webutil"
 )
 
 func Test_newRouter(t *testing.T) {

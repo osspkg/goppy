@@ -6,8 +6,8 @@
 package main
 
 import (
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins/database"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins/database"
 )
 
 func main() {

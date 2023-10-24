@@ -10,7 +10,7 @@ import (
 	"database/sql"
 	"sync"
 
-	"github.com/osspkg/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/orm/schema"
 )
 
 var poolExec = sync.Pool{New: func() interface{} { return &exec{} }}

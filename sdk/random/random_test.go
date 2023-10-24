@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/random"
+	"go.osspkg.com/goppy/sdk/random"
 )
 
 func TestUnit_Bytes(t *testing.T) {

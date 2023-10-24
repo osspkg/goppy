@@ -8,9 +8,9 @@ package auth
 import (
 	"net/http"
 
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/web"
-	"github.com/osspkg/goppy/sdk/auth/oauth"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/sdk/auth/oauth"
 )
 
 // ConfigOAuth oauth config model

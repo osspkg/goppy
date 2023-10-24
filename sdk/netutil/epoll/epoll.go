@@ -10,9 +10,9 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/netutil"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/netutil"
 	"golang.org/x/sys/unix"
 )
 

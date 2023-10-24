@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/auth/jwt"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/auth/jwt"
 )
 
 type demoJwtPayload struct {

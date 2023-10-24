@@ -11,12 +11,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/syscall"
+	"go.osspkg.com/goppy/sdk/syscall"
 
-	"github.com/osspkg/goppy/sdk/iosync"
-	"github.com/osspkg/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/log"
 
-	"github.com/osspkg/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/sdk/netutil/websocket"
 )
 
 func main() {

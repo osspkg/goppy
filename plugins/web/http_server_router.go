@@ -12,9 +12,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/log"
-	"github.com/osspkg/goppy/sdk/webutil"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/log"
+	"go.osspkg.com/goppy/sdk/webutil"
 )
 
 type (

@@ -10,11 +10,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/sdk/netutil/websocket"
 
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/web"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/web"
 )
 
 func main() {

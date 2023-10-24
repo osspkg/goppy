@@ -8,8 +8,8 @@ package acl_test
 import (
 	"testing"
 
-	acl2 "github.com/osspkg/goppy/sdk/acl"
 	"github.com/stretchr/testify/require"
+	acl2 "go.osspkg.com/goppy/sdk/acl"
 )
 
 func TestUnit_NewACL(t *testing.T) {

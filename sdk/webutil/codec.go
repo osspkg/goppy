@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/osspkg/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/ioutil"
 )
 
 func JSONEncode(w http.ResponseWriter, v interface{}) {

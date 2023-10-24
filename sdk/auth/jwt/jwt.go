@@ -18,7 +18,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/encryption/aesgcm"
+	"go.osspkg.com/goppy/sdk/encryption/aesgcm"
 )
 
 const (

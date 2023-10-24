@@ -12,8 +12,8 @@ import (
 	"sync"
 
 	_ "github.com/mattn/go-sqlite3" //nolint: golint
-	"github.com/osspkg/goppy/sdk/errors"
-	"github.com/osspkg/goppy/sdk/orm/schema"
+	"go.osspkg.com/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/orm/schema"
 )
 
 var (

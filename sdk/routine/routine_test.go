@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/routine"
+	"go.osspkg.com/goppy/sdk/routine"
 )
 
 func TestUnit_Parallel(t *testing.T) {

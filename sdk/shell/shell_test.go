@@ -9,7 +9,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/shell"
+	"go.osspkg.com/goppy/sdk/shell"
 )
 
 func TestUnit_ShellCall(t *testing.T) {

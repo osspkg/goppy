@@ -6,10 +6,10 @@
 package main
 
 import (
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/auth"
-	"github.com/osspkg/goppy/plugins/web"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/auth"
+	"go.osspkg.com/goppy/plugins/web"
 )
 
 func main() {

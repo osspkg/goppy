@@ -8,10 +8,10 @@ package main
 import (
 	"net"
 
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/geoip"
-	"github.com/osspkg/goppy/plugins/web"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/geoip"
+	"go.osspkg.com/goppy/plugins/web"
 )
 
 func main() {

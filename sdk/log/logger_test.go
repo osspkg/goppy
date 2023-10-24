@@ -12,9 +12,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/iosync"
-	"github.com/osspkg/goppy/sdk/log"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/iosync"
+	"go.osspkg.com/goppy/sdk/log"
 )
 
 func TestUnit_New(t *testing.T) {

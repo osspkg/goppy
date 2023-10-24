@@ -8,8 +8,8 @@ package unix
 import (
 	"sync"
 
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/sdk/netutil/unixsocket"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/sdk/netutil/unixsocket"
 )
 
 func WithClient() plugins.Plugin {

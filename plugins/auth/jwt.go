@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/sdk/auth/jwt"
-	"github.com/osspkg/goppy/sdk/random"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/sdk/auth/jwt"
+	"go.osspkg.com/goppy/sdk/random"
 )
 
 type (

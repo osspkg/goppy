@@ -16,8 +16,8 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/osspkg/goppy/sdk/ioutil"
-	"github.com/osspkg/goppy/sdk/webutil/signature"
+	"go.osspkg.com/goppy/sdk/ioutil"
+	"go.osspkg.com/goppy/sdk/webutil/signature"
 )
 
 type (

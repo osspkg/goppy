@@ -9,7 +9,6 @@ package oauth
 
 import (
 	json "encoding/json"
-
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -23,7 +22,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson3bc980faDecodeGithubComOsspkgGoSdkAuthOauth(in *jlexer.Lexer, out *modelGoogle) {
+func easyjson3bc980faDecodeGoOsspkgComGoppySdkAuthOauth(in *jlexer.Lexer, out *modelGoogle) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -60,7 +59,7 @@ func easyjson3bc980faDecodeGithubComOsspkgGoSdkAuthOauth(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson3bc980faEncodeGithubComOsspkgGoSdkAuthOauth(out *jwriter.Writer, in modelGoogle) {
+func easyjson3bc980faEncodeGoOsspkgComGoppySdkAuthOauth(out *jwriter.Writer, in modelGoogle) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -90,23 +89,23 @@ func easyjson3bc980faEncodeGithubComOsspkgGoSdkAuthOauth(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v modelGoogle) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson3bc980faEncodeGithubComOsspkgGoSdkAuthOauth(&w, v)
+	easyjson3bc980faEncodeGoOsspkgComGoppySdkAuthOauth(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v modelGoogle) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson3bc980faEncodeGithubComOsspkgGoSdkAuthOauth(w, v)
+	easyjson3bc980faEncodeGoOsspkgComGoppySdkAuthOauth(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *modelGoogle) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson3bc980faDecodeGithubComOsspkgGoSdkAuthOauth(&r, v)
+	easyjson3bc980faDecodeGoOsspkgComGoppySdkAuthOauth(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *modelGoogle) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson3bc980faDecodeGithubComOsspkgGoSdkAuthOauth(l, v)
+	easyjson3bc980faDecodeGoOsspkgComGoppySdkAuthOauth(l, v)
 }

@@ -10,7 +10,7 @@ import (
 	"crypto"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/certificate/pgp"
+	"go.osspkg.com/goppy/sdk/certificate/pgp"
 )
 
 func TestUnit_PGP(t *testing.T) {

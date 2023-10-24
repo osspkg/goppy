@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 func TestUnit_New(t *testing.T) {
@@ -246,7 +246,7 @@ func TestUnit_Trace(t *testing.T) {
 		{
 			name: "Case1",
 			err:  errors.New("test"),
-			want: "[trace] github.com/osspkg/goppy/sdk/errors_test.TestUnit_Trace.func1",
+			want: "[trace] go.osspkg.com/goppy/sdk/errors_test.TestUnit_Trace.func1",
 		},
 	}
 	for _, tt := range tests {

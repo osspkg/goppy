@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/osspkg/goppy/plugins/web"
+	"go.osspkg.com/goppy/plugins/web"
 )
 
 const (

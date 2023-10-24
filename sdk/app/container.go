@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/osspkg/go-algorithms/graph/kahn"
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/algorithms/graph/kahn"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 type _dic struct {

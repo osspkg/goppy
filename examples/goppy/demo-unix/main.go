@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/unix"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/unix"
 )
 
 func main() {

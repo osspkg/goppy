@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/osspkg/goppy/sdk/console"
+	"go.osspkg.com/goppy/sdk/console"
 )
 
 func main() {

@@ -10,11 +10,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/osspkg/goppy"
-	"github.com/osspkg/goppy/plugins"
-	"github.com/osspkg/goppy/plugins/web"
-	"github.com/osspkg/goppy/sdk/app"
-	"github.com/osspkg/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/sdk/app"
+	"go.osspkg.com/goppy/sdk/netutil/websocket"
 )
 
 func main() {

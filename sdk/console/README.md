@@ -3,7 +3,7 @@
 ## Сreating console application
 
 ```go
-import "github.com/osspkg/goppy/sdk/console"
+import "go.osspkg.com/goppy/sdk/console"
 
 // creating an instance of the application, 
 // specifying its name and description for flag: --help 
@@ -19,7 +19,7 @@ root.Exec()
 ## Creating a simple command
 
 ```go
-import "github.com/osspkg/goppy/sdk/console"
+import "go.osspkg.com/goppy/sdk/console"
 // creating a new team with settings
 console.NewCommand(func(setter console.CommandSetter) {
 	// passing the command name and description

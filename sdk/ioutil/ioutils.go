@@ -9,7 +9,7 @@ import (
 	"bytes"
 	"io"
 
-	"github.com/osspkg/goppy/sdk/errors"
+	"go.osspkg.com/goppy/sdk/errors"
 )
 
 func ReadAll(r io.ReadCloser) ([]byte, error) {

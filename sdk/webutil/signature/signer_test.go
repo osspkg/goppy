@@ -8,8 +8,8 @@ package signature_test
 import (
 	"testing"
 
-	"github.com/osspkg/goppy/sdk/webutil/signature"
 	"github.com/stretchr/testify/require"
+	"go.osspkg.com/goppy/sdk/webutil/signature"
 )
 
 func TestUnit_Signature(t *testing.T) {
