@@ -20,7 +20,7 @@ type (
 
 	ObservableClient interface {
 		OnClose(cb func(cid string))
-		Encode(eid EventID, in interface{})
+		SendEvent(eid EventID, in interface{})
 		DelHandler(eids ...EventID)
 		SetHandler(call ClientHandler, eids ...EventID)
 	}
@@ -48,7 +48,7 @@ func (v *_obs) Subscribe(eid EventID, in interface{}) Subscription {
 			if in == nil {
 				return
 			}
-			v.cli.Encode(eid, in)
+			v.cli.SendEvent(eid, in)
 		},
 		sync: iosync.NewSwitch(),
 	}
