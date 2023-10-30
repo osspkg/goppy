@@ -33,7 +33,7 @@ type (
 	}
 
 	Client interface {
-		Encode(eid EventID, in interface{})
+		SendEvent(eid EventID, in interface{})
 		ConnectID() string
 		Header(key, value string)
 		SetHandler(call ClientHandler, eids ...EventID)
@@ -146,7 +146,7 @@ func (v *cli) WriteToBus(b []byte) {
 	}
 }
 
-func (v *cli) Encode(eid EventID, in interface{}) {
+func (v *cli) SendEvent(eid EventID, in interface{}) {
 	getEventModel(func(ev *event) {
 		ev.ID = eid
 		ev.Encode(in)

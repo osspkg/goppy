@@ -43,7 +43,7 @@ type (
 	}
 
 	WebsocketClientConnect interface {
-		Encode(eid websocket.EventID, in interface{})
+		SendEvent(eid websocket.EventID, in interface{})
 		ConnectID() string
 		Header(key, value string)
 		SetHandler(call websocket.ClientHandler, eids ...websocket.EventID)

@@ -30,7 +30,7 @@ func main() {
 			Resolve: func(c *Controller, ctx app.Context, ws web.WebsocketClient) {
 				wsc := ws.Create("ws://127.0.0.1:8088/ws")
 				wsc.SetHandler(c.EventListener, 99, 1, 65000)
-				go c.Ticker(wsc.Encode)
+				go c.Ticker(wsc.SendEvent)
 				wsc.OnClose(func(cid string) {
 					fmt.Println("server close connect")
 					ctx.Close()
