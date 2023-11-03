@@ -11,18 +11,18 @@ import (
 
 	"go.osspkg.com/goppy"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/unix"
+	"go.osspkg.com/goppy/unixsocket"
 )
 
 func main() {
 	app := goppy.New()
 	app.Plugins(
-		unix.WithServer(),
-		unix.WithClient(),
+		unixsocket.WithServer(),
+		unixsocket.WithClient(),
 	)
 	app.Plugins(
 		plugins.Plugin{
-			Resolve: func(s unix.Server, c unix.Client, conf *unix.Config) error {
+			Resolve: func(s unixsocket.Server, c unixsocket.Client, conf *unixsocket.Config) error {
 
 				s.Command("demo", func(bytes []byte) ([]byte, error) {
 					fmt.Println("<", string(bytes))

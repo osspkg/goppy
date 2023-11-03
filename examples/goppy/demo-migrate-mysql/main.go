@@ -7,14 +7,14 @@ package main
 
 import (
 	"go.osspkg.com/goppy"
-	"go.osspkg.com/goppy/plugins/database"
+	"go.osspkg.com/goppy/ormmysql"
 )
 
 func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		database.WithMySQL(),
+		ormmysql.WithMySQL(),
 	)
 	app.Run()
 

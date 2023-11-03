@@ -10,34 +10,35 @@ import (
 	"sync"
 	"time"
 
-	"go.osspkg.com/goppy/sdk/netutil/websocket"
-
 	"go.osspkg.com/goppy"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/ws"
+	"go.osspkg.com/goppy/ws/event"
+	"go.osspkg.com/goppy/ws/server"
 )
 
 func main() {
 	app := goppy.New()
 	app.Plugins(
 		web.WithHTTP(),
-		web.WithWebsocketServer(),
+		ws.WithWebsocketServer(),
 	)
 	app.Plugins(
 		plugins.Plugin{
-			Inject: func(ws web.WebsocketServer) *Controller {
+			Inject: func(ws ws.WebsocketServer) *Controller {
 				return NewController(ws)
 			},
-			Resolve: func(routes web.RouterPool, c *Controller, ws web.WebsocketServer) {
+			Resolve: func(routes web.RouterPool, c *Controller, wss ws.WebsocketServer) {
 				router := routes.Main()
 				router.Use(web.ThrottlingMiddleware(100))
 
-				ws.SetHandler(c.Event99, 99)
-				ws.SetHandler(c.OneEvent, 1, 2)
-				ws.SetHandler(c.MultiEvent, 11, 13)
+				wss.SetHandler(c.Event99, 99)
+				wss.SetHandler(c.OneEvent, 1, 2)
+				wss.SetHandler(c.MultiEvent, 11, 13)
 
 				router.Get("/ws", func(ctx web.Context) {
-					ws.Handling(ctx.Response(), ctx.Request())
+					wss.Handling(ctx.Response(), ctx.Request())
 				})
 			},
 		},
@@ -47,8 +48,8 @@ func main() {
 
 type (
 	sender interface {
-		SendEvent(eid websocket.EventID, m interface{}, cids ...string)
-		Broadcast(eid websocket.EventID, m interface{})
+		SendEvent(eid event.Id, m interface{}, cids ...string)
+		Broadcast(eid event.Id, m interface{})
 	}
 	Controller struct {
 		list   map[string]struct{}
@@ -66,7 +67,7 @@ func NewController(s sender) *Controller {
 	return c
 }
 
-func (v *Controller) Event99(w websocket.Response, r websocket.Request, m websocket.Meta) error {
+func (v *Controller) Event99(w server.Response, r server.Request, m server.Meta) error {
 	var data string
 	if err := r.Decode(&data); err != nil {
 		return err
@@ -76,7 +77,7 @@ func (v *Controller) Event99(w websocket.Response, r websocket.Request, m websoc
 	return nil
 }
 
-func (v *Controller) OneEvent(w websocket.Response, r websocket.Request, m websocket.Meta) error {
+func (v *Controller) OneEvent(w server.Response, r server.Request, m server.Meta) error {
 	list := make([]int, 0)
 	if err := r.Decode(&list); err != nil {
 		return err
@@ -105,7 +106,7 @@ func (v *Controller) Timer() {
 	}
 }
 
-func (v *Controller) MultiEvent(w websocket.Response, r websocket.Request, m websocket.Meta) error {
+func (v *Controller) MultiEvent(w server.Response, r server.Request, m server.Meta) error {
 	switch r.EventID() {
 	case 11:
 		v.muxLock(func() {

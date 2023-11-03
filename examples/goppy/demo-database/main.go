@@ -9,9 +9,10 @@ import (
 	"fmt"
 
 	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/ormmysql"
+	"go.osspkg.com/goppy/ormsqlite"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/database"
-	"go.osspkg.com/goppy/plugins/web"
+	"go.osspkg.com/goppy/web"
 )
 
 func main() {
@@ -20,8 +21,8 @@ func main() {
 	app.Plugins(
 		web.WithHTTPDebug(),
 		web.WithHTTP(),
-		database.WithMySQL(),
-		database.WithSQLite(),
+		ormmysql.WithMySQL(),
+		ormsqlite.WithSQLite(),
 	)
 	app.Plugins(
 		plugins.Plugin{
@@ -41,13 +42,13 @@ func main() {
 }
 
 type Controller struct {
-	mdb database.MySQL
-	sdb database.SQLite
+	mdb ormmysql.MySQL
+	sdb ormsqlite.SQLite
 }
 
 func NewController(
-	m database.MySQL,
-	s database.SQLite,
+	m ormmysql.MySQL,
+	s ormsqlite.SQLite,
 ) *Controller {
 	return &Controller{
 		mdb: m,
@@ -61,7 +62,7 @@ func (v *Controller) Users(ctx web.Context) {
 }
 
 func (v *Controller) User(ctx web.Context) {
-	id, _ := ctx.Param("id").Int()
+	id, _ := ctx.Param("id").Int() //nolint: errcheck
 
 	err := v.mdb.Pool("main").Ping()
 	if err != nil {

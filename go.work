@@ -1,0 +1,36 @@
+go 1.18
+
+use (
+	.
+	./acl
+	./app
+	./auth
+	./console
+	./domain
+	./encryption
+	./env
+	./epoll
+	./errors
+	./examples
+	./geoip
+	./iofile
+	./iosync
+	./ioutil
+	./orm
+	./ormmysql
+	./ormpgsql
+	./ormsqlite
+	./plugins
+	./random
+	./routine
+	./shell
+	./sqlcommon
+	./syscall
+	./unixsocket
+	./web
+	./ws
+	./xc
+	./xlog
+	./xnet
+	./xtest
+)
