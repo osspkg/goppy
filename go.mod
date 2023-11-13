@@ -12,9 +12,9 @@ require (
 	github.com/stretchr/testify v1.8.4
 	go.osspkg.com/algorithms v1.3.0
 	go.osspkg.com/static v1.4.0
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.15.0
 	golang.org/x/oauth2 v0.13.0
-	golang.org/x/sys v0.13.0
+	golang.org/x/sys v0.14.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
