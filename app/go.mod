@@ -18,8 +18,8 @@ require (
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/syscall v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.0
-	go.osspkg.com/goppy/xtest v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.1
+	go.osspkg.com/goppy/xtest v0.1.1
 	gopkg.in/yaml.v3 v3.0.1
 )
 

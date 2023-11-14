@@ -14,7 +14,7 @@ replace (
 
 require (
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/iofile v0.1.0
+	go.osspkg.com/goppy/iofile v0.1.1
 	go.osspkg.com/goppy/sqlcommon v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
 	go.osspkg.com/goppy/xlog v0.1.0
