@@ -10,13 +10,13 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xlog v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xtest v0.0.0-00010101000000-000000000000
+	go.osspkg.com/goppy/errors v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.0
+	go.osspkg.com/goppy/xtest v0.1.0
 )
 
 require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	go.osspkg.com/goppy/iosync v0.0.0-00010101000000-000000000000 // indirect
+	go.osspkg.com/goppy/iosync v0.1.0 // indirect
 )

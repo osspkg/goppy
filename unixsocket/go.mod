@@ -13,12 +13,12 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/iosync v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/ioutil v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/plugins v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xc v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xlog v0.0.0-00010101000000-000000000000
+	go.osspkg.com/goppy/errors v0.1.0
+	go.osspkg.com/goppy/iosync v0.1.0
+	go.osspkg.com/goppy/ioutil v0.1.0
+	go.osspkg.com/goppy/plugins v0.1.0
+	go.osspkg.com/goppy/xc v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.0
 )
 
 require (

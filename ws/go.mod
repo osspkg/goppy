@@ -13,12 +13,12 @@ replace (
 require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/mailru/easyjson v0.7.7
-	go.osspkg.com/goppy v0.14.1
-	go.osspkg.com/goppy/errors v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/iosync v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xc v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xlog v0.0.0-00010101000000-000000000000
-	go.osspkg.com/goppy/xtest v0.0.0-00010101000000-000000000000
+	go.osspkg.com/goppy v0.15.0
+	go.osspkg.com/goppy/errors v0.1.0
+	go.osspkg.com/goppy/iosync v0.1.0
+	go.osspkg.com/goppy/xc v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.0
+	go.osspkg.com/goppy/xtest v0.1.0
 )
 
 require github.com/josharian/intern v1.0.0 // indirect
