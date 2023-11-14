@@ -12,23 +12,24 @@ import (
 
 	"go.osspkg.com/goppy"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/web"
-	"go.osspkg.com/goppy/sdk/app"
-	"go.osspkg.com/goppy/sdk/netutil/websocket"
+	"go.osspkg.com/goppy/ws"
+	"go.osspkg.com/goppy/ws/client"
+	"go.osspkg.com/goppy/ws/event"
+	"go.osspkg.com/goppy/xc"
 )
 
 func main() {
 	application := goppy.New()
 	application.Plugins(
-		web.WithWebsocketClient(),
+		ws.WithWebsocketClient(),
 	)
 	application.Plugins(
 		plugins.Plugin{
 			Inject: func() *Controller {
 				return &Controller{}
 			},
-			Resolve: func(c *Controller, ctx app.Context, ws web.WebsocketClient) {
-				wsc := ws.Create("ws://127.0.0.1:8088/ws")
+			Resolve: func(c *Controller, ctx xc.Context, wws ws.WebsocketClient) {
+				wsc := wws.Create("ws://127.0.0.1:8088/ws")
 				wsc.SetHandler(c.EventListener, 99, 1, 65000)
 				go c.Ticker(wsc.SendEvent)
 				wsc.OnClose(func(cid string) {
@@ -47,7 +48,7 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Ticker(call func(id websocket.EventID, in interface{})) {
+func (v *Controller) Ticker(call func(id event.Id, in interface{})) {
 	t := time.NewTicker(time.Second * 3)
 	defer t.Stop()
 
@@ -59,7 +60,7 @@ func (v *Controller) Ticker(call func(id websocket.EventID, in interface{})) {
 	}
 }
 
-func (v *Controller) EventListener(w websocket.CRequest, r websocket.CResponse, m websocket.CMeta) {
+func (v *Controller) EventListener(w client.Request, r client.Response, m client.Meta) {
 	var vv json.RawMessage
 	if err := r.Decode(&vv); err != nil {
 		fmt.Println(err)

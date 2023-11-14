@@ -10,9 +10,9 @@ import (
 	"os"
 
 	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/console"
 	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/plugins/web"
-	"go.osspkg.com/goppy/sdk/console"
+	"go.osspkg.com/goppy/web"
 )
 
 func main() {
@@ -51,7 +51,7 @@ func (v *Controller) Users(ctx web.Context) {
 }
 
 func (v *Controller) User(ctx web.Context) {
-	id, _ := ctx.Param("id").Int()
+	id, _ := ctx.Param("id").Int() //nolint: errcheck
 	ctx.String(200, "user id: %d", id)
 	ctx.Log().Infof("user - %d", id)
 }
