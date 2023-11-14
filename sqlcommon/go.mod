@@ -12,7 +12,7 @@ replace (
 require (
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/xlog v0.1.0
-	go.osspkg.com/goppy/xtest v0.1.0
+	go.osspkg.com/goppy/xtest v0.1.1
 )
 
 require (

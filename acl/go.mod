@@ -9,5 +9,5 @@ replace (
 
 require (
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/xtest v0.1.0
+	go.osspkg.com/goppy/xtest v0.1.1
 )

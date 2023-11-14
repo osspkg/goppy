@@ -20,9 +20,9 @@ require (
 	go.osspkg.com/goppy/ioutil v0.1.0
 	go.osspkg.com/goppy/plugins v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.1
 	go.osspkg.com/goppy/xnet v0.1.0
-	go.osspkg.com/goppy/xtest v0.1.0
+	go.osspkg.com/goppy/xtest v0.1.1
 	go.osspkg.com/static v1.4.0
 )
 
