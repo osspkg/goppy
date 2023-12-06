@@ -22,6 +22,7 @@ replace (
 	go.osspkg.com/goppy/routine => ../routine
 	go.osspkg.com/goppy/sqlcommon => ../sqlcommon
 	go.osspkg.com/goppy/syscall => ../syscall
+	go.osspkg.com/goppy/udp => ../udp
 	go.osspkg.com/goppy/unixsocket => ../unixsocket
 	go.osspkg.com/goppy/web => ../web
 	go.osspkg.com/goppy/ws => ../ws
@@ -32,8 +33,8 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy v0.15.0
-	go.osspkg.com/goppy/app v0.1.0
+	go.osspkg.com/goppy v0.15.3
+	go.osspkg.com/goppy/app v0.1.1
 	go.osspkg.com/goppy/auth v0.1.0
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/geoip v0.1.0
@@ -42,12 +43,13 @@ require (
 	go.osspkg.com/goppy/ormpgsql v0.1.0
 	go.osspkg.com/goppy/ormsqlite v0.1.0
 	go.osspkg.com/goppy/plugins v0.1.0
+	go.osspkg.com/goppy/routine v0.1.0
 	go.osspkg.com/goppy/syscall v0.1.0
 	go.osspkg.com/goppy/unixsocket v0.1.0
-	go.osspkg.com/goppy/web v0.1.0
+	go.osspkg.com/goppy/web v0.1.1
 	go.osspkg.com/goppy/ws v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.1
 )
 
 require (
@@ -65,12 +67,11 @@ require (
 	go.osspkg.com/algorithms v1.3.0 // indirect
 	go.osspkg.com/goppy/encryption v0.1.0 // indirect
 	go.osspkg.com/goppy/errors v0.1.0 // indirect
-	go.osspkg.com/goppy/iofile v0.1.0 // indirect
+	go.osspkg.com/goppy/iofile v0.1.1 // indirect
 	go.osspkg.com/goppy/ioutil v0.1.0 // indirect
-	go.osspkg.com/goppy/orm v0.1.0 // indirect
+	go.osspkg.com/goppy/orm v0.1.1 // indirect
 	go.osspkg.com/goppy/random v0.1.0 // indirect
-	go.osspkg.com/goppy/routine v0.1.0 // indirect
-	go.osspkg.com/goppy/sqlcommon v0.1.0 // indirect
+	go.osspkg.com/goppy/sqlcommon v0.1.1 // indirect
 	go.osspkg.com/goppy/xnet v0.1.0 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
