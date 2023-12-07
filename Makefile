@@ -29,3 +29,10 @@ pre-commite: setup lint build tests
 .PHONY: ci
 ci: install setup lint build tests
 
+.PHONY: go_work
+go_work:
+	go work use -r .
+	go work sync
+
+create_release:
+	devtool tag

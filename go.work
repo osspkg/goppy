@@ -24,8 +24,10 @@ use (
 	./random
 	./routine
 	./shell
+	./sip
 	./sqlcommon
 	./syscall
+	./udp
 	./unixsocket
 	./web
 	./ws

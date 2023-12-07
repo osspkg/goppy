@@ -15,7 +15,7 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/app v0.1.1
+	go.osspkg.com/goppy/app v0.1.2
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/plugins v0.1.0
@@ -27,8 +27,8 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	go.osspkg.com/algorithms v1.3.0 // indirect
-	go.osspkg.com/goppy/iosync v0.1.0 // indirect
+	go.osspkg.com/goppy/iosync v0.1.1 // indirect
 	go.osspkg.com/goppy/syscall v0.1.0 // indirect
 	go.osspkg.com/goppy/xc v0.1.0 // indirect
-	go.osspkg.com/goppy/xlog v0.1.1 // indirect
+	go.osspkg.com/goppy/xlog v0.1.2 // indirect
 )
