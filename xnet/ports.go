@@ -52,3 +52,27 @@ func CheckHostPort(addr string) string {
 	}
 	return strings.Join(hp, ":")
 }
+
+func Normalize(p string, ips ...string) []string {
+	result := make([]string, 0, len(ips))
+	for _, ip := range ips {
+		host, port, err := net.SplitHostPort(ip)
+		if err != nil {
+			host = ip
+			port = p
+		}
+		if !IsValidIP(host) {
+			continue
+		}
+		if port == "0" {
+			port = p
+		}
+		result = append(result, net.JoinHostPort(host, port))
+	}
+
+	return result
+}
+
+func IsValidIP(ip string) bool {
+	return net.ParseIP(ip) != nil
+}
