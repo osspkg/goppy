@@ -40,3 +40,8 @@ func Bytes(n int) []byte {
 func String(n int) string {
 	return string(Bytes(n))
 }
+
+func Shuffle(v []string) []string {
+	rnd.Shuffle(len(v), func(i, j int) { v[i], v[j] = v[j], v[i] })
+	return v
+}

@@ -13,18 +13,41 @@ import (
 	"strings"
 )
 
+func CurrentDir() string {
+	dir, err := os.Getwd()
+	if err != nil {
+		return "."
+	}
+	return dir
+}
+
 func Exist(filename string) bool {
 	_, err := os.Stat(filename)
 	return err == nil
 }
 
 func Search(dir, filename string) ([]string, error) {
-	files := make([]string, 0)
+	files := make([]string, 0, 2)
 	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 		if info.IsDir() || info.Name() != filename {
+			return nil
+		}
+		files = append(files, path)
+		return nil
+	})
+	return files, err
+}
+
+func SearchByExt(dir, ext string) ([]string, error) {
+	files := make([]string, 0, 2)
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() || filepath.Ext(info.Name()) != ext {
 			return nil
 		}
 		files = append(files, path)

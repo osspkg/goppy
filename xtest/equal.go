@@ -47,7 +47,7 @@ func NotEqual(t IUnitTest, expected interface{}, actual interface{}, args ...int
 }
 
 func True(t IUnitTest, actual bool, args ...interface{}) {
-	if !actual {
+	if actual {
 		return
 	}
 	t.Helper()
@@ -56,7 +56,7 @@ func True(t IUnitTest, actual bool, args ...interface{}) {
 }
 
 func False(t IUnitTest, actual bool, args ...interface{}) {
-	if actual {
+	if !actual {
 		return
 	}
 	t.Helper()

@@ -26,21 +26,21 @@ func TestUnit_Level(t *testing.T) {
 				s:     "www.domain.ltd",
 				level: 1,
 			},
-			want: "ltd",
+			want: "ltd.",
 		},
 		{
 			args: args{
 				s:     "www.domain.ltd",
 				level: 2,
 			},
-			want: "domain.ltd",
+			want: "domain.ltd.",
 		},
 		{
 			args: args{
 				s:     "www.domain.ltd",
 				level: 10,
 			},
-			want: "www.domain.ltd",
+			want: "www.domain.ltd.",
 		},
 		{
 			args: args{
@@ -48,6 +48,20 @@ func TestUnit_Level(t *testing.T) {
 				level: 1,
 			},
 			want: "ltd.",
+		},
+		{
+			args: args{
+				s:     "ltd.",
+				level: 3,
+			},
+			want: "ltd.",
+		},
+		{
+			args: args{
+				s:     "www.domain.ltd.",
+				level: 0,
+			},
+			want: ".",
 		},
 	}
 	for i, tt := range tests {
@@ -59,14 +73,90 @@ func TestUnit_Level(t *testing.T) {
 	}
 }
 
-func Benchmark_Level(b *testing.B) {
-	d := "www.domain.ltd."
-	e := "domain.ltd."
+func BenchmarkDomainLevel(b *testing.B) {
+	address := "www.domain.ltd."
+	expected := "domain.ltd."
 
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
-		if got := domain.Level(d, 2); got != e {
-			b.Errorf("Level() = %v, want %v", got, e)
+		if got := domain.Level(address, 2); got != expected {
+			b.Errorf("DomainLevel() = %v, want %v", got, expected)
 		}
+	}
+}
+
+func TestUnit_Normalize(t *testing.T) {
+	tests := []struct {
+		name    string
+		domain  string
+		want    string
+		wantErr bool
+	}{
+		{
+			name:    "Case1",
+			domain:  "1www.a-aa.com",
+			want:    "1www.a-aa.com.",
+			wantErr: false,
+		},
+		{
+			name:    "Case2",
+			domain:  "1_www.aaa.com",
+			want:    "",
+			wantErr: true,
+		},
+		{
+			name:    "Case3",
+			domain:  "com",
+			want:    "com.",
+			wantErr: false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := domain.Normalize(tt.domain)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Normalize() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("Normalize() got = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestUnit_CountLevels(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  string
+		want int
+	}{
+		{
+			name: "Case1",
+			arg:  "",
+			want: 0,
+		},
+		{
+			name: "Case2",
+			arg:  "aaa.",
+			want: 1,
+		},
+		{
+			name: "Case3",
+			arg:  "aaa.bbb.",
+			want: 2,
+		},
+		{
+			name: "Case4",
+			arg:  "aaa.bbb",
+			want: 2,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := domain.CountLevels(tt.arg); got != tt.want {
+				t.Errorf("CountLevels() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

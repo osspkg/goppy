@@ -3,6 +3,7 @@ module go.osspkg.com/goppy/udp
 go 1.18
 
 replace (
+	go.osspkg.com/goppy/errors => ../errors
 	go.osspkg.com/goppy/iosync => ../iosync
 	go.osspkg.com/goppy/xc => ../xc
 	go.osspkg.com/goppy/xlog => ../xlog
@@ -10,10 +11,10 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/iosync v0.1.1
+	go.osspkg.com/goppy/iosync v0.1.2
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.2
-	go.osspkg.com/goppy/xnet v0.1.0
+	go.osspkg.com/goppy/xlog v0.1.3
+	go.osspkg.com/goppy/xnet v0.1.1
 )
 
 require (
