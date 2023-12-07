@@ -12,7 +12,7 @@ replace (
 )
 
 require (
-	github.com/gorilla/websocket v1.5.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/mailru/easyjson v0.7.7
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/iosync v0.1.2
@@ -22,4 +22,7 @@ require (
 	go.osspkg.com/goppy/xtest v0.1.2
 )
 
-require github.com/josharian/intern v1.0.0 // indirect
+require (
+	github.com/josharian/intern v1.0.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
+)
