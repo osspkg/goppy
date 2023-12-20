@@ -14,7 +14,7 @@ replace (
 require (
 	go.osspkg.com/goppy/iosync v0.1.2
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.3
+	go.osspkg.com/goppy/xlog v0.1.4
 	go.osspkg.com/goppy/xnet v0.1.1
 )
 
