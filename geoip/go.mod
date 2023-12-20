@@ -31,5 +31,5 @@ require (
 	go.osspkg.com/goppy/xlog v0.1.4 // indirect
 	go.osspkg.com/goppy/xnet v0.1.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 )

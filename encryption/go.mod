@@ -12,5 +12,5 @@ require (
 	go.osspkg.com/goppy/errors v0.1.0
 	go.osspkg.com/goppy/random v0.1.1
 	go.osspkg.com/goppy/xtest v0.1.2
-	golang.org/x/crypto v0.14.0
+	golang.org/x/crypto v0.17.0
 )
