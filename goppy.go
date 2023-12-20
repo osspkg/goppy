@@ -14,6 +14,7 @@ import (
 	"go.osspkg.com/goppy/console"
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/xlog"
 	"gopkg.in/yaml.v3"
 )
 
@@ -27,6 +28,7 @@ type (
 	}
 
 	Goppy interface {
+		Logger(l xlog.Logger)
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
 		Run()
@@ -44,6 +46,10 @@ func New() Goppy {
 		configs:  make([]interface{}, 0, 100),
 		args:     console.NewArgs().Parse(os.Args[1:]),
 	}
+}
+
+func (v *_app) Logger(l xlog.Logger) {
+	v.application.Logger(l)
 }
 
 // Plugins setting the list of plugins to initialize

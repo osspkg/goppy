@@ -6,7 +6,6 @@
 package xlog
 
 import (
-	"encoding/json"
 	"io"
 	"os"
 	"sync"
@@ -16,24 +15,26 @@ import (
 	"go.osspkg.com/goppy/iosync"
 )
 
-var nl = byte('\n')
-
 // log base model
 type log struct {
-	status   uint32
-	writer   io.Writer
-	entities sync.Pool
-	channel  chan []byte
-	wg       iosync.Group
+	status    uint32
+	writer    io.Writer
+	entities  sync.Pool
+	formatter Formatter
+	channel   chan []byte
+	mux       iosync.Lock
+	wg        iosync.Group
 }
 
 // New init new logger
 func New() Logger {
 	object := &log{
-		status:  LevelError,
-		writer:  os.Stdout,
-		channel: make(chan []byte, 1024),
-		wg:      iosync.NewGroup(),
+		status:    LevelError,
+		writer:    os.Stdout,
+		formatter: NewFormatJSON(),
+		channel:   make(chan []byte, 1024),
+		wg:        iosync.NewGroup(),
+		mux:       iosync.NewLock(),
 	}
 	object.entities = sync.Pool{
 		New: func() interface{} {
@@ -46,14 +47,14 @@ func New() Logger {
 	return object
 }
 
-func (l *log) SendMessage(level uint32, call func(v *message)) {
+func (l *log) SendMessage(level uint32, call func(v *Message)) {
 	if l.GetLevel() < level {
 		return
 	}
 
-	m, ok := poolMessage.Get().(*message)
+	m, ok := poolMessage.Get().(*Message)
 	if !ok {
-		m = &message{}
+		m = &Message{}
 	}
 
 	call(m)
@@ -63,15 +64,17 @@ func (l *log) SendMessage(level uint32, call func(v *message)) {
 	}
 	m.Level, m.Time = lvl, time.Now().Unix()
 
-	b, err := json.Marshal(m)
-	if err != nil {
-		b = []byte(err.Error())
-	}
+	l.mux.RLock(func() {
+		b, err := l.formatter.Encode(m)
+		if err != nil {
+			b = []byte(err.Error())
+		}
 
-	select {
-	case l.channel <- b:
-	default:
-	}
+		select {
+		case l.channel <- b:
+		default:
+		}
+	})
 
 	m.Reset()
 	poolMessage.Put(m)
@@ -79,14 +82,16 @@ func (l *log) SendMessage(level uint32, call func(v *message)) {
 
 func (l *log) queue() {
 	for {
-		m, ok := <-l.channel
+		b, ok := <-l.channel
 		if !ok {
 			return
 		}
-		if m == nil {
+		if b == nil {
 			return
 		}
-		l.writer.Write(append(m, nl)) //nolint:errcheck
+		l.mux.RLock(func() {
+			l.writer.Write(b) //nolint:errcheck
+		})
 	}
 }
 
@@ -111,7 +116,15 @@ func (l *log) Close() {
 
 // SetOutput change writer
 func (l *log) SetOutput(out io.Writer) {
-	l.writer = out
+	l.mux.Lock(func() {
+		l.writer = out
+	})
+}
+
+func (l *log) SetFormatter(f Formatter) {
+	l.mux.Lock(func() {
+		l.formatter = f
+	})
 }
 
 // SetLevel change log level

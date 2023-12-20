@@ -23,6 +23,7 @@ func (devNullMetric) ExecutionTime(_ string, call func()) { call() }
 type devNullLogger struct{}
 
 func (devNullLogger) SetOutput(io.Writer)                             {}
+func (devNullLogger) SetFormatter(f xlog.Formatter)                   {}
 func (devNullLogger) Fatalf(string, ...interface{})                   {}
 func (devNullLogger) Errorf(string, ...interface{})                   {}
 func (devNullLogger) Warnf(string, ...interface{})                    {}
