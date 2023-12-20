@@ -64,8 +64,8 @@ func (e *entity) WithFields(fields Fields) Writer {
 	return e
 }
 
-func (e *entity) prepareMessage(format string, args ...interface{}) func(v *message) {
-	return func(v *message) {
+func (e *entity) prepareMessage(format string, args ...interface{}) func(v *Message) {
+	return func(v *Message) {
 		v.Message = fmt.Sprintf(format, args...)
 		for key, value := range e.ctx {
 			v.Ctx[key] = value

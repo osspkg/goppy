@@ -163,7 +163,9 @@ func (a *_app) prepareConfig(interactive bool) {
 			Level:   4,
 			LogFile: "/dev/stdout",
 		})
-		a.log = xlog.Default()
+		if a.log == nil {
+			a.log = xlog.Default()
+		}
 		a.logout.Handler(a.log)
 	}
 	if len(a.cfile) > 0 {

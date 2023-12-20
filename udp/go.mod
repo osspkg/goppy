@@ -8,6 +8,7 @@ replace (
 	go.osspkg.com/goppy/xc => ../xc
 	go.osspkg.com/goppy/xlog => ../xlog
 	go.osspkg.com/goppy/xnet => ../xnet
+	go.osspkg.com/goppy/xtest => ../xtest
 )
 
 require (

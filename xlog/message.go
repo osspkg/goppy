@@ -16,20 +16,20 @@ var poolMessage = sync.Pool{
 }
 
 //easyjson:json
-type message struct {
-	Time    int64                  `json:"time"`
-	Level   string                 `json:"lvl"`
-	Message string                 `json:"msg"`
-	Ctx     map[string]interface{} `json:"ctx,omitempty"`
+type Message struct {
+	Time    int64                  `json:"time" yaml:"time"`
+	Level   string                 `json:"lvl" yaml:"lvl"`
+	Message string                 `json:"msg" yaml:"msg"`
+	Ctx     map[string]interface{} `json:"ctx,omitempty" yaml:"ctx,omitempty,inline"`
 }
 
-func newMessage() *message {
-	return &message{
-		Ctx: make(map[string]interface{}),
+func newMessage() *Message {
+	return &Message{
+		Ctx: make(map[string]interface{}, 2),
 	}
 }
 
-func (v *message) Reset() {
+func (v *Message) Reset() {
 	v.Time = 0
 	v.Level = ""
 	v.Message = ""

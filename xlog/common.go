@@ -27,7 +27,7 @@ type Fields map[string]interface{}
 
 type Sender interface {
 	PutEntity(v *entity)
-	SendMessage(level uint32, call func(v *message))
+	SendMessage(level uint32, call func(v *Message))
 	Close()
 }
 
@@ -50,6 +50,7 @@ type WriterContext interface {
 // Logger base interface
 type Logger interface {
 	SetOutput(out io.Writer)
+	SetFormatter(f Formatter)
 	SetLevel(v uint32)
 	GetLevel() uint32
 	Close()

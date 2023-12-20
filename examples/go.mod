@@ -45,7 +45,7 @@ require (
 	go.osspkg.com/goppy/plugins v0.1.0
 	go.osspkg.com/goppy/routine v0.1.2
 	go.osspkg.com/goppy/syscall v0.1.0
-	go.osspkg.com/goppy/udp v0.0.0-00010101000000-000000000000
+	go.osspkg.com/goppy/udp v0.0.2
 	go.osspkg.com/goppy/unixsocket v0.1.0
 	go.osspkg.com/goppy/web v0.1.3
 	go.osspkg.com/goppy/ws v0.1.0
