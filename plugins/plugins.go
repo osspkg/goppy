@@ -43,9 +43,7 @@ func (p Plugins) Inject(list ...interface{}) Plugins {
 }
 
 func Inject(list ...interface{}) Plugins {
-	p := make(Plugins, 0, len(list))
-	p.Inject(list...)
-	return p
+	return Plugins{}.Inject(list...)
 }
 
 // Defaulter interface for setting default values for a structure
