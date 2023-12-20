@@ -18,7 +18,7 @@ require (
 	go.osspkg.com/goppy/app v0.1.4
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/plugins v0.1.0
+	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/xlog v0.1.4
 	gopkg.in/yaml.v3 v3.0.1
 )
