@@ -27,6 +27,7 @@ replace (
 	go.osspkg.com/goppy/web => ../web
 	go.osspkg.com/goppy/ws => ../ws
 	go.osspkg.com/goppy/xc => ../xc
+	go.osspkg.com/goppy/xdns => ../xdns
 	go.osspkg.com/goppy/xlog => ../xlog
 	go.osspkg.com/goppy/xnet => ../xnet
 	go.osspkg.com/goppy/xtest => ../xtest
@@ -42,14 +43,15 @@ require (
 	go.osspkg.com/goppy/ormmysql v0.1.0
 	go.osspkg.com/goppy/ormpgsql v0.1.0
 	go.osspkg.com/goppy/ormsqlite v0.1.0
-	go.osspkg.com/goppy/plugins v0.1.0
+	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/routine v0.1.2
 	go.osspkg.com/goppy/syscall v0.1.0
 	go.osspkg.com/goppy/udp v0.0.2
 	go.osspkg.com/goppy/unixsocket v0.1.0
-	go.osspkg.com/goppy/web v0.1.4
+	go.osspkg.com/goppy/web v0.1.5
 	go.osspkg.com/goppy/ws v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
+	go.osspkg.com/goppy/xdns v0.0.0-00010101000000-000000000000
 	go.osspkg.com/goppy/xlog v0.1.4
 )
 
@@ -63,10 +65,11 @@ require (
 	github.com/lib/pq v1.10.9 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-sqlite3 v1.14.19 // indirect
+	github.com/miekg/dns v1.1.57 // indirect
 	github.com/oschwald/geoip2-golang v1.9.0 // indirect
 	github.com/oschwald/maxminddb-golang v1.11.0 // indirect
 	go.osspkg.com/algorithms v1.3.0 // indirect
-	go.osspkg.com/goppy/encryption v0.1.2 // indirect
+	go.osspkg.com/goppy/encryption v0.1.3 // indirect
 	go.osspkg.com/goppy/errors v0.1.0 // indirect
 	go.osspkg.com/goppy/iofile v0.1.3 // indirect
 	go.osspkg.com/goppy/ioutil v0.1.0 // indirect
@@ -75,9 +78,11 @@ require (
 	go.osspkg.com/goppy/sqlcommon v0.1.4 // indirect
 	go.osspkg.com/goppy/xnet v0.1.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
+	golang.org/x/mod v0.12.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/oauth2 v0.13.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/tools v0.13.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect

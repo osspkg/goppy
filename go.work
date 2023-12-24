@@ -33,6 +33,7 @@ use (
 	./web
 	./ws
 	./xc
+	./xdns
 	./xlog
 	./xnet
 	./xtest

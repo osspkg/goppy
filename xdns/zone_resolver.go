@@ -1,0 +1,35 @@
+package xdns
+
+import (
+	"math/rand"
+	"time"
+
+	"go.osspkg.com/goppy/xnet"
+)
+
+var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+type ZoneResolve struct {
+	dns []string
+}
+
+func NewSimpleZoneResolve(dns ...string) *ZoneResolve {
+	if len(dns) == 0 {
+		dns = append(dns, "1.1.1.1", "1.0.0.1")
+	}
+	ndns := xnet.Normalize("53", dns...)
+	return &ZoneResolve{dns: ndns}
+}
+
+func (v *ZoneResolve) Resolve(name string) string {
+	if len(v.dns) == 1 {
+		return v.dns[0]
+	}
+	return v.dns[rnd.Intn(len(v.dns))]
+}
+
+func DefaultExchanger(dns ...string) Exchanger {
+	cli := NewClient(ClientOptionNetUDP())
+	cli.SetZoneResolver(NewSimpleZoneResolve())
+	return cli
+}
