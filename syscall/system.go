@@ -17,7 +17,7 @@ func OnStop(callFunc func()) {
 	quit := make(chan os.Signal, 4)
 	signal.Notify(quit, os.Interrupt, scall.SIGINT, scall.SIGTERM, scall.SIGKILL) //nolint:staticcheck
 	<-quit
-
+	signal.Stop(quit)
 	callFunc()
 }
 
@@ -26,7 +26,7 @@ func OnUp(callFunc func()) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, scall.SIGHUP)
 	<-quit
-
+	signal.Stop(quit)
 	callFunc()
 }
 
@@ -35,7 +35,7 @@ func OnCustom(callFunc func(), sig ...os.Signal) {
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, sig...)
 	<-quit
-
+	signal.Stop(quit)
 	callFunc()
 }
 
