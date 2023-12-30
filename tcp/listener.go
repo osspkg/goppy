@@ -3,24 +3,23 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package server
+package tcp
 
 import (
 	"crypto/rand"
 	"crypto/tls"
-	"fmt"
 	"net"
+
+	"go.osspkg.com/goppy/xnet"
 )
 
-type (
-	Listen struct {
-		conn net.Listener
-		tls  bool
-	}
-)
+type Listen struct {
+	conn net.Listener
+	tls  bool
+}
 
-func NewListen(port int, certs ...Cert) (*Listen, error) {
-	address := fmt.Sprintf("0.0.0.0:%d", port)
+func NewListen(address string, certs ...Cert) (*Listen, error) {
+	address = xnet.CheckHostPort(address)
 
 	if len(certs) == 0 {
 		l, err := net.Listen("tcp", address)
@@ -52,4 +51,8 @@ func (v *Listen) Close() error {
 
 func (v *Listen) Accept() (net.Conn, error) {
 	return v.conn.Accept()
+}
+
+func (v *Listen) IsTLS() bool {
+	return v.tls
 }

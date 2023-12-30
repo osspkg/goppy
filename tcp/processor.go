@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package server
+package tcp
 
 import (
 	"bufio"
@@ -14,16 +14,16 @@ import (
 	"go.osspkg.com/goppy/errors"
 )
 
-type connProcessor struct {
+type connect struct {
 	conn    net.Conn
 	pipe    *textproto.Reader
 	buff    *bufio.Reader
 	timeout time.Duration
 }
 
-func newConnProcessor(c net.Conn, ttl time.Duration) *connProcessor {
+func newConnect(c net.Conn, ttl time.Duration) *connect {
 	buff := bufio.NewReader(c)
-	return &connProcessor{
+	return &connect{
 		pipe:    textproto.NewReader(buff),
 		buff:    buff,
 		conn:    c,
@@ -31,29 +31,29 @@ func newConnProcessor(c net.Conn, ttl time.Duration) *connProcessor {
 	}
 }
 
-func (v *connProcessor) ReadLine() ([]byte, error) {
+func (v *connect) ReadLine() ([]byte, error) {
 	if err := v.updateDeadline(); err != nil {
 		return nil, err
 	}
 	return v.pipe.ReadLineBytes()
 }
 
-func (v *connProcessor) Read(b []byte) (int, error) {
+func (v *connect) Read(b []byte) (int, error) {
 	if err := v.updateDeadline(); err != nil {
 		return 0, err
 	}
 	return v.buff.Read(b)
 }
 
-func (v *connProcessor) Addr() net.Addr {
+func (v *connect) Addr() net.Addr {
 	return v.conn.RemoteAddr()
 }
 
-func (v *connProcessor) Write(b []byte) (int, error) {
+func (v *connect) Write(b []byte) (int, error) {
 	return v.conn.Write(b)
 }
 
-func (v *connProcessor) updateDeadline() error {
+func (v *connect) updateDeadline() error {
 	return errors.Wrap(
 		v.conn.SetDeadline(time.Now().Add(v.timeout)),
 		v.conn.SetReadDeadline(time.Now().Add(v.timeout)),

@@ -15,27 +15,19 @@ type (
 	}
 
 	_group struct {
-		wg   sync.WaitGroup
-		sync Switch
+		wg sync.WaitGroup
 	}
 )
 
 func NewGroup() Group {
-	return &_group{
-		sync: NewSwitch(),
-	}
+	return &_group{}
 }
 
 func (v *_group) Wait() {
-	v.sync.On()
 	v.wg.Wait()
-	v.sync.Off()
 }
 
 func (v *_group) Background(call func()) {
-	if v.sync.IsOn() {
-		return
-	}
 	v.wg.Add(1)
 	go func() {
 		call()
@@ -44,9 +36,6 @@ func (v *_group) Background(call func()) {
 }
 
 func (v *_group) Run(call func()) {
-	if v.sync.IsOn() {
-		return
-	}
 	v.wg.Add(1)
 	call()
 	v.wg.Done()

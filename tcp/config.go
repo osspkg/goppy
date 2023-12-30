@@ -3,18 +3,14 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package server
+package tcp
 
 import "time"
 
 type ConfigItem struct {
-	Pools   []Pool        `yaml:"pool"`
+	Address string        `yaml:"address"`
+	Certs   []Cert        `yaml:"certs,omitempty"`
 	Timeout time.Duration `yaml:"timeout,omitempty"`
-}
-
-type Pool struct {
-	Port  int    `yaml:"port"`
-	Certs []Cert `yaml:"certs,omitempty"`
 }
 
 type Cert struct {

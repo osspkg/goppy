@@ -3,19 +3,24 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package server
+package tcp
 
 import (
 	"net"
 )
 
 type HandlerTCP interface {
-	HandlerTCP(p Processor)
+	HandlerTCP(w Response, r Request)
 }
 
-type Processor interface {
-	Write([]byte) (int, error)
-	ReadLine() ([]byte, error)
-	Read(b []byte) (int, error)
-	Addr() net.Addr
-}
+type (
+	Request interface {
+		ReadLine() ([]byte, error)
+		Read(b []byte) (int, error)
+		Addr() net.Addr
+	}
+
+	Response interface {
+		Write([]byte) (int, error)
+	}
+)
