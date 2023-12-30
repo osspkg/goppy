@@ -16,7 +16,8 @@ type Client struct {
 	addr string
 	conn *net.UDPConn
 	wg   iosync.Group
-	call func(err error, b []byte)
+	call HandlerUDP
+	mux  iosync.Lock
 }
 
 func New(addr string) (*Client, error) {
@@ -31,8 +32,9 @@ func New(addr string) (*Client, error) {
 	c := &Client{
 		addr: addr,
 		conn: conn,
+		call: newNilHandler(),
 		wg:   iosync.NewGroup(),
-		call: func(err error, b []byte) {},
+		mux:  iosync.NewLock(),
 	}
 	c.readLoop()
 	return c, nil
@@ -55,7 +57,9 @@ func (v *Client) readLoop() {
 			n, _, err := v.conn.ReadFrom(buf)
 			if err != nil {
 				if !strings.Contains(err.Error(), "use of closed network connection") {
-					go v.call(err, nil)
+					go v.mux.RLock(func() {
+						v.call.HandlerUDP(err, nil)
+					})
 					continue
 				}
 				return
@@ -63,11 +67,15 @@ func (v *Client) readLoop() {
 			if n == 0 {
 				continue
 			}
-			go v.call(nil, buf[:n])
+			go v.mux.RLock(func() {
+				v.call.HandlerUDP(nil, buf[:n])
+			})
 		}
 	})
 }
 
-func (v *Client) Handler(call func(err error, b []byte)) {
-	v.call = call
+func (v *Client) HandleFunc(h HandlerUDP) {
+	v.mux.Lock(func() {
+		v.call = h
+	})
 }

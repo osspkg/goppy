@@ -18,32 +18,28 @@ import (
 
 type (
 	Server struct {
-		addr string
-		conn net.PacketConn
-		call func(w Writer, addr net.Addr, b []byte)
-		log  xlog.Logger
-		wg   iosync.Group
-		sync iosync.Switch
-	}
-
-	Writer interface {
-		WriteTo(p []byte, addr net.Addr) (n int, err error)
+		addr    string
+		conn    net.PacketConn
+		handler HandlerUDP
+		log     xlog.Logger
+		wg      iosync.Group
+		sync    iosync.Switch
 	}
 )
 
 func New(l xlog.Logger, addr string) *Server {
 	return &Server{
-		addr: addr,
-		call: func(w Writer, addr net.Addr, b []byte) {},
-		log:  l,
-		sync: iosync.NewSwitch(),
-		wg:   iosync.NewGroup(),
+		addr:    addr,
+		handler: NewLogHandlerUDP(l),
+		log:     l,
+		sync:    iosync.NewSwitch(),
+		wg:      iosync.NewGroup(),
 	}
 }
 
-func (v *Server) Handler(call func(w Writer, addr net.Addr, b []byte)) {
+func (v *Server) HandleFunc(h HandlerUDP) {
 	if v.sync.IsOff() {
-		v.call = call
+		v.handler = h
 	}
 }
 
@@ -71,7 +67,7 @@ func (v *Server) Up(ctx xc.Context) error {
 				continue
 			}
 			go func() {
-				v.call(v.conn, addr, buf[:n])
+				v.handler.HandlerUDP(v.conn, addr, buf[:n])
 				setBuf(buf)
 			}()
 		}

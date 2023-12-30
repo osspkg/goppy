@@ -1,3 +1,8 @@
+/*
+ *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package xdns
 
 import (
@@ -11,20 +16,21 @@ import (
 )
 
 type Server struct {
-	conf     ConfigItem
-	serv     []*dns.Server
-	resolver Exchanger
-	log      xlog.Logger
-	wg       iosync.Group
+	conf    ConfigItem
+	serv    []*dns.Server
+	handler HandlerDNS
+	log     xlog.Logger
+	wg      iosync.Group
+	mux     iosync.Lock
 }
 
 func NewServer(conf ConfigItem, l xlog.Logger) *Server {
 	return &Server{
-		conf:     conf,
-		serv:     make([]*dns.Server, 0, 2),
-		resolver: DefaultExchanger(),
-		wg:       iosync.NewGroup(),
-		log:      l,
+		conf:    conf,
+		serv:    make([]*dns.Server, 0, 2),
+		handler: DefaultExchanger(),
+		wg:      iosync.NewGroup(),
+		log:     l,
 	}
 }
 
@@ -89,8 +95,10 @@ func (v *Server) Down() error {
 	return nil
 }
 
-func (v *Server) SetResolver(r Exchanger) {
-	v.resolver = r
+func (v *Server) HandleFunc(r HandlerDNS) {
+	v.mux.Lock(func() {
+		v.handler = r
+	})
 }
 
 func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
@@ -100,7 +108,14 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	response.SetReply(msg)
 	response.SetRcode(msg, dns.RcodeSuccess)
 
-	answer, err := v.resolver.Exchange(msg.Question)
+	var (
+		answer []dns.RR
+		err    error
+	)
+	v.mux.RLock(func() {
+		answer, err = v.handler.Exchange(msg.Question)
+	})
+
 	if err != nil {
 		v.log.WithFields(xlog.Fields{
 			"err":      err.Error(),

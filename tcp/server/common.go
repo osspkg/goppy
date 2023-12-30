@@ -3,16 +3,19 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package xdns
+package server
 
 import (
-	"github.com/miekg/dns"
+	"net"
 )
 
-type HandlerDNS interface {
-	Exchange(q []dns.Question) ([]dns.RR, error)
+type HandlerTCP interface {
+	HandlerTCP(p Processor)
 }
 
-type ZoneResolver interface {
-	Resolve(name string) string
+type Processor interface {
+	Write([]byte) (int, error)
+	ReadLine() ([]byte, error)
+	Read(b []byte) (int, error)
+	Addr() net.Addr
 }

@@ -3,16 +3,12 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package xdns
+package ioutil
 
-import (
-	"github.com/miekg/dns"
-)
+import "bytes"
 
-type HandlerDNS interface {
-	Exchange(q []dns.Question) ([]dns.RR, error)
-}
+var asciiEof = []byte{255, 244, 255, 253, 6}
 
-type ZoneResolver interface {
-	Resolve(name string) string
+func IsAsciiEOF(b []byte) bool {
+	return bytes.Equal(b, asciiEof)
 }

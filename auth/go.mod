@@ -20,10 +20,10 @@ require (
 	github.com/mailru/easyjson v0.7.7
 	go.osspkg.com/goppy/encryption v0.1.3
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/ioutil v0.1.0
+	go.osspkg.com/goppy/ioutil v0.1.1
 	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/random v0.1.1
-	go.osspkg.com/goppy/web v0.1.5
+	go.osspkg.com/goppy/web v0.1.6
 	go.osspkg.com/goppy/xtest v0.1.2
 	golang.org/x/oauth2 v0.13.0
 )

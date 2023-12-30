@@ -27,6 +27,7 @@ use (
 	./sip
 	./sqlcommon
 	./syscall
+	./tcp
 	./udp
 	./unixsocket
 	./version

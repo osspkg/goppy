@@ -3,16 +3,12 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package xdns
+package client
 
-import (
-	"github.com/miekg/dns"
-)
+type nilHandler struct{}
 
-type HandlerDNS interface {
-	Exchange(q []dns.Question) ([]dns.RR, error)
+func newNilHandler() HandlerUDP {
+	return &nilHandler{}
 }
 
-type ZoneResolver interface {
-	Resolve(name string) string
-}
+func (v *nilHandler) HandlerUDP(_ error, _ []byte) {}

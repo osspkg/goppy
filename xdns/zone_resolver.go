@@ -1,3 +1,8 @@
+/*
+ *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package xdns
 
 import (
@@ -28,7 +33,7 @@ func (v *ZoneResolve) Resolve(name string) string {
 	return v.dns[rnd.Intn(len(v.dns))]
 }
 
-func DefaultExchanger(dns ...string) Exchanger {
+func DefaultExchanger(dns ...string) HandlerDNS {
 	cli := NewClient(ClientOptionNetUDP())
 	cli.SetZoneResolver(NewSimpleZoneResolve())
 	return cli
