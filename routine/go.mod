@@ -10,5 +10,5 @@ replace (
 
 require (
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/iosync v0.1.2
+	go.osspkg.com/goppy/iosync v0.1.3
 )
