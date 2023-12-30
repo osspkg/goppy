@@ -50,7 +50,7 @@ require (
 	go.osspkg.com/goppy/tcp v0.0.0-00010101000000-000000000000
 	go.osspkg.com/goppy/udp v0.0.2
 	go.osspkg.com/goppy/unixsocket v0.1.0
-	go.osspkg.com/goppy/web v0.1.5
+	go.osspkg.com/goppy/web v0.1.6
 	go.osspkg.com/goppy/ws v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
 	go.osspkg.com/goppy/xdns v0.1.0
@@ -74,7 +74,7 @@ require (
 	go.osspkg.com/goppy/encryption v0.1.3 // indirect
 	go.osspkg.com/goppy/errors v0.1.0 // indirect
 	go.osspkg.com/goppy/iofile v0.1.3 // indirect
-	go.osspkg.com/goppy/ioutil v0.1.0 // indirect
+	go.osspkg.com/goppy/ioutil v0.1.1 // indirect
 	go.osspkg.com/goppy/orm v0.1.4 // indirect
 	go.osspkg.com/goppy/random v0.1.1 // indirect
 	go.osspkg.com/goppy/sqlcommon v0.1.4 // indirect
