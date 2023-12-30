@@ -17,12 +17,16 @@ import (
 
 func main() {
 	serv := server.New(xlog.Default(), ":11111")
-	serv.Handler(func(w server.Writer, addr net.Addr, b []byte) {
-		fmt.Println(addr.String(), ">  ", string(b))
-		w.WriteTo(b, addr) //nolint: errcheck
-	})
+	serv.HandleFunc(&Echo{})
 	fmt.Println(serv.Up(xc.New()))
 	syscall.OnStop(func() {
 		fmt.Println(serv.Down())
 	})
+}
+
+type Echo struct{}
+
+func (v *Echo) HandlerUDP(w server.Writer, addr net.Addr, b []byte) {
+	fmt.Println(addr.String(), ">  ", string(b))
+	w.WriteTo(b, addr) //nolint: errcheck
 }

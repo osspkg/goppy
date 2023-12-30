@@ -20,9 +20,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	cli.Handler(func(err error, b []byte) {
-		fmt.Println(err, ">", len(b), "...", string(b))
-	})
+	cli.HandleFunc(&Printer{})
 	routine.Interval(context.TODO(), time.Second, func(ctx context.Context) {
 		if _, err = cli.Write([]byte("123")); err != nil {
 			fmt.Println(err)
@@ -31,4 +29,10 @@ func main() {
 	syscall.OnStop(func() {
 		fmt.Println(cli.Close())
 	})
+}
+
+type Printer struct{}
+
+func (v *Printer) HandlerUDP(err error, b []byte) {
+	fmt.Println(err, ">", len(b), "...", string(b))
 }
