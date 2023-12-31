@@ -14,11 +14,11 @@ replace (
 
 require (
 	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/iosync v0.1.3
+	go.osspkg.com/goppy/iosync v0.1.4
 	go.osspkg.com/goppy/ioutil v0.1.1
 	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/xc v0.1.0
-	go.osspkg.com/goppy/xlog v0.1.5
+	go.osspkg.com/goppy/xlog v0.1.6
 )
 
 require (
