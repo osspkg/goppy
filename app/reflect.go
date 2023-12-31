@@ -12,9 +12,9 @@ import (
 
 var errType = reflect.TypeOf(new(error)).Elem()
 
-func getRefAddr(t reflect.Type) (string, bool) {
+func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
 	if len(t.PkgPath()) > 0 {
-		return t.PkgPath() + "." + t.Name(), true
+		return fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()), true
 	}
 	switch t.Kind() {
 	case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
@@ -22,17 +22,19 @@ func getRefAddr(t reflect.Type) (string, bool) {
 			return "error", false
 		}
 		if len(t.Elem().PkgPath()) > 0 {
-			return t.Elem().PkgPath() + "." + t.Elem().Name(), true
+			return fmt.Sprintf("%s.%s", t.Elem().PkgPath(), t.Elem().Name()), true
 		}
 	case reflect.Func:
-		// TODO: fix for anonymous function
-		// random.String(30) + "." + t.String(), true
-		return t.String(), true
+		if v == nil {
+			return t.String(), false
+		}
+		p := reflect.ValueOf(v).Pointer()
+		return fmt.Sprintf("0x%x.%s", p, t.String()), true
 	}
 	return t.String(), false
 }
 
-func typingRefPtr(vv []interface{}, call func(interface{}) error) ([]interface{}, error) {
+func typingReflectPtr(vv []interface{}, call func(interface{}) error) ([]interface{}, error) {
 	result := make([]interface{}, 0, len(vv))
 	for _, v := range vv {
 		ref := reflect.TypeOf(v)

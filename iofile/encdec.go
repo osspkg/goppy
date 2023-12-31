@@ -9,9 +9,9 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
-	"sync"
 
 	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/goppy/iosync"
 	"gopkg.in/yaml.v3"
 )
 
@@ -29,14 +29,14 @@ var (
 type codec struct {
 	enc map[string]func(v interface{}) ([]byte, error)
 	dec map[string]func([]byte, interface{}) error
-	mux sync.RWMutex
+	mux iosync.Lock
 }
 
 func newCodec() *codec {
 	return &codec{
 		enc: make(map[string]func(v interface{}) ([]byte, error), 10),
 		dec: make(map[string]func([]byte, interface{}) error, 10),
-		mux: sync.RWMutex{},
+		mux: iosync.NewLock(),
 	}
 }
 
@@ -45,25 +45,25 @@ func AddFileCodec(ext string, enc func(v interface{}) ([]byte, error), dec func(
 }
 
 func (v *codec) Add(ext string, enc func(v interface{}) ([]byte, error), dec func([]byte, interface{}) error) *codec {
-	v.mux.Lock()
-	defer v.mux.Unlock()
-	v.enc[ext] = enc
-	v.dec[ext] = dec
+	v.mux.Lock(func() {
+		v.enc[ext] = enc
+		v.dec[ext] = dec
+	})
 	return v
 }
 
-func (v *codec) GetEnc(ext string) (func(v interface{}) ([]byte, error), bool) {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-	fn, ok := v.enc[ext]
-	return fn, ok
+func (v *codec) GetEnc(ext string) (fn func(v interface{}) ([]byte, error), ok bool) {
+	v.mux.RLock(func() {
+		fn, ok = v.enc[ext]
+	})
+	return
 }
 
-func (v *codec) GetDec(ext string) (func([]byte, interface{}) error, bool) {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-	fn, ok := v.dec[ext]
-	return fn, ok
+func (v *codec) GetDec(ext string) (fn func([]byte, interface{}) error, ok bool) {
+	v.mux.RLock(func() {
+		fn, ok = v.dec[ext]
+	})
+	return
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

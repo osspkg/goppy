@@ -32,8 +32,8 @@ github.com/oschwald/maxminddb-golang v1.11.0/go.mod h1:YmVI+H0zh3ySFR3w+oz8PCfgl
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/rogpeppe/go-internal v1.11.0 h1:cWPaGQEPrBb5/AsnsZesgZZ9yb1OQ+GOISoDNXVBh4M=
 github.com/stretchr/testify v1.8.4 h1:CcVxjf3Q8PM0mHUKJCdn+eZZtm5yQwehR5yeSVQQcUk=
-go.osspkg.com/algorithms v1.3.0 h1:rrKO440aNTofYJwGnOVsW00w0VRtZtu+BQrgXMXw7j4=
-go.osspkg.com/algorithms v1.3.0/go.mod h1:J2SXxHdqBK9ALGYJomA9XGvTOhIwMK0fvVw+KusYyoo=
+go.osspkg.com/algorithms v1.3.1 h1:Weh0Z4dMzHFRJTfMva/mU6Uk95wSRGwt1Saj2sfz3Wc=
+go.osspkg.com/algorithms v1.3.1/go.mod h1:kj+oVK7UDQlXMKleMTYzbEEpUAXC2tzRBtki7F5EbXc=
 go.osspkg.com/static v1.4.0 h1:2uy4/11c0QP+QLMucKQZbAU+e6lhVHKw5dWJPTk/DBg=
 go.osspkg.com/static v1.4.0/go.mod h1:94YydVU3qUtb1J534486lpm+qg6CviQjqtxKlkpSppM=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=

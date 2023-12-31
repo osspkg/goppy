@@ -8,409 +8,271 @@ package app
 import (
 	"fmt"
 	"reflect"
-	"sync"
 
 	"go.osspkg.com/algorithms/graph/kahn"
 	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/goppy/iosync"
 	"go.osspkg.com/goppy/xc"
 )
 
-type _dic struct {
-	kahn *kahn.Graph
-	srv  *_serv
-	list *dicMap
-}
+type (
+	container struct {
+		kahn   *kahn.Graph
+		srv    *serviceTree
+		store  *objectStorage
+		status iosync.Switch
+	}
 
-func newDic(ctx xc.Context) *_dic {
-	return &_dic{
-		kahn: kahn.New(),
-		srv:  newService(ctx),
-		list: newDicMap(),
+	Container interface {
+		Start() error
+		Register(items ...interface{}) error
+		Invoke(item interface{}) error
+		Stop() error
+	}
+)
+
+func NewContainer(ctx xc.Context) Container {
+	return &container{
+		kahn:   kahn.New(),
+		srv:    newServiceTree(ctx),
+		store:  newObjectStorage(),
+		status: iosync.NewSwitch(),
 	}
 }
 
-// Down - stop all services in dependencies
-func (v *_dic) Down() error {
+// Stop - stop all services in dependencies
+func (v *container) Stop() error {
+	if !v.status.Off() {
+		return nil
+	}
 	return v.srv.Down()
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Start - initialize dependencies and start
+func (v *container) Start() error {
+	if !v.status.On() {
+		return errDepAlreadyRunned
+	}
+	if err := v.srv.MakeAsUp(); err != nil {
+		return err
+	}
+	if err := v.prepare(); err != nil {
+		return err
+	}
+	if err := v.kahn.Build(); err != nil {
+		return errors.Wrapf(err, "dependency graph calculation")
+	}
+	return v.run()
+}
 
-// Register - register a new dependency
-func (v *_dic) Register(items ...interface{}) error {
-	if v.srv.IsUp() {
-		return errDepBuilderNotRunning
+func (v *container) Register(items ...interface{}) error {
+	if v.srv.IsOn() {
+		return errDepAlreadyRunned
 	}
 
 	for _, item := range items {
 		ref := reflect.TypeOf(item)
+		rt := asTypeExist
 		switch ref.Kind() {
+		case reflect.Func, reflect.Struct:
+			rt = asTypeNew
+		default:
+		}
+		if err := v.store.Add(ref, item, rt); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
-		case reflect.Struct:
-			if err := v.list.Add(item, item, typeExist); err != nil {
-				return err
-			}
+var root = "ROOT"
+
+func (v *container) prepare() error {
+	return v.store.Each(func(item *objectStorageItem) error {
+
+		switch item.Kind {
 
 		case reflect.Func:
-			for i := 0; i < ref.NumIn(); i++ {
-				in := ref.In(i)
-				if in.Kind() == reflect.Struct {
-					if err := v.list.Add(in, reflect.New(in).Elem().Interface(), typeNewIfNotExist); err != nil {
-						return err
-					}
-				}
+			if item.ReflectType.NumIn() == 0 {
+				v.kahn.Add(root, item.Address)
+				break
+			}
+			for i := 0; i < item.ReflectType.NumIn(); i++ {
+				inRefType := item.ReflectType.In(i)
+				inAddress, _ := getReflectAddress(inRefType, nil)
+				v.kahn.Add(inAddress, item.Address)
+			}
 
+		case reflect.Struct:
+			if item.ReflectType.NumField() == 0 {
+				v.kahn.Add(root, item.Address)
+				break
 			}
-			if ref.NumOut() == 0 {
-				if err := v.list.Add(ref, item, typeNew); err != nil {
-					return err
-				}
-				continue
-			}
-			for i := 0; i < ref.NumOut(); i++ {
-				if err := v.list.Add(ref.Out(i), item, typeNew); err != nil {
-					return err
-				}
+			for i := 0; i < item.ReflectType.NumField(); i++ {
+				inRefType := item.ReflectType.Field(i).Type
+				inAddress, _ := getReflectAddress(inRefType, nil)
+				v.kahn.Add(inAddress, item.Address)
 			}
 
 		default:
-			if err := v.list.Add(item, item, typeExist); err != nil {
-				return err
+			v.kahn.Add(root, item.Address)
+		}
+
+		return nil
+	})
+}
+
+func (v *container) Invoke(obj interface{}) error {
+	if v.srv.IsOff() {
+		return errDepNotRunning
+	}
+	item, err := v.toStoreItem(obj)
+	if err != nil {
+		return err
+	}
+	_, err = v.callArgs(item)
+	if err != nil {
+		return err
+	}
+	if item.Service == itDownService {
+		if err = v.srv.AddAndUp(item.Value); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v *container) toStoreItem(obj interface{}) (*objectStorageItem, error) {
+	item, ok := obj.(*objectStorageItem)
+	if ok {
+		return item, nil
+	}
+	ref := reflect.TypeOf(obj)
+	address, ok := getReflectAddress(ref, obj)
+	if !ok {
+		return nil, fmt.Errorf("dependency [%s] is not supported", address)
+	}
+	serviceStatus := itNotService
+	if isService(obj) {
+		serviceStatus = itDownService
+	}
+	item = &objectStorageItem{
+		Address:      address,
+		RelationType: 0,
+		ReflectType:  ref,
+		Kind:         ref.Kind(),
+		Value:        obj,
+		Service:      serviceStatus,
+	}
+	return item, nil
+}
+
+func (v *container) callArgs(obj interface{}) ([]reflect.Value, error) {
+	item, err := v.toStoreItem(obj)
+	if err != nil {
+		return nil, err
+	}
+
+	switch item.Kind {
+
+	case reflect.Func:
+		args := make([]reflect.Value, 0, item.ReflectType.NumIn())
+		for i := 0; i < item.ReflectType.NumIn(); i++ {
+			inRefType := item.ReflectType.In(i)
+			inAddress, ok := getReflectAddress(inRefType, item.Value)
+			if !ok {
+				return nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
+			}
+			dep, err := v.store.Get(inAddress)
+			if err != nil {
+				return nil, err
+			}
+			args = append(args, reflect.ValueOf(dep.Value))
+		}
+		args = reflect.ValueOf(item.Value).Call(args)
+		for _, arg := range args {
+			if err, ok := arg.Interface().(error); ok && err != nil {
+				return nil, err
 			}
 		}
-	}
+		return args, nil
 
-	return nil
-}
-
-// Build - initialize dependencies
-func (v *_dic) Build() error {
-	if err := v.srv.MakeAsUp(); err != nil {
-		return err
-	}
-
-	err := v.list.foreach(v.calcFunc, v.calcStruct, v.calcOther)
-	if err != nil {
-		return errors.Wrapf(err, "building dependency graph")
-	}
-
-	if err = v.kahn.Build(); err != nil {
-		return errors.Wrapf(err, "dependency graph calculation")
-	}
-
-	return v.exec()
-}
-
-// Inject - obtained dependence
-func (v *_dic) Inject(item interface{}) error {
-	_, err := v.callArgs(item)
-	return err
-}
-
-// Invoke - obtained dependence
-func (v *_dic) Invoke(item interface{}) error {
-	ref := reflect.TypeOf(item)
-	addr, ok := getRefAddr(ref)
-	if !ok {
-		return fmt.Errorf("resolve invoke reference")
-	}
-
-	if err := v.Register(item); err != nil {
-		return err
-	}
-
-	if err := v.srv.MakeAsUp(); err != nil {
-		return err
-	}
-
-	err := v.list.foreach(v.calcFunc, v.calcStruct, v.calcOther)
-	if err != nil {
-		return errors.Wrapf(err, "building dependency graph")
-	}
-
-	v.kahn.BreakPoint(addr)
-
-	if err = v.kahn.Build(); err != nil {
-		return errors.Wrapf(err, "dependency graph calculation")
-	}
-
-	return v.exec()
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-var empty = "EMPTY"
-
-func (v *_dic) calcFunc(outAddr string, outRef reflect.Type) error {
-	if outRef.NumIn() == 0 {
-		if err := v.kahn.Add(empty, outAddr); err != nil {
-			return errors.Wrapf(err, "cant add [->%s] to graph", outAddr)
-		}
-	}
-
-	for i := 0; i < outRef.NumIn(); i++ {
-		inRef := outRef.In(i)
-		inAddr, _ := getRefAddr(inRef)
-
-		//TODO: need?
-		//if _, err := v.list.Get(inAddr); err != nil {
-		//	return errors.Wrapf(err, "cant add [%s->%s] to graph", inAddr, outAddr)
-		//}
-		if err := v.kahn.Add(inAddr, outAddr); err != nil {
-			return errors.Wrapf(err, "cant add [%s->%s] to graph", inAddr, outAddr)
-		}
-	}
-
-	return nil
-}
-
-func (v *_dic) calcStruct(outAddr string, outRef reflect.Type) error {
-	if outRef.NumField() == 0 {
-		if err := v.kahn.Add(empty, outAddr); err != nil {
-			return errors.Wrapf(err, "cant add [->%s] to graph", outAddr)
-		}
-		return nil
-	}
-	for i := 0; i < outRef.NumField(); i++ {
-		inRef := outRef.Field(i).Type
-		inAddr, _ := getRefAddr(inRef)
-
-		//TODO: need?
-		//if _, err := v.list.Get(inAddr); err != nil {
-		//	return errors.Wrapf(err, "cant add [%s->%s] to graph", inAddr, outAddr)
-		//}
-		if err := v.kahn.Add(inAddr, outAddr); err != nil {
-			return errors.Wrapf(err, "cant add [%s->%s] to graph", inAddr, outAddr)
-		}
-	}
-	return nil
-}
-
-func (v *_dic) calcOther(_ string, _ reflect.Type) error {
-	return nil
-}
-
-func (v *_dic) callFunc(item interface{}) ([]reflect.Value, error) {
-	ref := reflect.TypeOf(item)
-	args := make([]reflect.Value, 0, ref.NumIn())
-
-	for i := 0; i < ref.NumIn(); i++ {
-		inRef := ref.In(i)
-		inAddr, _ := getRefAddr(inRef)
-		vv, err := v.list.Get(inAddr)
-		if err != nil {
-			return nil, err
-		}
-		args = append(args, reflect.ValueOf(vv))
-	}
-
-	args = reflect.ValueOf(item).Call(args)
-	for _, arg := range args {
-		if err, ok := arg.Interface().(error); ok && err != nil {
-			return nil, err
-		}
-	}
-
-	return args, nil
-}
-
-func (v *_dic) callStruct(item interface{}) ([]reflect.Value, error) {
-	ref := reflect.TypeOf(item)
-	value := reflect.New(ref)
-	args := make([]reflect.Value, 0, ref.NumField())
-
-	for i := 0; i < ref.NumField(); i++ {
-		inRef := ref.Field(i)
-		inAddr, _ := getRefAddr(inRef.Type)
-		vv, err := v.list.Get(inAddr)
-		if err != nil {
-			return nil, err
-		}
-		value.Elem().FieldByName(inRef.Name).Set(reflect.ValueOf(vv))
-	}
-
-	return append(args, value.Elem()), nil
-}
-
-func (v *_dic) callArgs(item interface{}) ([]reflect.Value, error) {
-	ref := reflect.TypeOf(item)
-
-	switch ref.Kind() {
-	case reflect.Func:
-		return v.callFunc(item)
 	case reflect.Struct:
-		return v.callStruct(item)
+		value := reflect.New(item.ReflectType)
+		args := make([]reflect.Value, 0, 1)
+		for i := 0; i < item.ReflectType.NumField(); i++ {
+			inRefType := item.ReflectType.Field(i)
+			inAddress, ok := getReflectAddress(inRefType.Type, nil)
+			if !ok {
+				return nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
+			}
+			dep, err := v.store.Get(inAddress)
+			if err != nil {
+				return nil, err
+			}
+			value.Elem().FieldByName(inRefType.Name).Set(reflect.ValueOf(dep.Value))
+		}
+		return append(args, value.Elem()), nil
+
 	default:
-		return []reflect.Value{reflect.ValueOf(item)}, nil
 	}
+
+	return []reflect.Value{reflect.ValueOf(item.Value)}, nil
 }
 
-func (v *_dic) exec() error {
+// nolint: gocyclo
+func (v *container) run() error {
 	names := make(map[string]struct{})
 	for _, name := range v.kahn.Result() {
-		if name == empty {
+		if name == root {
 			continue
 		}
 		names[name] = struct{}{}
 	}
 
 	for _, name := range v.kahn.Result() {
-		if _, ok := names[name]; !ok {
+		if name == root {
 			continue
 		}
-		if v.list.HasType(name, typeExist) {
-			continue
-		}
-
-		item, err := v.list.Get(name)
+		item, err := v.store.Get(name)
 		if err != nil {
 			return err
 		}
-
+		if item.RelationType == asTypeExist {
+			if item.Service == itDownService {
+				if err = v.srv.AddAndUp(item.Value); err != nil {
+					return errors.Wrapf(err, "service initialization error [%s]", item.Address)
+				}
+				item.Service = itUpedService
+			}
+			delete(names, name)
+			continue
+		}
 		args, err := v.callArgs(item)
 		if err != nil {
 			return errors.Wrapf(err, "initialize error [%s]", name)
 		}
-
 		for _, arg := range args {
-			addr, _ := getRefAddr(arg.Type())
-			if vv, ok := asService(arg); ok {
-				if err = v.srv.AddAndRun(vv); err != nil {
-					return errors.Wrapf(err, "service initialization error [%s]", addr)
+			address, ok := getReflectAddress(arg.Type(), arg.Interface())
+			if !ok {
+				if address == "error" {
+					continue
+				}
+				return fmt.Errorf("dependency [%s] is not supported form [%s]", address, item.Address)
+			}
+			if isService(arg.Interface()) {
+				if err = v.srv.AddAndUp(arg.Interface()); err != nil {
+					return errors.Wrapf(err, "service initialization error [%s]", address)
 				}
 			}
-			if vv, ok := asServiceContext(arg); ok {
-				if err = v.srv.AddAndRun(vv); err != nil {
-					return errors.Wrapf(err, "service initialization error [%s]", addr)
-				}
-			}
-			delete(names, addr)
-			if arg.Type().String() == "error" {
-				continue
-			}
-			if err = v.list.Add(arg.Type(), arg.Interface(), typeExist); err != nil {
-				return errors.Wrapf(err, "initialize error [%s]", addr)
+			delete(names, address)
+			if err = v.store.Add(arg.Type(), arg.Interface(), asTypeExist); err != nil {
+				return errors.Wrapf(err, "initialize error [%s]", address)
 			}
 		}
 		delete(names, name)
 	}
 
 	v.srv.IterateOver()
-
-	return nil
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-const (
-	typeNew int = iota
-	typeNewIfNotExist
-	typeExist
-)
-
-type (
-	dicMapItem struct {
-		Value interface{}
-		Type  int
-	}
-	dicMap struct {
-		data map[string]*dicMapItem
-		mux  sync.RWMutex
-	}
-)
-
-func newDicMap() *dicMap {
-	return &dicMap{
-		data: make(map[string]*dicMapItem),
-	}
-}
-
-func (v *dicMap) Add(place, value interface{}, t int) error {
-	v.mux.Lock()
-	defer v.mux.Unlock()
-
-	ref, ok := place.(reflect.Type)
-	if !ok {
-		ref = reflect.TypeOf(place)
-	}
-
-	addr, ok := getRefAddr(ref)
-	if !ok {
-		if addr != "error" {
-			return fmt.Errorf("dependency [%s] is not supported", addr)
-		}
-		//return nil
-	}
-
-	if vv, ok := v.data[addr]; ok {
-		if t == typeNewIfNotExist {
-			return nil
-		}
-		if vv.Type == typeExist {
-			return fmt.Errorf("dependency [%s] already initiated", addr)
-		}
-	}
-	v.data[addr] = &dicMapItem{
-		Value: value,
-		Type:  t,
-	}
-
-	return nil
-}
-
-func (v *dicMap) Get(addr string) (interface{}, error) {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-
-	if vv, ok := v.data[addr]; ok {
-		return vv.Value, nil
-	}
-	return nil, fmt.Errorf("dependency [%s] not initiated", addr)
-}
-
-func (v *dicMap) HasType(addr string, t int) bool {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-
-	if vv, ok := v.data[addr]; ok {
-		return vv.Type == t
-	}
-	return false
-}
-
-func (v *dicMap) Step(addr string) (int, error) {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-
-	if vv, ok := v.data[addr]; ok {
-		return vv.Type, nil
-	}
-	return 0, fmt.Errorf("dependency [%s] not initiated", addr)
-}
-
-func (v *dicMap) foreach(kFunc, kStruct, kOther func(addr string, ref reflect.Type) error) error {
-	v.mux.RLock()
-	defer v.mux.RUnlock()
-
-	for addr, item := range v.data {
-		if item.Type == typeExist {
-			continue
-		}
-
-		ref := reflect.TypeOf(item.Value)
-		var err error
-		switch ref.Kind() {
-		case reflect.Func:
-			err = kFunc(addr, ref)
-		case reflect.Struct:
-			err = kStruct(addr, ref)
-		default:
-			err = kOther(addr, ref)
-		}
-
-		if err != nil {
-			return err
-		}
-	}
 	return nil
 }

@@ -6,44 +6,27 @@
 package app
 
 import (
-	"reflect"
-	"sync/atomic"
+	"context"
 
 	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/goppy/iosync"
 	"go.osspkg.com/goppy/xc"
 )
 
 type (
-	// ServiceInterface interface for services
 	ServiceInterface interface {
 		Up() error
 		Down() error
 	}
-	//ServiceContextInterface interface for services with context
-	ServiceContextInterface interface {
+	ServiceXContextInterface interface {
 		Up(ctx xc.Context) error
 		Down() error
 	}
-)
-
-var (
-	srvType    = reflect.TypeOf(new(ServiceInterface)).Elem()
-	srvTypeCtx = reflect.TypeOf(new(ServiceContextInterface)).Elem()
-)
-
-func asService(v reflect.Value) (ServiceInterface, bool) {
-	if v.Type().AssignableTo(srvType) {
-		return v.Interface().(ServiceInterface), true
+	ServiceContextInterface interface {
+		Up(ctx context.Context) error
+		Down() error
 	}
-	return nil, false
-}
-
-func asServiceContext(v reflect.Value) (ServiceContextInterface, bool) {
-	if v.Type().AssignableTo(srvTypeCtx) {
-		return v.Interface().(ServiceContextInterface), true
-	}
-	return nil, false
-}
+)
 
 func isService(v interface{}) bool {
 	if _, ok := v.(ServiceInterface); ok {
@@ -52,46 +35,96 @@ func isService(v interface{}) bool {
 	if _, ok := v.(ServiceContextInterface); ok {
 		return true
 	}
+	if _, ok := v.(ServiceXContextInterface); ok {
+		return true
+	}
 	return false
+}
+
+func serviceCallUp(v interface{}, c xc.Context) error {
+	if vv, ok := v.(ServiceContextInterface); ok {
+		return vv.Up(c.Context())
+	}
+	if vv, ok := v.(ServiceXContextInterface); ok {
+		return vv.Up(c)
+	}
+	if vv, ok := v.(ServiceInterface); ok {
+		return vv.Up()
+	}
+	return errors.Wrapf(errServiceUnknown, "service [%T]", v)
+}
+
+func serviceCallDown(v interface{}) error {
+	if vv, ok := v.(ServiceContextInterface); ok {
+		return vv.Down()
+	}
+	if vv, ok := v.(ServiceXContextInterface); ok {
+		return vv.Down()
+	}
+	if vv, ok := v.(ServiceInterface); ok {
+		return vv.Down()
+	}
+	return errors.Wrapf(errServiceUnknown, "service [%T]", v)
 }
 
 /**********************************************************************************************************************/
 
-const (
-	statusUp   uint32 = 1
-	statusDown uint32 = 0
-)
-
 type (
-	_serv struct {
-		tree   *treeItem
-		status uint32
-		ctx    xc.Context
-	}
 	treeItem struct {
 		Previous *treeItem
 		Current  interface{}
 		Next     *treeItem
 	}
+	serviceTree struct {
+		tree   *treeItem
+		status iosync.Switch
+		ctx    xc.Context
+	}
 )
 
-func newService(ctx xc.Context) *_serv {
-	return &_serv{
+func newServiceTree(ctx xc.Context) *serviceTree {
+	return &serviceTree{
 		tree:   nil,
-		status: statusDown,
 		ctx:    ctx,
+		status: iosync.NewSwitch(),
 	}
 }
 
-// IsUp - mark that all services have started
-func (s *_serv) IsUp() bool {
-	return atomic.LoadUint32(&s.status) == statusUp
+func (s *serviceTree) IsOn() bool {
+	return s.status.IsOn()
 }
 
-// AddAndRun - add new service by interface
-func (s *_serv) AddAndRun(v interface{}) error {
-	if !s.IsUp() {
-		return errDepBuilderNotRunning
+func (s *serviceTree) IsOff() bool {
+	return s.status.IsOff()
+}
+
+func (s *serviceTree) MakeAsUp() error {
+	if !s.status.On() {
+		return errDepAlreadyRunned
+	}
+	return nil
+}
+
+func (s *serviceTree) IterateOver() {
+	if s.tree == nil {
+		return
+	}
+	for s.tree.Previous != nil {
+		s.tree = s.tree.Previous
+	}
+	for {
+		if s.tree.Next == nil {
+			break
+		}
+		s.tree = s.tree.Next
+	}
+	return
+}
+
+// AddAndUp - add new service and call up
+func (s *serviceTree) AddAndUp(v interface{}) error {
+	if s.IsOff() {
+		return errDepNotRunning
 	}
 
 	if !isService(v) {
@@ -114,67 +147,23 @@ func (s *_serv) AddAndRun(v interface{}) error {
 		s.tree = n
 	}
 
-	if vv, ok := v.(ServiceContextInterface); ok {
-		if err := vv.Up(s.ctx); err != nil {
-			return err
-		}
-	}
-	if vv, ok := v.(ServiceInterface); ok {
-		if err := vv.Up(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (s *_serv) MakeAsUp() error {
-	if !atomic.CompareAndSwapUint32(&s.status, statusDown, statusUp) {
-		return errDepBuilderNotRunning
-	}
-	return nil
-}
-
-func (s *_serv) IterateOver() {
-	if s.tree == nil {
-		return
-	}
-	for s.tree.Previous != nil {
-		s.tree = s.tree.Previous
-	}
-	for {
-		if s.tree.Next == nil {
-			break
-		}
-		s.tree = s.tree.Next
-	}
-	return
+	return serviceCallUp(v, s.ctx)
 }
 
 // Down - stop all services
-func (s *_serv) Down() error {
+func (s *serviceTree) Down() error {
 	var err0 error
-	if !atomic.CompareAndSwapUint32(&s.status, statusUp, statusDown) {
+	if !s.status.Off() {
 		return errDepNotRunning
 	}
 	if s.tree == nil {
 		return nil
 	}
 	for {
-		if vv, ok := s.tree.Current.(ServiceContextInterface); ok {
-			if err := vv.Down(); err != nil {
-				err0 = errors.Wrap(err0,
-					errors.Wrapf(err, "down [%T] service error", s.tree.Current),
-				)
-			}
-		} else if vv, ok := s.tree.Current.(ServiceInterface); ok {
-			if err := vv.Down(); err != nil {
-				err0 = errors.Wrap(err0,
-					errors.Wrapf(err, "down [%T] service error", s.tree.Current),
-				)
-			}
-		} else {
-			return errors.Wrapf(errServiceUnknown, "service [%T]", s.tree.Current)
+		if err := serviceCallDown(s.tree.Current); err != nil {
+			err0 = errors.Wrap(err0,
+				errors.Wrapf(err, "down [%T] service error", s.tree.Current),
+			)
 		}
 		if s.tree.Previous == nil {
 			break

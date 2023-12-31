@@ -7,6 +7,7 @@ package app
 
 import (
 	"go.osspkg.com/goppy/console"
+	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/syscall"
 	"go.osspkg.com/goppy/xc"
 	"go.osspkg.com/goppy/xlog"
@@ -31,8 +32,8 @@ type (
 		pidfile  string
 		configs  Modules
 		modules  Modules
-		sources  Sources
-		packages *_dic
+		sources  iofile.FileCodec
+		packages Container
 		logout   *_log
 		log      xlog.Logger
 		ctx      xc.Context
@@ -46,7 +47,7 @@ func New() App {
 	return &_app{
 		modules:  Modules{},
 		configs:  Modules{},
-		packages: newDic(ctx),
+		packages: NewContainer(ctx),
 		ctx:      ctx,
 		exitFunc: func(_ int) {},
 	}
@@ -104,7 +105,7 @@ func (a *_app) Run() {
 			},
 			{
 				Message: "Running dependencies",
-				Call:    func() error { return a.packages.Build() },
+				Call:    func() error { return a.packages.Start() },
 			},
 		},
 		func(er bool) {
@@ -118,7 +119,7 @@ func (a *_app) Run() {
 		[]step{
 			{
 				Message: "Stop dependencies",
-				Call:    func() error { return a.packages.Down() },
+				Call:    func() error { return a.packages.Stop() },
 			},
 		},
 	)
@@ -139,13 +140,16 @@ func (a *_app) Invoke(call interface{}) {
 				Call: func() error { return a.packages.Register(a.modules...) },
 			},
 			{
+				Call: func() error { return a.packages.Start() },
+			},
+			{
 				Call: func() error { return a.packages.Invoke(call) },
 			},
 		},
 		func(_ bool) {},
 		[]step{
 			{
-				Call: func() error { return a.packages.Down() },
+				Call: func() error { return a.packages.Stop() },
 			},
 		},
 	)
@@ -170,7 +174,7 @@ func (a *_app) prepareConfig(interactive bool) {
 	}
 	if len(a.cfile) > 0 {
 		// read config file
-		a.sources = Sources(a.cfile)
+		a.sources = iofile.FileCodec(a.cfile)
 
 		// init logger
 		config := &Config{}
@@ -191,7 +195,7 @@ func (a *_app) prepareConfig(interactive bool) {
 		)
 		// decode all configs
 		var configs []interface{}
-		configs, err = typingRefPtr(a.configs, func(i interface{}) error {
+		configs, err = typingReflectPtr(a.configs, func(i interface{}) error {
 			return a.sources.Decode(i)
 		})
 		if err != nil {

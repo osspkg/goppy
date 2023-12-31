@@ -3,210 +3,344 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package app
+package app_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
+	"go.osspkg.com/goppy/app"
+	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/xc"
 	"go.osspkg.com/goppy/xtest"
 )
 
+func TestUnit_EmptyDI(t *testing.T) {
+	c := app.NewContainer(xc.New())
+	xtest.NoError(t, c.Start())
+	xtest.NoError(t, c.Stop())
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-type t0 struct{}
-
-func newT0() *t0           { return &t0{} }
-func (t0 *t0) Up() error   { return nil }
-func (t0 *t0) Down() error { return nil }
-func (t0 *t0) V() string   { return "t0V" }
-
-type t1 struct {
-	t0 *t0
+type SimpleDI1_A struct {
+	A string
 }
 
-func newT1(t0 *t0) *t1     { return &t1{t0: t0} }
-func (t1 *t1) Up() error   { return nil }
-func (t1 *t1) Down() error { return nil }
-func (t1 *t1) V() string   { return "t1V" }
-
-type t2 struct {
-	t0 *t0
-	t1 *t1
+func SimpleDI1_func1(a *SimpleDI1_A) {
+	fmt.Println("[func]", a.A)
 }
 
-func newT2(t1 *t1, t0 *t0) *t2             { return &t2{t0: t0, t1: t1} }
-func (t2 *t2) Up() error                   { return nil }
-func (t2 *t2) Down() error                 { return nil }
-func (t2 *t2) V() (string, string, string) { return "t2V", t2.t1.V(), t2.t0.V() }
-
-type t4 struct {
-	T0  *t0
-	T1  *t1
-	T2  *t2
-	T7  *t7
-	T44 t44
+func SimpleDI1_func2(a, b *SimpleDI1_A) {
+	fmt.Println("[func]", a.A, b.A)
 }
 
-type t44 struct {
-	Env string
+type SimpleDI1_Err struct {
+	ER string
 }
 
-type t5 struct{}
-
-func newT5() *t5         { return &t5{} }
-func (t5 *t5) V() string { return "t5V" }
-
-type t6 struct{ T4 t4 }
-
-func newT6(t4 t4) *t6    { return &t6{T4: t4} }
-func (t6 *t6) V() string { return "t6V" }
-
-type t7 struct{}
-
-func newT7() *t7         { return &t7{} }
-func (t7 *t7) V() string { return "t7V" }
-
-type t8 struct{}
-
-func newT8() (*t8, error) { return &t8{}, nil }
-func (t8 *t8) V() string  { return "t8V" }
-
-type hello string
-
-var AA = hello("hhhh")
-
-type ii interface {
-	V() string
+func (v *SimpleDI1_Err) Error() string {
+	return v.ER
 }
 
-func newT7i(_ hello) ii {
-	return &t7{}
+type SimpleDI1_StructEmpty struct {
 }
 
-func TestUnit_Dependencies(t *testing.T) {
-	dep := newDic(xc.New())
+type SimpleDI1_StructUnsupported struct {
+	A float32
+}
 
-	xtest.NoError(t, dep.Register([]interface{}{
-		newT1, newT2, newT5, newT6, newT7(), newT8,
-		AA, newT7i, newT0, t44{Env: "aaa"},
-		func(b *t6) {
-			t.Log("anonymous function")
+type SimpleDI1_Struct struct {
+	AA *SimpleDI1_A
+}
+
+type SimpleDI1_ServiceEmpty struct{}
+
+func (v *SimpleDI1_ServiceEmpty) Up() error   { return nil }
+func (v *SimpleDI1_ServiceEmpty) Down() error { return nil }
+
+type SimpleDI1_ServiceEmptyXC struct{}
+
+func (v *SimpleDI1_ServiceEmptyXC) Up(_ xc.Context) error { return nil }
+func (v *SimpleDI1_ServiceEmptyXC) Down() error           { return nil }
+
+type SimpleDI1_ServiceEmptyCtx struct{}
+
+func (v *SimpleDI1_ServiceEmptyCtx) Up(_ context.Context) error { return nil }
+func (v *SimpleDI1_ServiceEmptyCtx) Down() error                { return nil }
+
+type SimpleDI1_Service struct {
+	ErrUp   string
+	ErrDown string
+}
+
+func (v *SimpleDI1_Service) Up() error {
+	if len(v.ErrUp) > 0 {
+		return fmt.Errorf(v.ErrUp)
+	}
+	return nil
+}
+
+func (v *SimpleDI1_Service) Down() error {
+	if len(v.ErrDown) > 0 {
+		return fmt.Errorf(v.ErrDown)
+	}
+	return nil
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+func TestUnit_SimpleDI1(t *testing.T) {
+	c := app.NewContainer(xc.New())
+	xtest.NoError(t, c.Register(
+		&SimpleDI1_A{A: "field A of struct"},
+		func(a *SimpleDI1_A) { fmt.Println(1, a.A) },
+		func(a *SimpleDI1_A) { fmt.Println(2, a.A) },
+		func() { fmt.Println("empty 1") },
+		func() { fmt.Println("empty 2") },
+		SimpleDI1_func1,
+	))
+	xtest.NoError(t, c.Start())
+	xtest.Error(t, c.Start())
+	xtest.NoError(t, c.Stop())
+	xtest.NoError(t, c.Stop())
+}
+
+func TestUnit_SimpleDI2(t *testing.T) {
+	c := app.NewContainer(xc.New())
+	xtest.NoError(t, c.Register(&SimpleDI1_A{A: "field A of struct"}))
+	xtest.ErrorContains(t, c.Invoke(func(a *SimpleDI1_A) {
+		fmt.Println("Invoke", a.A)
+	}), "dependencies are not running yet")
+	xtest.NoError(t, c.Start())
+	xtest.NoError(t, c.Stop())
+}
+
+func TestUnit_SimpleDI3(t *testing.T) {
+	c := app.NewContainer(xc.New())
+	xtest.NoError(t, c.Start())
+	xtest.ErrorContains(t, c.Invoke(func(a *SimpleDI1_A) {
+		fmt.Println("Invoke", a.A)
+	}), "_test.SimpleDI1_A] not initiated")
+	xtest.NoError(t, c.Stop())
+}
+
+func TestUnit_DI_Default(t *testing.T) {
+	tests := []struct {
+		name          string
+		register      []interface{}
+		invoke        interface{}
+		wantErr       bool
+		wantErrString string
+	}{
+		{
+			name: "Case1",
+			register: []interface{}{
+				&SimpleDI1_A{A: "field A of struct"},
+				&SimpleDI1_A{A: "field A of struct"},
+			},
+			wantErr:       true,
+			wantErrString: "_test.SimpleDI1_A] already initiated",
 		},
-	}...))
-
-	xtest.NoError(t, dep.Build())
-	xtest.Error(t, dep.Build())
-
-	xtest.NoError(t, dep.Inject(func(
-		v1 *t1, v2 *t2, v3 *t5, v4 *t6, v5 *t6,
-		v6 *t7, v7 *t8, v8 hello,
-		v9 ii, v10 *t0, v11 t44,
-	) {
-		xtest.Equal(t, "t1V", v1.V())
-		vv2, _, _ := v2.V()
-		xtest.Equal(t, "t2V", vv2)
-		xtest.Equal(t, "t5V", v3.V())
-		xtest.Equal(t, "t6V", v4.V())
-		xtest.Equal(t, "t6V", v5.V())
-		xtest.Equal(t, "t7V", v6.V())
-		xtest.Equal(t, hello("hhhh"), v8)
-		xtest.Equal(t, "t7V", v9.V())
-		xtest.Equal(t, "t0V", v10.V())
-		xtest.Equal(t, "aaa", v11.Env)
-	}))
-
-	xtest.Error(t, dep.Inject(func(a string, b int, c bool) {
-
-	}))
-
-	xtest.NoError(t, dep.Down())
-	xtest.Error(t, dep.Down())
-}
-
-type demo1 struct{}
-type demo2 struct{}
-type demo3 struct{}
-
-func newDemo() (*demo1, *demo2, *demo3) { return &demo1{}, &demo2{}, &demo3{} }
-func (d *demo1) Up() error {
-	fmt.Println("demo1 up")
-	return nil
-}
-func (d *demo1) Down() error {
-	fmt.Println("demo1 down")
-	return nil
-}
-
-func TestUnit_Dependencies2(t *testing.T) {
-	dep := newDic(xc.New())
-	xtest.NoError(t, dep.Register([]interface{}{
-		newDemo,
-	}...))
-	xtest.NoError(t, dep.Build())
-	xtest.Error(t, dep.Build())
-	xtest.NoError(t, dep.Down())
-	xtest.Error(t, dep.Down())
-}
-
-type demo4 struct{}
-
-func newDemo4() (*demo4, error) { return nil, fmt.Errorf("fail init constructor demo4") }
-
-func TestUnit_Dependencies3(t *testing.T) {
-	dep := newDic(xc.New())
-	xtest.NoError(t, dep.Register([]interface{}{
-		newDemo4,
-	}...))
-	err := dep.Build()
-	xtest.Error(t, err)
-	fmt.Println(err.Error())
-	xtest.Contains(t, err.Error(), "fail init constructor demo4")
-}
-
-func newDemo5() error { return fmt.Errorf("fail init constructor newDemo5") }
-
-func TestUnit_Dependencies4(t *testing.T) {
-	dep := newDic(xc.New())
-	xtest.NoError(t, dep.Register(newDemo5))
-	err := dep.Build()
-	xtest.Error(t, err)
-	fmt.Println(err.Error())
-	xtest.Contains(t, err.Error(), "fail init constructor newDemo5")
-}
-
-type demo6 struct{}
-
-func newDemo6() *demo6 { return &demo6{} }
-func (d *demo6) Up() error {
-	fmt.Println("demo6 up")
-	return nil
-}
-func (d *demo6) Down() error {
-	fmt.Println("demo6 down")
-	return nil
-}
-func (d *demo6) Name() string {
-	return "DEMO 6"
-}
-
-func TestUnit_DicInvoke1(t *testing.T) {
-	dep := newDic(xc.New())
-	xtest.NoError(t, dep.Register(newDemo6))
-	xtest.NoError(t, dep.Invoke(func(d *demo6) {
-		fmt.Println("Invoke", d.Name())
-	}))
-	xtest.NoError(t, dep.Down())
-	xtest.Error(t, dep.Down())
-}
-
-func TestUnit_DicInvoke2(t *testing.T) {
-	dep := newDic(xc.New())
-	xtest.NoError(t, dep.Register(newDemo6))
-	xtest.NoError(t, dep.Invoke(func() {
-		fmt.Println("Invoke")
-	}))
-	xtest.NoError(t, dep.Down())
-	xtest.Error(t, dep.Down())
+		{
+			name: "Case2",
+			register: []interface{}{
+				&SimpleDI1_Err{ER: "111"},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case3",
+			register: []interface{}{
+				123,
+			},
+			wantErr:       true,
+			wantErrString: "dependency [int] is not supported",
+		},
+		{
+			name: "Case4",
+			register: []interface{}{
+				&SimpleDI1_A{A: "field A of struct"},
+				SimpleDI1_func2,
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case5",
+			register: []interface{}{
+				&SimpleDI1_A{A: "field A of struct"},
+				SimpleDI1_StructEmpty{},
+				SimpleDI1_Struct{},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case6",
+			register: []interface{}{
+				func() *SimpleDI1_A { return &SimpleDI1_A{A: "field A of struct 1"} },
+				func() *SimpleDI1_A { return &SimpleDI1_A{A: "field A of struct 2"} },
+			},
+			wantErr:       true,
+			wantErrString: "_test.SimpleDI1_A] already initiated",
+		},
+		{
+			name: "Case7",
+			register: []interface{}{
+				SimpleDI1_func2,
+			},
+			wantErr:       true,
+			wantErrString: "_test.SimpleDI1_A] not initiated",
+		},
+		{
+			name: "Case8",
+			register: []interface{}{
+				SimpleDI1_Struct{},
+			},
+			wantErr:       true,
+			wantErrString: "_test.SimpleDI1_A] not initiated",
+		},
+		{
+			name:          "Case9",
+			register:      []interface{}{},
+			invoke:        func(a int) {},
+			wantErr:       true,
+			wantErrString: "dependency [int] is not supported",
+		},
+		{
+			name:          "Case10",
+			register:      []interface{}{},
+			invoke:        SimpleDI1_StructUnsupported{},
+			wantErr:       true,
+			wantErrString: "dependency [float32] is not supported",
+		},
+		{
+			name:          "Case11",
+			register:      []interface{}{},
+			invoke:        SimpleDI1_Struct{},
+			wantErr:       true,
+			wantErrString: "_test.SimpleDI1_A] not initiated",
+		},
+		{
+			name:          "Case12",
+			register:      []interface{}{},
+			invoke:        &SimpleDI1_A{},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name:          "Case13",
+			register:      []interface{}{},
+			invoke:        func() error { return fmt.Errorf("start fail") },
+			wantErr:       true,
+			wantErrString: "start fail",
+		},
+		{
+			name: "Case14",
+			register: []interface{}{
+				&SimpleDI1_Service{},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case15",
+			register: []interface{}{
+				&SimpleDI1_Service{ErrUp: "is up err"},
+			},
+			wantErr:       true,
+			wantErrString: "is up err",
+		},
+		{
+			name: "Case15",
+			register: []interface{}{
+				&SimpleDI1_Service{ErrDown: "is down err"},
+			},
+			wantErr:       true,
+			wantErrString: "is down err",
+		},
+		{
+			name: "Case16",
+			register: []interface{}{
+				func() *SimpleDI1_Service {
+					return &SimpleDI1_Service{ErrUp: "is up err"}
+				},
+			},
+			wantErr:       true,
+			wantErrString: "is up err",
+		},
+		{
+			name: "Case17",
+			register: []interface{}{
+				func() (int, error) {
+					return 0, nil
+				},
+			},
+			wantErr:       true,
+			wantErrString: "dependency [int] is not supported form [",
+		},
+		{
+			name: "Case17",
+			register: []interface{}{
+				func() (error, int) {
+					return nil, 0
+				},
+			},
+			wantErr:       true,
+			wantErrString: "dependency [int] is not supported form [",
+		},
+		{
+			name:     "Case18",
+			register: []interface{}{},
+			invoke: func() (int, error) {
+				return 0, nil
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name:     "Case19",
+			register: []interface{}{},
+			invoke: func(_ error) int {
+				return 0
+			},
+			wantErr:       true,
+			wantErrString: "dependency [error] is not supported",
+		},
+		{
+			name: "Case20",
+			register: []interface{}{
+				&SimpleDI1_ServiceEmpty{},
+				&SimpleDI1_ServiceEmptyXC{},
+				&SimpleDI1_ServiceEmptyCtx{},
+				&SimpleDI1_Service{},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := app.NewContainer(xc.New())
+			errs := errors.Wrap(
+				c.Register(tt.register...),
+				c.Start(),
+				func() error {
+					if tt.invoke != nil {
+						return c.Invoke(tt.invoke)
+					}
+					return nil
+				}(),
+				c.Stop(),
+			)
+			if tt.wantErr {
+				xtest.ErrorContains(t, errs, tt.wantErrString)
+			} else {
+				xtest.NoError(t, errs)
+			}
+		})
+	}
 }
