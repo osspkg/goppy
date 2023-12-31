@@ -13,6 +13,7 @@ import (
 	"go.osspkg.com/goppy/app"
 	"go.osspkg.com/goppy/console"
 	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/plugins"
 	"go.osspkg.com/goppy/xlog"
 	"gopkg.in/yaml.v3"
@@ -142,7 +143,7 @@ func validateConfig(filename string, configs ...interface{}) error {
 	defType := reflect.TypeOf(new(plugins.Validator)).Elem()
 	for _, cfg := range configs {
 		if reflect.TypeOf(cfg).AssignableTo(defType) {
-			if err = app.Sources(filename).Decode(cfg); err != nil {
+			if err = iofile.FileCodec(filename).Decode(cfg); err != nil {
 				return fmt.Errorf("decode config %T error: %w", cfg, err)
 			}
 			vv, ok := cfg.(plugins.Validator)

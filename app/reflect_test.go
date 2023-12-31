@@ -6,14 +6,13 @@
 package app
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 	"testing"
-
-	"go.osspkg.com/goppy/errors"
 )
 
-func TestUnit_getRefAddr(t *testing.T) {
+func TestUnit_getReflectAddress(t *testing.T) {
 	type (
 		aa string
 		bb struct{}
@@ -35,28 +34,30 @@ func TestUnit_getRefAddr(t *testing.T) {
 	tests := []struct {
 		name string
 		args reflect.Type
+		obj  interface{}
 		want string
 		ok   bool
 	}{
-		{name: "Case1", args: reflect.TypeOf(a), want: "int"},
-		{name: "Case2", args: reflect.TypeOf(b), want: "string"},
-		{name: "Case3", args: reflect.TypeOf(c), want: "bool"},
-		{name: "Case4", args: reflect.TypeOf(d), want: "go.osspkg.com/goppy/app.aa", ok: true},
-		{name: "Case5", args: reflect.TypeOf(e), want: "go.osspkg.com/goppy/app.ff", ok: true},
-		{name: "Case6", args: reflect.TypeOf(f), want: "func(string) bool", ok: true},
-		{name: "Case7", args: reflect.TypeOf(g), want: "error"},
-		{name: "Case8", args: reflect.TypeOf(h), want: "[]string"},
-		{name: "Case9", args: reflect.TypeOf(j), want: "go.osspkg.com/goppy/app.bb", ok: true},
-		{name: "Case10", args: reflect.TypeOf(k), want: "struct {}"},
+		{name: "Case1", args: reflect.TypeOf(a), obj: a, want: "int"},
+		{name: "Case2", args: reflect.TypeOf(b), obj: b, want: "string"},
+		{name: "Case3", args: reflect.TypeOf(c), obj: c, want: "bool"},
+		{name: "Case4", args: reflect.TypeOf(d), obj: d, want: "go.osspkg.com/goppy/app.aa", ok: true},
+		{name: "Case5", args: reflect.TypeOf(e), obj: e, want: "go.osspkg.com/goppy/app.ff", ok: true},
+		{name: "Case6", args: reflect.TypeOf(f), obj: f, want: "func(string) bool", ok: true},
+		{name: "Case6", args: reflect.TypeOf(f), obj: nil, want: "func(string) bool", ok: false},
+		{name: "Case7", args: reflect.TypeOf(g), obj: g, want: "error"},
+		{name: "Case8", args: reflect.TypeOf(h), obj: h, want: "[]string"},
+		{name: "Case9", args: reflect.TypeOf(j), obj: j, want: "go.osspkg.com/goppy/app.bb", ok: true},
+		{name: "Case10", args: reflect.TypeOf(k), obj: k, want: "struct {}"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, ok := getRefAddr(tt.args)
+			got, ok := getReflectAddress(tt.args, tt.obj)
 			if !strings.Contains(got, tt.want) {
-				t.Errorf("getRefAddr() = %v, want %v", got, tt.want)
+				t.Errorf("getReflectAddress() = %v, want %v", got, tt.want)
 			}
 			if ok != tt.ok {
-				t.Errorf("getRefAddr() = %v, want %v", ok, tt.ok)
+				t.Errorf("getReflectAddress() = %v, want %v", ok, tt.ok)
 			}
 		})
 	}
