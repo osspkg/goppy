@@ -18,13 +18,12 @@ import (
 
 func WithWebsocketServerPool(options ...func(websocket.Upgrader)) plugins.Plugin {
 	return plugins.Plugin{
-		Inject: func(l xlog.Logger) (*wssPool, WebsocketServerPool) {
-			wssp := &wssPool{
+		Inject: func(l xlog.Logger) WebsocketServerPool {
+			return &wssPool{
 				options: options,
 				pool:    make(map[string]*server.Server, 10),
 				log:     l,
 			}
-			return wssp, wssp
 		},
 	}
 }

@@ -18,9 +18,8 @@ import (
 
 func WithWebsocketClient() plugins.Plugin {
 	return plugins.Plugin{
-		Inject: func(l xlog.Logger) (*wscProvider, WebsocketClient) {
-			c := newWSClientProvider(l)
-			return c, c
+		Inject: func(l xlog.Logger) WebsocketClient {
+			return newWSClientProvider(l)
 		},
 	}
 }

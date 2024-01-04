@@ -26,9 +26,8 @@ func (v *Config) Default() {
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &Config{},
-		Inject: func(c *Config, l xlog.Logger) (*serverProvider, Server) {
-			s := newServerProvider(c, l)
-			return s, s
+		Inject: func(c *Config, l xlog.Logger) Server {
+			return newServerProvider(c, l)
 		},
 	}
 }

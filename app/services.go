@@ -29,13 +29,13 @@ type (
 )
 
 func isService(v interface{}) bool {
-	if _, ok := v.(ServiceInterface); ok {
-		return true
-	}
 	if _, ok := v.(ServiceContextInterface); ok {
 		return true
 	}
 	if _, ok := v.(ServiceXContextInterface); ok {
+		return true
+	}
+	if _, ok := v.(ServiceInterface); ok {
 		return true
 	}
 	return false

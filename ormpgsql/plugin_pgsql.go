@@ -69,11 +69,11 @@ func (v *ConfigPgsql) Default() {
 func WithPostgreSQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigPgsql{},
-		Inject: func(c *ConfigPgsql, l xlog.Logger) (*pgsqlProvider, PgSQL) {
+		Inject: func(c *ConfigPgsql, l xlog.Logger) PgSQL {
 			conn := New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
 			m := orm.NewMigrate(o, c.Migrate, l)
-			p := &pgsqlProvider{
+			return &pgsqlProvider{
 				conn:    conn,
 				orm:     o,
 				migrate: m,
@@ -82,7 +82,6 @@ func WithPostgreSQL() plugins.Plugin {
 				list:    make(map[string]orm.Stmt),
 				active:  false,
 			}
-			return p, p
 		},
 	}
 }
