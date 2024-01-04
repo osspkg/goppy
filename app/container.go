@@ -131,11 +131,7 @@ func (v *container) Invoke(obj interface{}) error {
 	if v.srv.IsOff() {
 		return errDepNotRunning
 	}
-	item, err := v.toStoreItem(obj)
-	if err != nil {
-		return err
-	}
-	_, err = v.callArgs(item)
+	item, _, err := v.callArgs(obj)
 	if err != nil {
 		return err
 	}
@@ -153,29 +149,16 @@ func (v *container) toStoreItem(obj interface{}) (*objectStorageItem, error) {
 		return item, nil
 	}
 	ref := reflect.TypeOf(obj)
-	address, ok := getReflectAddress(ref, obj)
-	if !ok {
-		return nil, fmt.Errorf("dependency [%s] is not supported", address)
+	if err := v.store.Add(ref, obj, asTypeNew); err != nil {
+		return nil, err
 	}
-	serviceStatus := itNotService
-	if isService(obj) {
-		serviceStatus = itDownService
-	}
-	item = &objectStorageItem{
-		Address:      address,
-		RelationType: 0,
-		ReflectType:  ref,
-		Kind:         ref.Kind(),
-		Value:        obj,
-		Service:      serviceStatus,
-	}
-	return item, nil
+	return v.store.GetByReflect(ref, obj)
 }
 
-func (v *container) callArgs(obj interface{}) ([]reflect.Value, error) {
+func (v *container) callArgs(obj interface{}) (*objectStorageItem, []reflect.Value, error) {
 	item, err := v.toStoreItem(obj)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	switch item.Kind {
@@ -186,21 +169,21 @@ func (v *container) callArgs(obj interface{}) ([]reflect.Value, error) {
 			inRefType := item.ReflectType.In(i)
 			inAddress, ok := getReflectAddress(inRefType, item.Value)
 			if !ok {
-				return nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
+				return nil, nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
 			}
-			dep, err := v.store.Get(inAddress)
+			dep, err := v.store.GetByAddress(inAddress)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			args = append(args, reflect.ValueOf(dep.Value))
 		}
 		args = reflect.ValueOf(item.Value).Call(args)
 		for _, arg := range args {
 			if err, ok := arg.Interface().(error); ok && err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
-		return args, nil
+		return item, args, nil
 
 	case reflect.Struct:
 		value := reflect.New(item.ReflectType)
@@ -209,20 +192,20 @@ func (v *container) callArgs(obj interface{}) ([]reflect.Value, error) {
 			inRefType := item.ReflectType.Field(i)
 			inAddress, ok := getReflectAddress(inRefType.Type, nil)
 			if !ok {
-				return nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
+				return nil, nil, fmt.Errorf("dependency [%s] is not supported", inAddress)
 			}
-			dep, err := v.store.Get(inAddress)
+			dep, err := v.store.GetByAddress(inAddress)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			value.Elem().FieldByName(inRefType.Name).Set(reflect.ValueOf(dep.Value))
 		}
-		return append(args, value.Elem()), nil
+		return item, append(args, value.Elem()), nil
 
 	default:
 	}
 
-	return []reflect.Value{reflect.ValueOf(item.Value)}, nil
+	return item, []reflect.Value{reflect.ValueOf(item.Value)}, nil
 }
 
 // nolint: gocyclo
@@ -239,7 +222,7 @@ func (v *container) run() error {
 		if name == root {
 			continue
 		}
-		item, err := v.store.Get(name)
+		item, err := v.store.GetByAddress(name)
 		if err != nil {
 			return err
 		}
@@ -253,29 +236,29 @@ func (v *container) run() error {
 			delete(names, name)
 			continue
 		}
-		args, err := v.callArgs(item)
+		_, args, err := v.callArgs(item)
 		if err != nil {
 			return errors.Wrapf(err, "initialize error [%s]", name)
 		}
+		delete(names, name)
 		for _, arg := range args {
-			address, ok := getReflectAddress(arg.Type(), arg.Interface())
-			if !ok {
-				if address == "error" {
+			if err = v.store.Add(arg.Type(), arg.Interface(), asTypeExist); err != nil {
+				return errors.Wrapf(err, "initialize error")
+			}
+			if item, err = v.store.GetByReflect(arg.Type(), arg.Interface()); err != nil {
+				if errors.Is(err, errIsTypeError) {
 					continue
 				}
-				return fmt.Errorf("dependency [%s] is not supported form [%s]", address, item.Address)
+				return errors.Wrapf(err, "initialize error")
 			}
-			if isService(arg.Interface()) {
-				if err = v.srv.AddAndUp(arg.Interface()); err != nil {
-					return errors.Wrapf(err, "service initialization error [%s]", address)
+			delete(names, item.Address)
+			if item.Service == itDownService {
+				if err = v.srv.AddAndUp(item.Value); err != nil {
+					return errors.Wrapf(err, "service initialization error [%s]", item.Address)
 				}
-			}
-			delete(names, address)
-			if err = v.store.Add(arg.Type(), arg.Interface(), asTypeExist); err != nil {
-				return errors.Wrapf(err, "initialize error [%s]", address)
+				item.Service = itUpedService
 			}
 		}
-		delete(names, name)
 	}
 
 	v.srv.IterateOver()

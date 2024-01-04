@@ -255,7 +255,7 @@ func TestUnit_DI_Default(t *testing.T) {
 			wantErrString: "is up err",
 		},
 		{
-			name: "Case15",
+			name: "Case16",
 			register: []interface{}{
 				&SimpleDI1_Service{ErrDown: "is down err"},
 			},
@@ -263,7 +263,7 @@ func TestUnit_DI_Default(t *testing.T) {
 			wantErrString: "is down err",
 		},
 		{
-			name: "Case16",
+			name: "Case17",
 			register: []interface{}{
 				func() *SimpleDI1_Service {
 					return &SimpleDI1_Service{ErrUp: "is up err"}
@@ -273,27 +273,27 @@ func TestUnit_DI_Default(t *testing.T) {
 			wantErrString: "is up err",
 		},
 		{
-			name: "Case17",
+			name: "Case18",
 			register: []interface{}{
 				func() (int, error) {
 					return 0, nil
 				},
 			},
 			wantErr:       true,
-			wantErrString: "dependency [int] is not supported form [",
+			wantErrString: "dependency [int] is not supported",
 		},
 		{
-			name: "Case17",
+			name: "Case19",
 			register: []interface{}{
 				func() (error, int) {
 					return nil, 0
 				},
 			},
 			wantErr:       true,
-			wantErrString: "dependency [int] is not supported form [",
+			wantErrString: "dependency [int] is not supported",
 		},
 		{
-			name:     "Case18",
+			name:     "Case20",
 			register: []interface{}{},
 			invoke: func() (int, error) {
 				return 0, nil
@@ -302,7 +302,7 @@ func TestUnit_DI_Default(t *testing.T) {
 			wantErrString: "",
 		},
 		{
-			name:     "Case19",
+			name:     "Case21",
 			register: []interface{}{},
 			invoke: func(_ error) int {
 				return 0
@@ -311,7 +311,7 @@ func TestUnit_DI_Default(t *testing.T) {
 			wantErrString: "dependency [error] is not supported",
 		},
 		{
-			name: "Case20",
+			name: "Case22",
 			register: []interface{}{
 				&SimpleDI1_ServiceEmpty{},
 				&SimpleDI1_ServiceEmptyXC{},

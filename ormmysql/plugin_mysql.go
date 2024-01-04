@@ -73,11 +73,11 @@ func (v *ConfigMysql) Default() {
 func WithMySQL() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
-		Inject: func(c *ConfigMysql, l xlog.Logger) (*mysqlProvider, MySQL) {
+		Inject: func(c *ConfigMysql, l xlog.Logger) MySQL {
 			conn := New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
 			m := orm.NewMigrate(o, c.Migrate, l)
-			p := &mysqlProvider{
+			return &mysqlProvider{
 				conn:    conn,
 				orm:     o,
 				migrate: m,
@@ -86,7 +86,6 @@ func WithMySQL() plugins.Plugin {
 				list:    make(map[string]orm.Stmt),
 				active:  false,
 			}
-			return p, p
 		},
 	}
 }

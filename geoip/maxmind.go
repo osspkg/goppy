@@ -26,9 +26,8 @@ func (v *MaxMindConfig) Default() {
 func WithMaxMindGeoIP() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &MaxMindConfig{},
-		Inject: func(conf *MaxMindConfig) (*maxmind, GeoIP) {
-			mmdb := newMMDB(conf)
-			return mmdb, mmdb
+		Inject: func(conf *MaxMindConfig) GeoIP {
+			return newMMDB(conf)
 		},
 	}
 }

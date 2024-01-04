@@ -27,9 +27,8 @@ func (v *ConfigHttpPool) Default() {
 func WithHTTP() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigHttpPool{},
-		Inject: func(conf *ConfigHttpPool, l xlog.Logger) (*routeProvider, RouterPool) {
-			rp := newRouteProvider(conf.Config, l)
-			return rp, rp
+		Inject: func(conf *ConfigHttpPool, l xlog.Logger) RouterPool {
+			return newRouteProvider(conf.Config, l)
 		},
 	}
 }

@@ -23,7 +23,7 @@ require (
 	go.osspkg.com/goppy/ioutil v0.1.1
 	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/random v0.1.1
-	go.osspkg.com/goppy/web v0.1.8
+	go.osspkg.com/goppy/web v0.1.9
 	go.osspkg.com/goppy/xtest v0.1.3
 	golang.org/x/oauth2 v0.13.0
 )

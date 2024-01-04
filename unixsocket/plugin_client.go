@@ -14,9 +14,8 @@ import (
 
 func WithClient() plugins.Plugin {
 	return plugins.Plugin{
-		Inject: func() (*clientProvider, Client) {
-			s := newClientProvider()
-			return s, s
+		Inject: func() Client {
+			return newClientProvider()
 		},
 	}
 }

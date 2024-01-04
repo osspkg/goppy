@@ -48,14 +48,13 @@ type (
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &Config{},
-		Inject: func(c *Config, l xlog.Logger) (*serverProvider, Server) {
-			s := &serverProvider{
+		Inject: func(c *Config, l xlog.Logger) Server {
+			return &serverProvider{
 				log:   l,
 				conf:  c.TCP,
 				servs: make([]*ServerTCP, 0, len(c.TCP)),
 				wg:    iosync.NewGroup(),
 			}
-			return s, s
 		},
 	}
 }

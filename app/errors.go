@@ -11,4 +11,5 @@ var (
 	errDepAlreadyRunned = errors.New("dependencies are already running")
 	errDepNotRunning    = errors.New("dependencies are not running yet")
 	errServiceUnknown   = errors.New("unknown service")
+	errIsTypeError      = errors.New("ERROR")
 )

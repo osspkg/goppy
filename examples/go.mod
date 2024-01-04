@@ -36,7 +36,7 @@ replace (
 
 require (
 	go.osspkg.com/goppy v0.15.4
-	go.osspkg.com/goppy/app v0.1.7
+	go.osspkg.com/goppy/app v0.1.8
 	go.osspkg.com/goppy/auth v0.1.0
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/geoip v0.1.0

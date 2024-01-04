@@ -23,8 +23,11 @@ func (v *ConfigDebug) Default() {
 func WithHTTPDebug() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigDebug{},
-		Inject: func(c *ConfigDebug, l xlog.Logger) *ServerDebug {
+		Inject: func(c *ConfigDebug, l xlog.Logger) Debugger {
 			return NewServerDebug(c.Config, l)
 		},
 	}
+}
+
+type Debugger interface {
 }

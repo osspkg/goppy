@@ -48,7 +48,7 @@ func newObjectStorage() *objectStorage {
 	}
 }
 
-func (v *objectStorage) Get(address string) (*objectStorageItem, error) {
+func (v *objectStorage) GetByAddress(address string) (*objectStorageItem, error) {
 	v.mux.RLock()
 	defer v.mux.RUnlock()
 
@@ -56,6 +56,20 @@ func (v *objectStorage) Get(address string) (*objectStorageItem, error) {
 		return item, nil
 	}
 	return nil, fmt.Errorf("dependency [%s] not initiated", address)
+}
+
+func (v *objectStorage) GetByReflect(ref reflect.Type, obj interface{}) (*objectStorageItem, error) {
+	v.mux.RLock()
+	defer v.mux.RUnlock()
+
+	address, ok := getReflectAddress(ref, obj)
+	if !ok {
+		if address == "error" {
+			return nil, errIsTypeError
+		}
+		return nil, fmt.Errorf("dependency [%s] is not supported", address)
+	}
+	return v.GetByAddress(address)
 }
 
 func (v *objectStorage) Add(ref reflect.Type, obj interface{}, relationType objectRelationType) error {

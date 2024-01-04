@@ -63,11 +63,11 @@ func (v *ConfigSqlite) List() (list []sqlcommon.ItemInterface) {
 func WithSQLite() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
-		Inject: func(c *ConfigSqlite, l xlog.Logger) (*sqliteProvider, SQLite) {
+		Inject: func(c *ConfigSqlite, l xlog.Logger) SQLite {
 			conn := New(c)
 			o := orm.New(conn, orm.UsePluginLogger(l))
 			m := orm.NewMigrate(o, c.Migrate, l)
-			p := &sqliteProvider{
+			return &sqliteProvider{
 				conn:    conn,
 				orm:     o,
 				migrate: m,
@@ -76,7 +76,6 @@ func WithSQLite() plugins.Plugin {
 				list:    make(map[string]orm.Stmt),
 				active:  false,
 			}
-			return p, p
 		},
 	}
 }
