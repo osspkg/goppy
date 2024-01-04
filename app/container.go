@@ -102,6 +102,11 @@ func (v *container) prepare() error {
 				inAddress, _ := getReflectAddress(inRefType, nil)
 				v.kahn.Add(inAddress, item.Address)
 			}
+			for i := 0; i < item.ReflectType.NumOut(); i++ {
+				outRefType := item.ReflectType.Out(i)
+				outAddress, _ := getReflectAddress(outRefType, nil)
+				v.kahn.Add(item.Address, outAddress)
+			}
 
 		case reflect.Struct:
 			if item.ReflectType.NumField() == 0 {
