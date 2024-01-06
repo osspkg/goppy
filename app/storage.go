@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -64,7 +64,7 @@ func (v *objectStorage) GetByReflect(ref reflect.Type, obj interface{}) (*object
 
 	address, ok := getReflectAddress(ref, obj)
 	if !ok {
-		if address == "error" {
+		if address == errName {
 			return nil, errIsTypeError
 		}
 		return nil, fmt.Errorf("dependency [%s] is not supported", address)
@@ -78,7 +78,7 @@ func (v *objectStorage) Add(ref reflect.Type, obj interface{}, relationType obje
 
 	address, ok := getReflectAddress(ref, obj)
 	if !ok {
-		if address != "error" {
+		if address != errName {
 			return fmt.Errorf("dependency [%s] is not supported", address)
 		}
 		return nil

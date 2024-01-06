@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -317,6 +317,19 @@ func TestUnit_DI_Default(t *testing.T) {
 				&SimpleDI1_ServiceEmptyXC{},
 				&SimpleDI1_ServiceEmptyCtx{},
 				&SimpleDI1_Service{},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case23",
+			register: []interface{}{
+				func() *SimpleDI1_Service {
+					return &SimpleDI1_Service{}
+				},
+				func(_ *SimpleDI1_Service) error {
+					return nil
+				},
 			},
 			wantErr:       false,
 			wantErrString: "",

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -8,57 +8,83 @@ package tcp
 import (
 	"context"
 	"crypto/tls"
-	"time"
+	"fmt"
+	"io"
+	"net"
 
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/iosync"
 )
 
-type ServerTCP struct {
-	conf     ConfigItem
-	listener *Listen
-	handler  HandlerTCP
-	wg       iosync.Group
-	mux      iosync.Lock
-	sync     iosync.Switch
-}
+type (
+	Handler interface {
+		HandlerTCP(c Connect)
+	}
+	ErrHandler interface {
+		ErrHandlerTCP(c ErrConnect)
+	}
+	Server struct {
+		conf        ConfigItem
+		listener    net.Listener
+		baseHandler Handler
+		errHandler  ErrHandler
+		wg          iosync.Group
+		sync        iosync.Switch
+	}
+)
 
-func NewServerTCP(conf ConfigItem) *ServerTCP {
-	return &ServerTCP{
+func NewServer(conf ConfigItem) *Server {
+	return &Server{
 		conf: conf,
 		wg:   iosync.NewGroup(),
-		mux:  iosync.NewLock(),
 		sync: iosync.NewSwitch(),
 	}
 }
 
-func (v *ServerTCP) HandleFunc(h HandlerTCP) {
-	v.mux.Lock(func() {
-		v.handler = h
-	})
+func (v *Server) HandleFunc(h Handler) {
+	if v.sync.IsOn() {
+		return
+	}
+	v.baseHandler = h
 }
 
-func (v *ServerTCP) ListenAndServe(ctx context.Context) error {
+func (v *Server) ErrHandleFunc(h ErrHandler) {
+	if v.sync.IsOn() {
+		return
+	}
+	v.errHandler = h
+}
+
+func (v *Server) ListenAndServe(ctx context.Context) error {
+	if v.baseHandler == nil {
+		return fmt.Errorf("handler not found")
+	}
+	if v.errHandler == nil {
+		return fmt.Errorf("error handler not found")
+	}
+	if !v.sync.On() {
+		return errServAlreadyRunning
+	}
+	defer v.sync.Off()
 	if err := v.build(); err != nil {
 		return err
 	}
-	v.sync.On()
 	v.run(ctx)
 	v.wg.Wait()
 	return nil
 }
 
-func (v *ServerTCP) Close() error {
+func (v *Server) Close() error {
 	if !v.sync.Off() {
 		return nil
 	}
 	return v.listener.Close()
 }
 
-func (v *ServerTCP) build() error {
+func (v *Server) build() error {
 	certs := make([]Cert, 0, 1)
 	for _, cert := range v.conf.Certs {
-		certs = append(certs, Cert{Public: cert.Public, Private: cert.Public})
+		certs = append(certs, Cert{Cert: cert.Cert, Key: cert.Key})
 	}
 	l, err := NewListen(v.conf.Address, certs...)
 	if err != nil {
@@ -68,7 +94,7 @@ func (v *ServerTCP) build() error {
 	return nil
 }
 
-func (v *ServerTCP) run(ctx context.Context) {
+func (v *Server) run(ctx context.Context) {
 	v.wg.Background(func() {
 		for {
 			conn, err := v.listener.Accept()
@@ -83,19 +109,9 @@ func (v *ServerTCP) run(ctx context.Context) {
 				continue
 			}
 
-			if v.conf.Timeout > 0 {
-				err = errors.Wrap(
-					conn.SetDeadline(time.Now().Add(v.conf.Timeout)),
-					conn.SetReadDeadline(time.Now().Add(v.conf.Timeout)),
-					conn.SetWriteDeadline(time.Now().Add(v.conf.Timeout)),
-				)
-				if err != nil {
-					continue
-				}
-			}
-
 			if tc, ok := conn.(*tls.Conn); ok {
 				if err = tc.HandshakeContext(ctx); err != nil {
+					fmt.Println(err)
 					conn.Close() //nolint: errcheck
 					continue
 				}
@@ -103,12 +119,23 @@ func (v *ServerTCP) run(ctx context.Context) {
 
 			v.wg.Background(func() {
 				defer conn.Close() //nolint: errcheck
-				nc := newConnect(conn, v.conf.Timeout)
-				v.mux.RLock(func() {
-					if v.handler != nil {
-						v.handler.HandlerTCP(nc, nc)
-					}
+				cp := newConnectProvider(ctx, conn, cpConfig{
+					MaxSize: v.conf.ClientMaxBodySize,
+					Timeout: v.conf.Timeout,
 				})
+				defer cp.Close() //nolint: errcheck
+				for {
+					if err = cp.Wait(); err != nil {
+						if !errors.Is(err, io.EOF) {
+							v.errHandler.ErrHandlerTCP(cp)
+						}
+						return
+					}
+					if cp.IsEmpty() {
+						return
+					}
+					v.baseHandler.HandlerTCP(cp)
+				}
 			})
 		}
 	})

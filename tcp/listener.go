@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -13,12 +13,7 @@ import (
 	"go.osspkg.com/goppy/xnet"
 )
 
-type Listen struct {
-	conn net.Listener
-	tls  bool
-}
-
-func NewListen(address string, certs ...Cert) (*Listen, error) {
+func NewListen(address string, certs ...Cert) (net.Listener, error) {
 	address = xnet.CheckHostPort(address)
 
 	if len(certs) == 0 {
@@ -26,12 +21,12 @@ func NewListen(address string, certs ...Cert) (*Listen, error) {
 		if err != nil {
 			return nil, err
 		}
-		return &Listen{conn: l}, nil
+		return l, nil
 	}
 
 	certificates := make([]tls.Certificate, 0, len(certs))
 	for _, c := range certs {
-		cert, err := tls.LoadX509KeyPair(c.Public, c.Private)
+		cert, err := tls.LoadX509KeyPair(c.Cert, c.Key)
 		if err != nil {
 			return nil, err
 		}
@@ -42,17 +37,5 @@ func NewListen(address string, certs ...Cert) (*Listen, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Listen{conn: l, tls: true}, nil
-}
-
-func (v *Listen) Close() error {
-	return v.conn.Close()
-}
-
-func (v *Listen) Accept() (net.Conn, error) {
-	return v.conn.Accept()
-}
-
-func (v *Listen) IsTLS() bool {
-	return v.tls
+	return l, nil
 }

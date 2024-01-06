@@ -36,7 +36,7 @@ replace (
 
 require (
 	go.osspkg.com/goppy v0.15.4
-	go.osspkg.com/goppy/app v0.1.8
+	go.osspkg.com/goppy/app v0.1.9
 	go.osspkg.com/goppy/auth v0.1.0
 	go.osspkg.com/goppy/console v0.1.0
 	go.osspkg.com/goppy/geoip v0.1.0
@@ -47,10 +47,10 @@ require (
 	go.osspkg.com/goppy/plugins v0.1.1
 	go.osspkg.com/goppy/routine v0.1.4
 	go.osspkg.com/goppy/syscall v0.1.1
-	go.osspkg.com/goppy/tcp v0.0.0-00010101000000-000000000000
+	go.osspkg.com/goppy/tcp v0.0.4
 	go.osspkg.com/goppy/udp v0.0.2
 	go.osspkg.com/goppy/unixsocket v0.1.0
-	go.osspkg.com/goppy/web v0.1.8
+	go.osspkg.com/goppy/web v0.1.9
 	go.osspkg.com/goppy/ws v0.1.0
 	go.osspkg.com/goppy/xc v0.1.0
 	go.osspkg.com/goppy/xdns v0.1.0

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -24,23 +24,25 @@ func (v *Config) Default() {
 		v.TCP = append(v.TCP, ConfigItem{
 			Address: "0.0.0.0:8080",
 			Certs: []Cert{{
-				Public:  "./ssl/public.crt",
-				Private: "./ssl/private.key",
+				Cert: "./ssl/public.crt",
+				Key:  "./ssl/private.key",
 			}},
-			Timeout: 5 * time.Second,
+			Timeout:           5 * time.Second,
+			ClientMaxBodySize: 5e+6,
 		})
 	}
 }
 
 type (
-	Server interface {
-		HandleFunc(h HandlerTCP)
+	ServerTCP interface {
+		HandleFunc(h Handler)
+		ErrHandleFunc(h ErrHandler)
 	}
 
 	serverProvider struct {
 		log   xlog.Logger
 		conf  []ConfigItem
-		servs []*ServerTCP
+		servs []*Server
 		wg    iosync.Group
 	}
 )
@@ -48,27 +50,32 @@ type (
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &Config{},
-		Inject: func(c *Config, l xlog.Logger) Server {
+		Inject: func(c *Config, l xlog.Logger) ServerTCP {
 			return &serverProvider{
 				log:   l,
 				conf:  c.TCP,
-				servs: make([]*ServerTCP, 0, len(c.TCP)),
+				servs: make([]*Server, 0, len(c.TCP)),
 				wg:    iosync.NewGroup(),
 			}
 		},
 	}
 }
 
-func (v *serverProvider) HandleFunc(h HandlerTCP) {
+func (v *serverProvider) HandleFunc(h Handler) {
 	for _, serv := range v.servs {
 		serv.HandleFunc(h)
+	}
+}
+func (v *serverProvider) ErrHandleFunc(h ErrHandler) {
+	for _, serv := range v.servs {
+		serv.ErrHandleFunc(h)
 	}
 }
 
 func (v *serverProvider) Up(ctx xc.Context) error {
 	for _, conf := range v.conf {
 		conf := conf
-		serv := NewServerTCP(conf)
+		serv := NewServer(conf)
 		v.servs = append(v.servs, serv)
 		v.log.WithFields(xlog.Fields{
 			"addr": conf.Address,

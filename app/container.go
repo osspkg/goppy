@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -85,7 +85,7 @@ func (v *container) Register(items ...interface{}) error {
 	return nil
 }
 
-var root = "ROOT"
+const root = "ROOT"
 
 func (v *container) prepare() error {
 	return v.store.Each(func(item *objectStorageItem) error {
@@ -218,8 +218,10 @@ func (v *container) run() error {
 		names[name] = struct{}{}
 	}
 
+	defer v.srv.IterateOver()
+
 	for _, name := range v.kahn.Result() {
-		if name == root {
+		if name == root || name == errName {
 			continue
 		}
 		item, err := v.store.GetByAddress(name)
@@ -261,6 +263,5 @@ func (v *container) run() error {
 		}
 	}
 
-	v.srv.IterateOver()
 	return nil
 }
