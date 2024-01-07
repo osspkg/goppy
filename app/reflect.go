@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2023 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
+ *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.ru>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -10,6 +10,8 @@ import (
 	"reflect"
 )
 
+const errName = "error"
+
 var errType = reflect.TypeOf(new(error)).Elem()
 
 func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
@@ -19,7 +21,7 @@ func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
 	switch t.Kind() {
 	case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
 		if t.Implements(errType) {
-			return "error", false
+			return errName, false
 		}
 		if len(t.Elem().PkgPath()) > 0 {
 			return fmt.Sprintf("%s.%s", t.Elem().PkgPath(), t.Elem().Name()), true

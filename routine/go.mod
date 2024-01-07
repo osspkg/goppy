@@ -9,6 +9,6 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.1.0
-	go.osspkg.com/goppy/iosync v0.1.4
+	go.osspkg.com/goppy/errors v0.1.1
+	go.osspkg.com/goppy/iosync v0.1.5
 )

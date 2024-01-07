@@ -16,20 +16,20 @@ replace (
 
 require (
 	github.com/oschwald/geoip2-golang v1.9.0
-	go.osspkg.com/goppy/plugins v0.1.1
-	go.osspkg.com/goppy/web v0.1.9
+	go.osspkg.com/goppy/plugins v0.1.2
+	go.osspkg.com/goppy/web v0.1.10
 )
 
 require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/oschwald/maxminddb-golang v1.11.0 // indirect
-	go.osspkg.com/goppy/errors v0.1.0 // indirect
-	go.osspkg.com/goppy/iosync v0.1.4 // indirect
-	go.osspkg.com/goppy/ioutil v0.1.1 // indirect
-	go.osspkg.com/goppy/xc v0.1.0 // indirect
-	go.osspkg.com/goppy/xlog v0.1.6 // indirect
-	go.osspkg.com/goppy/xnet v0.1.1 // indirect
+	go.osspkg.com/goppy/errors v0.1.1 // indirect
+	go.osspkg.com/goppy/iosync v0.1.5 // indirect
+	go.osspkg.com/goppy/ioutil v0.1.2 // indirect
+	go.osspkg.com/goppy/xc v0.1.1 // indirect
+	go.osspkg.com/goppy/xlog v0.1.7 // indirect
+	go.osspkg.com/goppy/xnet v0.1.2 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 )
