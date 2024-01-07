@@ -9,8 +9,8 @@ replace (
 
 require (
 	github.com/mailru/easyjson v0.7.7
-	go.osspkg.com/goppy/iosync v0.1.4
-	go.osspkg.com/goppy/xtest v0.1.3
+	go.osspkg.com/goppy/iosync v0.1.5
+	go.osspkg.com/goppy/xtest v0.1.4
 )
 
 require github.com/josharian/intern v1.0.0 // indirect
