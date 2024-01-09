@@ -1,8 +1,9 @@
-module go.osspkg.com/goppy/geoip
+module go.osspkg.com/goppy/metrics
 
 go 1.18
 
 replace (
+	go.osspkg.com/goppy/env => ../env
 	go.osspkg.com/goppy/errors => ../errors
 	go.osspkg.com/goppy/iosync => ../iosync
 	go.osspkg.com/goppy/ioutil => ../ioutil
@@ -16,22 +17,30 @@ replace (
 )
 
 require (
-	github.com/oschwald/geoip2-golang v1.9.0
+	github.com/prometheus/client_golang v1.18.0
+	github.com/prometheus/client_model v0.5.0
+	go.osspkg.com/goppy/env v0.1.1
 	go.osspkg.com/goppy/plugins v0.1.2
+	go.osspkg.com/goppy/syscall v0.1.2
 	go.osspkg.com/goppy/web v0.1.10
+	go.osspkg.com/goppy/xc v0.1.1
+	go.osspkg.com/goppy/xlog v0.1.7
+	go.osspkg.com/goppy/xnet v0.1.2
+	go.osspkg.com/goppy/xtest v0.1.4
+	google.golang.org/protobuf v1.32.0
 )
 
 require (
+	github.com/beorn7/perks v1.0.1 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/oschwald/maxminddb-golang v1.11.0 // indirect
+	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
+	github.com/prometheus/common v0.45.0 // indirect
+	github.com/prometheus/procfs v0.12.0 // indirect
 	go.osspkg.com/goppy/errors v0.1.1 // indirect
 	go.osspkg.com/goppy/iosync v0.1.5 // indirect
 	go.osspkg.com/goppy/ioutil v0.1.2 // indirect
-	go.osspkg.com/goppy/syscall v0.1.2 // indirect
-	go.osspkg.com/goppy/xc v0.1.1 // indirect
-	go.osspkg.com/goppy/xlog v0.1.7 // indirect
-	go.osspkg.com/goppy/xnet v0.1.2 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 )

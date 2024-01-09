@@ -8,6 +8,8 @@ package errors
 import (
 	e "errors"
 	"fmt"
+
+	"go.osspkg.com/goppy/syscall"
 )
 
 type err struct {
@@ -39,7 +41,7 @@ func (v *err) Unwrap() error {
 }
 
 func (v *err) WithTrace() {
-	v.trace = tracing()
+	v.trace = syscall.Trace(10)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"go.osspkg.com/goppy"
+	"go.osspkg.com/goppy/metrics"
 	"go.osspkg.com/goppy/ormmysql"
 	"go.osspkg.com/goppy/ormsqlite"
 	"go.osspkg.com/goppy/plugins"
@@ -19,7 +20,7 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		web.WithHTTPDebug(),
+		metrics.WithMetrics(),
 		web.WithHTTP(),
 		ormmysql.WithMySQL(),
 		ormsqlite.WithSQLite(),

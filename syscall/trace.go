@@ -3,17 +3,17 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package errors
+package syscall
 
 import (
 	"fmt"
 	"runtime"
 )
 
-func tracing() string {
-	var list [10]uintptr
+func Trace(c int) string {
+	list := make([]uintptr, c)
 
-	n := runtime.Callers(4, list[:])
+	n := runtime.Callers(4, list)
 	frame := runtime.CallersFrames(list[:n])
 
 	result := ""

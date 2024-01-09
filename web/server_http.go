@@ -9,6 +9,7 @@ import (
 	"context"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"go.osspkg.com/goppy/errors"
@@ -19,7 +20,7 @@ import (
 )
 
 type (
-	ConfigHttp struct {
+	Config struct {
 		Addr            string        `yaml:"addr"`
 		Network         string        `yaml:"network,omitempty"`
 		ReadTimeout     time.Duration `yaml:"read_timeout,omitempty"`
@@ -28,20 +29,21 @@ type (
 		ShutdownTimeout time.Duration `yaml:"shutdown_timeout,omitempty"`
 	}
 
-	ServerHttp struct {
-		conf    ConfigHttp
+	Server struct {
+		name    string
+		conf    Config
 		serv    *http.Server
 		handler http.Handler
-
-		log  xlog.Logger
-		wg   iosync.Group
-		sync iosync.Switch
+		log     xlog.Logger
+		wg      iosync.Group
+		sync    iosync.Switch
 	}
 )
 
-// NewServerHttp create default http server
-func NewServerHttp(conf ConfigHttp, handler http.Handler, l xlog.Logger) *ServerHttp {
-	srv := &ServerHttp{
+// NewServer create default http server
+func NewServer(name string, conf Config, handler http.Handler, l xlog.Logger) *Server {
+	srv := &Server{
+		name:    strings.ToUpper(name),
 		conf:    conf,
 		handler: handler,
 		log:     l,
@@ -52,7 +54,7 @@ func NewServerHttp(conf ConfigHttp, handler http.Handler, l xlog.Logger) *Server
 	return srv
 }
 
-func (s *ServerHttp) validate() {
+func (s *Server) validate() {
 	if s.conf.ReadTimeout == 0 {
 		s.conf.ReadTimeout = defaultTimeout
 	}
@@ -75,7 +77,7 @@ func (s *ServerHttp) validate() {
 }
 
 // Up start http server
-func (s *ServerHttp) Up(ctx xc.Context) error {
+func (s *Server) Up(ctx xc.Context) error {
 	if !s.sync.On() {
 		return errors.Wrapf(errServAlreadyRunning, "starting server on %s", s.conf.Addr)
 	}
@@ -93,25 +95,25 @@ func (s *ServerHttp) Up(ctx xc.Context) error {
 
 	s.log.WithFields(xlog.Fields{
 		"ip": s.conf.Addr,
-	}).Infof("HTTP server started")
+	}).Infof("%s server started", s.name)
 
 	s.wg.Background(func() {
 		if err = s.serv.Serve(nl); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			s.log.WithFields(xlog.Fields{
 				"err": err.Error(), "ip": s.conf.Addr,
-			}).Errorf("HTTP server stopped")
+			}).Errorf("%s server stopped", s.name)
 			ctx.Close()
 			return
 		}
 		s.log.WithFields(xlog.Fields{
 			"ip": s.conf.Addr,
-		}).Infof("HTTP server stopped")
+		}).Infof("%s server stopped", s.name)
 	})
 	return nil
 }
 
 // Down stop http server
-func (s *ServerHttp) Down() error {
+func (s *Server) Down() error {
 	if !s.sync.Off() {
 		return errors.Wrapf(errServAlreadyStopped, "stopping server on %s", s.conf.Addr)
 	}

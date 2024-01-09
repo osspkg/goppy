@@ -7,6 +7,7 @@ replace (
 	go.osspkg.com/goppy/iosync => ../iosync
 	go.osspkg.com/goppy/ioutil => ../ioutil
 	go.osspkg.com/goppy/plugins => ../plugins
+	go.osspkg.com/goppy/syscall => ../syscall
 	go.osspkg.com/goppy/xc => ../xc
 	go.osspkg.com/goppy/xlog => ../xlog
 	go.osspkg.com/goppy/xnet => ../xnet
@@ -26,4 +27,7 @@ require (
 	go.osspkg.com/static v1.4.0
 )
 
-require github.com/josharian/intern v1.0.0 // indirect
+require (
+	github.com/josharian/intern v1.0.0 // indirect
+	go.osspkg.com/goppy/syscall v0.1.2 // indirect
+)

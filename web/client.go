@@ -114,7 +114,14 @@ func ClientHttpOptionCodec(
 func ClientHttpOptionCodecDefault() ClientHttpOption {
 	return ClientHttpOptionCodec(
 		func(in interface{}) (body []byte, contentType string, err error) {
+			if v, ok := in.(io.Reader); ok {
+				body, err = io.ReadAll(v)
+				contentType = "text/plain; charset=utf-8"
+				return
+			}
 			switch v := in.(type) {
+			case string:
+				return []byte(v), "text/plain; charset=utf-8", nil
 			case []byte:
 				return v, "", nil
 			case json.Marshaler:
@@ -127,7 +134,14 @@ func ClientHttpOptionCodecDefault() ClientHttpOption {
 		func(code int, _ string, body []byte, out interface{}) error {
 			switch code {
 			case 200:
+				if v, ok := out.(io.Writer); ok {
+					_, err := v.Write(body)
+					return err
+				}
 				switch v := out.(type) {
+				case *string:
+					*v += string(body)
+					return nil
 				case *[]byte:
 					*v = append(*v, body...)
 					return nil

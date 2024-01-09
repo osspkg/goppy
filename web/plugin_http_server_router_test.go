@@ -22,7 +22,7 @@ func Test_newRouter(t *testing.T) {
 	logger := xlog.New()
 	defer logger.Close()
 
-	r := newRouter(ConfigHttp{}, logger)
+	r := newRouter("test", Config{}, logger)
 
 	r.NotFoundHandler(func(ctx Context) {
 		ctx.String(404, "NotFoundHandler")

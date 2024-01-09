@@ -8,6 +8,7 @@ replace (
 	go.osspkg.com/goppy/ioutil => ../ioutil
 	go.osspkg.com/goppy/plugins => ../plugins
 	go.osspkg.com/goppy/random => ../random
+	go.osspkg.com/goppy/syscall => ../syscall
 	go.osspkg.com/goppy/xc => ../xc
 	go.osspkg.com/goppy/xlog => ../xlog
 	go.osspkg.com/goppy/xnet => ../xnet
@@ -27,4 +28,5 @@ require (
 require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	go.osspkg.com/goppy/syscall v0.1.2 // indirect
 )

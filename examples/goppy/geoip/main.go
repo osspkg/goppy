@@ -18,7 +18,6 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		web.WithHTTPDebug(),
 		web.WithHTTP(),
 		geoip.WithMaxMindGeoIP(),
 	)

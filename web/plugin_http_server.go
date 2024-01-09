@@ -12,13 +12,13 @@ import (
 
 // ConfigHttpPool config to initialize HTTP service
 type ConfigHttpPool struct {
-	Config map[string]ConfigHttp `yaml:"http"`
+	Config map[string]Config `yaml:"http"`
 }
 
 func (v *ConfigHttpPool) Default() {
 	if v.Config == nil {
-		v.Config = map[string]ConfigHttp{
-			"main": {Addr: "127.0.0.1:8080"},
+		v.Config = map[string]Config{
+			"main": {Addr: "0.0.0.0:8080"},
 		}
 	}
 }

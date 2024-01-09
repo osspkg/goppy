@@ -4,6 +4,7 @@ go 1.18
 
 replace (
 	go.osspkg.com/goppy/console => ../console
+	go.osspkg.com/goppy/env => ../env
 	go.osspkg.com/goppy/errors => ../errors
 	go.osspkg.com/goppy/iofile => ../iofile
 	go.osspkg.com/goppy/iosync => ../iosync
@@ -16,6 +17,7 @@ replace (
 require (
 	go.osspkg.com/algorithms v1.3.1
 	go.osspkg.com/goppy/console v0.1.1
+	go.osspkg.com/goppy/env v0.1.1
 	go.osspkg.com/goppy/errors v0.1.1
 	go.osspkg.com/goppy/iofile v0.1.5
 	go.osspkg.com/goppy/iosync v0.1.5

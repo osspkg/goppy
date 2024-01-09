@@ -12,6 +12,7 @@ import (
 
 	"go.osspkg.com/goppy/app"
 	"go.osspkg.com/goppy/console"
+	"go.osspkg.com/goppy/env"
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/plugins"
@@ -26,9 +27,13 @@ type (
 		plugins     []interface{}
 		configs     []interface{}
 		args        *console.Args
+		info        *env.AppInfo
 	}
 
 	Goppy interface {
+		AppName(t string)
+		AppVersion(t string)
+		AppDescription(t string)
 		Logger(l xlog.Logger)
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
@@ -46,7 +51,23 @@ func New() Goppy {
 		plugins:  make([]interface{}, 0, 100),
 		configs:  make([]interface{}, 0, 100),
 		args:     console.NewArgs().Parse(os.Args[1:]),
+		info: func() *env.AppInfo {
+			info := env.NewAppInfo()
+			return &info
+		}(),
 	}
+}
+
+func (v *_app) AppName(t string) {
+	v.info.AppName = env.AppName(t)
+}
+
+func (v *_app) AppVersion(t string) {
+	v.info.AppVersion = env.AppVersion(t)
+}
+
+func (v *_app) AppDescription(t string) {
+	v.info.AppDescription = env.AppDescription(t)
 }
 
 func (v *_app) Logger(l xlog.Logger) {
@@ -76,6 +97,7 @@ func (v *_app) Command(name string, call interface{}) {
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
 	apps := v.application.Modules(v.plugins...)
+	apps.Modules(v.info.AppName, v.info.AppVersion, v.info.AppDescription, *v.info)
 
 	config := v.parseConfigFlag()
 	console.FatalIfErr(recoveryConfig(config, v.configs...), "config recovery")
