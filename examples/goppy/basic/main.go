@@ -11,13 +11,17 @@ import (
 
 	"go.osspkg.com/goppy"
 	"go.osspkg.com/goppy/console"
+	"go.osspkg.com/goppy/metrics"
 	"go.osspkg.com/goppy/plugins"
 	"go.osspkg.com/goppy/web"
 )
 
 func main() {
 	app := goppy.New()
+	app.AppName("goppy_base_app")
+	app.AppVersion("v1.0.0")
 	app.Plugins(
+		metrics.WithMetrics(),
 		web.WithHTTP(),
 	)
 	app.Plugins(
@@ -46,6 +50,7 @@ func NewController() *Controller {
 }
 
 func (v *Controller) Users(ctx web.Context) {
+	metrics.Gauge("users_request").Inc()
 	data := []int64{1, 2, 3, 4}
 	ctx.JSON(200, data)
 }

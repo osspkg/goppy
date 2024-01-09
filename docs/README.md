@@ -24,14 +24,15 @@ go get -u go.osspkg.com/goppy
 
 ## Plugins
 
-| Plugin         | Comment                                                                                                                                                             | Import                                                                                          |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **debug**      | Profiling application (pprof) with HTTP access.                                                                                                                     | `web.WithHTTPDebug()`                                                                           |
-| **http**       | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `web.WithHTTP()` `web.WithWebsocketServer()` `web.WithWebsocketClient()` `web.WithHTTPClient()` |
-| **unixsocket** | Requests via unix socket.                                                                                                                                           | `unix.WithServer()` `unix.WithClient()`                                                         |
-| **database**   | Multiple connection pools with MySQL, SQLite, Postgre databases (with automatic migration setup).                                                                   | `database.WithMySQL()` `database.WithSQLite()` `database.WithPostgreSQL()`                      |
-| **geoip**      | Definition of geo-IP information.                                                                                                                                   | `geoip.WithMaxMindGeoIP()` + `geoip.CloudflareMiddleware()` `geoip.MaxMindMiddleware()`         |
-| **oauth**      | Authorization via OAuth provider (Yandex, Google). JWT Cookie.                                                                                                      | `auth.WithOAuth()` `auth.WithJWT()` `auth.JWTGuardMiddleware()`                                 |
+| Plugin         | Comment                                                                                                                                                             | Import                                                                                                                                                                                                          |
+|----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **metrics**    | Profiling application (pprof) and metrics collection (prometheus) with access via HTTP.                                                                             | `go.osspkg.com/goppy/metrics`<br/> `metrics.WithMetrics()`                                                                                                                                                      |
+| **http**       | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `go.osspkg.com/goppy/web`<br/> `web.WithHTTP()`<br/> `web.WithHTTPClient()`                                                                                                                                     |
+| **websocket**  | Ready-made websocket handler for server and client. Websocket server pool.                                                                                          | `go.osspkg.com/goppy/ws`<br/> `ws.WithWebsocketServer()`<br/> `ws.WithWebsocketClient()`<br/> `ws.WithWebsocketServerPool()`                                                                                    |
+| **unixsocket** | Requests via unix socket.                                                                                                                                           | `go.osspkg.com/goppy/unix`<br/> `unix.WithServer()`<br/> `unix.WithClient()`                                                                                                                                    |
+| **database**   | Multiple connection pools with MySQL, SQLite, Postgre databases (with automatic migration setup).                                                                   | `go.osspkg.com/goppy/ormmysql`<br/> `ormmysql.WithMySQL()` <br/> <br/> `go.osspkg.com/goppy/ormsqlite`<br/> `ormsqlite.WithSQLite()`<br/> <br/> `go.osspkg.com/goppy/ormpgsql`<br/> `ormpgsql.WithPostgreSQL()` |
+| **geoip**      | Definition of geo-IP information.                                                                                                                                   | `go.osspkg.com/goppy/geoip`<br/> `geoip.WithMaxMindGeoIP()` + `geoip.CloudflareMiddleware()`<br/> `geoip.MaxMindMiddleware()`                                                                                   |
+| **oauth**      | Authorization via OAuth provider (Yandex, Google). JWT Cookie.                                                                                                      | `go.osspkg.com/goppy/metrics`<br/> `auth.WithOAuth()`<br/> `auth.WithJWT()` + `auth.JWTGuardMiddleware()`                                                                                                       |
 
 ## Quick Start
 
@@ -65,6 +66,8 @@ func main() {
 	// Specify the path to the config via the argument: `--config`.
 	// Specify the path to the pidfile via the argument: `--pid`.
 	app := goppy.New()
+	app.AppName("demo_app")
+	app.AppVersion("v1.0.0")
 	app.Plugins(
 		web.WithHTTP(),
 	)

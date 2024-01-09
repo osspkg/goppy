@@ -16,6 +16,7 @@ use (
 	./iofile
 	./iosync
 	./ioutil
+	./metrics
 	./orm
 	./ormmysql
 	./ormpgsql

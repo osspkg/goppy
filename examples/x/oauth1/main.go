@@ -28,7 +28,7 @@ var (
 		},
 	}
 
-	servConf = web.ConfigHttp{Addr: ":8080"}
+	servConf = web.Config{Addr: ":8080"}
 )
 
 func main() {
@@ -39,7 +39,7 @@ func main() {
 	route.Route("/oauth/request/google", authServ.Request(oauth.CodeGoogle), http.MethodGet)
 	route.Route("/oauth/callback/google", authServ.CallBack(oauth.CodeGoogle, oauthCallBackHandler), http.MethodGet)
 
-	serv := web.NewServerHttp(servConf, route, xlog.Default())
+	serv := web.NewServer("OAuth", servConf, route, xlog.Default())
 	serv.Up(ctx) //nolint: errcheck
 	<-time.After(60 * time.Minute)
 	ctx.Close()

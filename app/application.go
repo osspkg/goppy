@@ -7,6 +7,7 @@ package app
 
 import (
 	"go.osspkg.com/goppy/console"
+	"go.osspkg.com/goppy/env"
 	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/syscall"
 	"go.osspkg.com/goppy/xc"
@@ -14,9 +15,6 @@ import (
 )
 
 type (
-	//ENV type for environments (prod, dev, stage, etc)
-	ENV string
-
 	App interface {
 		Logger(log xlog.Logger) App
 		Modules(modules ...interface{}) App
@@ -191,7 +189,7 @@ func (a *_app) prepareConfig(interactive bool) {
 		}
 		a.logout.Handler(a.log)
 		a.modules = a.modules.Add(
-			ENV(config.Env),
+			env.ENV(config.Env),
 		)
 		// decode all configs
 		var configs []interface{}

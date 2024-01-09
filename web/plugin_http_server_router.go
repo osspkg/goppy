@@ -37,14 +37,14 @@ type (
 	}
 )
 
-func newRouteProvider(configs map[string]ConfigHttp, l xlog.Logger) *routeProvider {
+func newRouteProvider(configs map[string]Config, l xlog.Logger) *routeProvider {
 	v := &routeProvider{
 		pool: make(map[string]*routePoolItem),
 	}
 	for name, config := range configs {
 		v.pool[name] = &routePoolItem{
 			active: false,
-			route:  newRouter(config, l),
+			route:  newRouter(name, config, l),
 		}
 	}
 	return v
@@ -96,9 +96,10 @@ func (v *routeProvider) Down() error {
 
 type (
 	route struct {
+		name   string
 		route  *BaseRouter
-		serv   *ServerHttp
-		config ConfigHttp
+		serv   *Server
+		config Config
 		log    xlog.Logger
 	}
 
@@ -123,8 +124,9 @@ type (
 	}
 )
 
-func newRouter(c ConfigHttp, l xlog.Logger) *route {
+func newRouter(name string, c Config, l xlog.Logger) *route {
 	return &route{
+		name:   name,
 		route:  NewBaseRouter(),
 		config: c,
 		log:    l,
@@ -132,7 +134,7 @@ func newRouter(c ConfigHttp, l xlog.Logger) *route {
 }
 
 func (v *route) Up(c xc.Context) error {
-	v.serv = NewServerHttp(v.config, v.route, v.log)
+	v.serv = NewServer(v.name, v.config, v.route, v.log)
 	return v.serv.Up(c)
 }
 func (v *route) Down() error {
