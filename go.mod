@@ -17,11 +17,11 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/app v0.1.11
+	go.osspkg.com/goppy/app v0.1.12
 	go.osspkg.com/goppy/console v0.1.2
 	go.osspkg.com/goppy/env v0.1.2
 	go.osspkg.com/goppy/errors v0.1.2
-	go.osspkg.com/goppy/iofile v0.1.6
+	go.osspkg.com/goppy/iofile v0.1.7
 	go.osspkg.com/goppy/plugins v0.1.2
 	go.osspkg.com/goppy/xlog v0.1.7
 	gopkg.in/yaml.v3 v3.0.1
