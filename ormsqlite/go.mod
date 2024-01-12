@@ -19,8 +19,8 @@ replace (
 require (
 	github.com/mattn/go-sqlite3 v1.14.19
 	go.osspkg.com/goppy/errors v0.1.2
-	go.osspkg.com/goppy/iofile v0.1.6
-	go.osspkg.com/goppy/orm v0.1.8
+	go.osspkg.com/goppy/iofile v0.1.7
+	go.osspkg.com/goppy/orm v0.1.9
 	go.osspkg.com/goppy/plugins v0.1.2
 	go.osspkg.com/goppy/routine v0.1.6
 	go.osspkg.com/goppy/sqlcommon v0.1.8
