@@ -25,6 +25,7 @@ use (
 	./plugins
 	./random
 	./routine
+	./search
 	./shell
 	./sip
 	./sqlcommon
