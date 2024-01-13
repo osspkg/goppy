@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/xlog
 
-go 1.18
+go 1.20
 
 replace (
 	go.osspkg.com/goppy/iosync => ../iosync
@@ -9,8 +9,8 @@ replace (
 
 require (
 	github.com/mailru/easyjson v0.7.7
-	go.osspkg.com/goppy/iosync v0.1.5
-	go.osspkg.com/goppy/xtest v0.1.4
+	go.osspkg.com/goppy/iosync v0.2.0
+	go.osspkg.com/goppy/xtest v0.2.0
 )
 
 require github.com/josharian/intern v1.0.0 // indirect

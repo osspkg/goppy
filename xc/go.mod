@@ -1,3 +1,3 @@
 module go.osspkg.com/goppy/xc
 
-go 1.18
+go 1.20

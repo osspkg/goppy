@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/graphics
 
-go 1.18
+go 1.20
 
 replace (
 	go.osspkg.com/goppy/errors => ../errors
@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.1.2
+	go.osspkg.com/goppy/errors v0.2.0
 	golang.org/x/image v0.15.0
 )
 
-require go.osspkg.com/goppy/syscall v0.1.3 // indirect
+require go.osspkg.com/goppy/syscall v0.2.0 // indirect

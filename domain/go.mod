@@ -1,3 +1,3 @@
 module go.osspkg.com/goppy/domain
 
-go 1.18
+go 1.20
