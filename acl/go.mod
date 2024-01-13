@@ -9,8 +9,8 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.1.2
-	go.osspkg.com/goppy/xtest v0.1.4
+	go.osspkg.com/goppy/errors v0.2.0
+	go.osspkg.com/goppy/xtest v0.2.0
 )
 
-require go.osspkg.com/goppy/syscall v0.1.3 // indirect
+require go.osspkg.com/goppy/syscall v0.2.0 // indirect

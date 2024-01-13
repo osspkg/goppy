@@ -7,6 +7,6 @@ replace (
 	go.osspkg.com/goppy/syscall => ../syscall
 )
 
-require go.osspkg.com/goppy/errors v0.1.2
+require go.osspkg.com/goppy/errors v0.2.0
 
-require go.osspkg.com/goppy/syscall v0.1.3 // indirect
+require go.osspkg.com/goppy/syscall v0.2.0 // indirect

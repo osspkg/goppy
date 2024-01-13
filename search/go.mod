@@ -12,9 +12,9 @@ replace (
 
 require (
 	github.com/blevesearch/bleve/v2 v2.3.10
-	go.osspkg.com/goppy/errors v0.1.2
-	go.osspkg.com/goppy/iofile v0.1.7
-	go.osspkg.com/goppy/xtest v0.1.4
+	go.osspkg.com/goppy/errors v0.2.0
+	go.osspkg.com/goppy/iofile v0.2.0
+	go.osspkg.com/goppy/xtest v0.2.0
 )
 
 require (
@@ -46,8 +46,8 @@ require (
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	go.etcd.io/bbolt v1.3.7 // indirect
-	go.osspkg.com/goppy/iosync v0.1.5 // indirect
-	go.osspkg.com/goppy/syscall v0.1.3 // indirect
+	go.osspkg.com/goppy/iosync v0.2.0 // indirect
+	go.osspkg.com/goppy/syscall v0.2.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	google.golang.org/protobuf v1.32.0 // indirect
