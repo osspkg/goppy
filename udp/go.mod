@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/udp
 
-go 1.18
+go 1.20
 
 replace (
 	go.osspkg.com/goppy/errors => ../errors

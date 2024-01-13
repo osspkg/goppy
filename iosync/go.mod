@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/iosync
 
-go 1.18
+go 1.20
 
 replace go.osspkg.com/goppy/xtest => ../xtest
 
