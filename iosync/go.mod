@@ -4,4 +4,4 @@ go 1.20
 
 replace go.osspkg.com/goppy/xtest => ../xtest
 
-require go.osspkg.com/goppy/xtest v0.2.0
+require go.osspkg.com/goppy/xtest v0.3.0

@@ -19,14 +19,14 @@ replace (
 require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/client_model v0.5.0
-	go.osspkg.com/goppy/env v0.2.0
-	go.osspkg.com/goppy/plugins v0.2.0
-	go.osspkg.com/goppy/syscall v0.2.0
-	go.osspkg.com/goppy/web v0.2.0
-	go.osspkg.com/goppy/xc v0.2.0
-	go.osspkg.com/goppy/xlog v0.2.0
-	go.osspkg.com/goppy/xnet v0.2.0
-	go.osspkg.com/goppy/xtest v0.2.0
+	go.osspkg.com/goppy/env v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.0
+	go.osspkg.com/goppy/syscall v0.3.0
+	go.osspkg.com/goppy/web v0.3.0
+	go.osspkg.com/goppy/xc v0.3.0
+	go.osspkg.com/goppy/xlog v0.3.0
+	go.osspkg.com/goppy/xnet v0.3.0
+	go.osspkg.com/goppy/xtest v0.3.0
 	google.golang.org/protobuf v1.32.0
 )
 
@@ -38,9 +38,9 @@ require (
 	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	go.osspkg.com/goppy/errors v0.2.0 // indirect
-	go.osspkg.com/goppy/iosync v0.2.0 // indirect
-	go.osspkg.com/goppy/ioutil v0.2.0 // indirect
+	go.osspkg.com/goppy/errors v0.3.0 // indirect
+	go.osspkg.com/goppy/iosync v0.3.0 // indirect
+	go.osspkg.com/goppy/ioutil v0.3.0 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
 )

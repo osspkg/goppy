@@ -8,8 +8,8 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.2.0
+	go.osspkg.com/goppy/errors v0.3.0
 	golang.org/x/image v0.15.0
 )
 
-require go.osspkg.com/goppy/syscall v0.2.0 // indirect
+require go.osspkg.com/goppy/syscall v0.3.0 // indirect
