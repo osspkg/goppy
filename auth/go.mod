@@ -18,13 +18,13 @@ replace (
 
 require (
 	github.com/mailru/easyjson v0.7.7
-	go.osspkg.com/goppy/encryption v0.2.0
-	go.osspkg.com/goppy/errors v0.2.0
-	go.osspkg.com/goppy/ioutil v0.2.0
-	go.osspkg.com/goppy/plugins v0.2.0
-	go.osspkg.com/goppy/random v0.2.0
-	go.osspkg.com/goppy/web v0.2.0
-	go.osspkg.com/goppy/xtest v0.2.0
+	go.osspkg.com/goppy/encryption v0.3.0
+	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/ioutil v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.0
+	go.osspkg.com/goppy/random v0.3.0
+	go.osspkg.com/goppy/web v0.3.0
+	go.osspkg.com/goppy/xtest v0.3.0
 	golang.org/x/oauth2 v0.16.0
 )
 
@@ -33,11 +33,11 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
-	go.osspkg.com/goppy/iosync v0.2.0 // indirect
-	go.osspkg.com/goppy/syscall v0.2.0 // indirect
-	go.osspkg.com/goppy/xc v0.2.0 // indirect
-	go.osspkg.com/goppy/xlog v0.2.0 // indirect
-	go.osspkg.com/goppy/xnet v0.2.0 // indirect
+	go.osspkg.com/goppy/iosync v0.3.0 // indirect
+	go.osspkg.com/goppy/syscall v0.3.0 // indirect
+	go.osspkg.com/goppy/xc v0.3.0 // indirect
+	go.osspkg.com/goppy/xlog v0.3.0 // indirect
+	go.osspkg.com/goppy/xnet v0.3.0 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/net v0.20.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
