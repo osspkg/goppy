@@ -21,9 +21,9 @@ require (
 	go.osspkg.com/goppy/encryption v0.3.0
 	go.osspkg.com/goppy/errors v0.3.0
 	go.osspkg.com/goppy/ioutil v0.3.0
-	go.osspkg.com/goppy/plugins v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/random v0.3.0
-	go.osspkg.com/goppy/web v0.3.0
+	go.osspkg.com/goppy/web v0.3.1
 	go.osspkg.com/goppy/xtest v0.3.0
 	golang.org/x/oauth2 v0.16.0
 )
