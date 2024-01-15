@@ -38,17 +38,17 @@ func TestUnit_getReflectAddress(t *testing.T) {
 		want string
 		ok   bool
 	}{
-		{name: "Case1", args: reflect.TypeOf(a), obj: a, want: "int"},
-		{name: "Case2", args: reflect.TypeOf(b), obj: b, want: "string"},
-		{name: "Case3", args: reflect.TypeOf(c), obj: c, want: "bool"},
+		{name: "Case1", args: reflect.TypeOf(a), obj: a, want: "int", ok: false},
+		{name: "Case2", args: reflect.TypeOf(b), obj: b, want: "string", ok: false},
+		{name: "Case3", args: reflect.TypeOf(c), obj: c, want: "bool", ok: false},
 		{name: "Case4", args: reflect.TypeOf(d), obj: d, want: "go.osspkg.com/goppy/app.aa", ok: true},
 		{name: "Case5", args: reflect.TypeOf(e), obj: e, want: "go.osspkg.com/goppy/app.ff", ok: true},
 		{name: "Case6", args: reflect.TypeOf(f), obj: f, want: "func(string) bool", ok: true},
-		{name: "Case6", args: reflect.TypeOf(f), obj: nil, want: "func(string) bool", ok: false},
-		{name: "Case7", args: reflect.TypeOf(g), obj: g, want: "error"},
-		{name: "Case8", args: reflect.TypeOf(h), obj: h, want: "[]string"},
-		{name: "Case9", args: reflect.TypeOf(j), obj: j, want: "go.osspkg.com/goppy/app.bb", ok: true},
-		{name: "Case10", args: reflect.TypeOf(k), obj: k, want: "struct {}"},
+		{name: "Case7", args: reflect.TypeOf(f), obj: nil, want: "func(string) bool", ok: false},
+		{name: "Case8", args: reflect.TypeOf(g), obj: g, want: "error", ok: false},
+		{name: "Case9", args: reflect.TypeOf(h), obj: h, want: "[]string", ok: false},
+		{name: "Case10", args: reflect.TypeOf(j), obj: j, want: "go.osspkg.com/goppy/app.bb", ok: true},
+		{name: "Case11", args: reflect.TypeOf(k), obj: k, want: "struct {}", ok: false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

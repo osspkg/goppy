@@ -5,12 +5,6 @@
 
 package plugins
 
-import (
-	"fmt"
-	"os"
-	"reflect"
-)
-
 type (
 	// Plugin plugin structure
 	Plugin struct {
@@ -30,13 +24,7 @@ func (p Plugins) Inject(list ...interface{}) Plugins {
 		case Plugin:
 			p = append(p, v)
 		default:
-			switch reflect.TypeOf(vv).Kind() {
-			case reflect.Ptr, reflect.Func:
-				p = append(p, Plugin{Inject: vv})
-			default:
-				fmt.Printf("Plugins Inject error: unknown dependency %T", vv)
-				os.Exit(1)
-			}
+			p = append(p, Plugin{Inject: vv})
 		}
 	}
 	return p
