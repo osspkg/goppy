@@ -16,7 +16,7 @@ import (
 	"go.osspkg.com/goppy/xlog"
 )
 
-func WithWebsocketServerPool(options ...func(websocket.Upgrader)) plugins.Plugin {
+func WithWebsocketServerPool(options ...func(*websocket.Upgrader)) plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(l xlog.Logger) WebsocketServerPool {
 			return &wssPool{
@@ -30,7 +30,7 @@ func WithWebsocketServerPool(options ...func(websocket.Upgrader)) plugins.Plugin
 
 type (
 	wssPool struct {
-		options []func(websocket.Upgrader)
+		options []func(*websocket.Upgrader)
 		pool    map[string]*server.Server
 		log     xlog.Logger
 		ctx     context.Context
