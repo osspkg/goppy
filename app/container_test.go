@@ -24,6 +24,8 @@ func TestUnit_EmptyDI(t *testing.T) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+type SimpleString string
+
 type SimpleDI1_A struct {
 	A string
 }
@@ -333,6 +335,42 @@ func TestUnit_DI_Default(t *testing.T) {
 			},
 			wantErr:       false,
 			wantErrString: "",
+		},
+		{
+			name: "Case24",
+			register: []interface{}{
+				func() *SimpleDI1_Service {
+					return &SimpleDI1_Service{}
+				},
+				func(_ *SimpleDI1_Service) error {
+					return nil
+				},
+			},
+			wantErr:       false,
+			wantErrString: "",
+		},
+		{
+			name: "Case25",
+			register: []interface{}{
+				&SimpleDI1_A{A: "123"},
+				SimpleDI1_Struct{},
+				func(s SimpleDI1_Struct) error {
+					return fmt.Errorf(s.AA.A)
+				},
+			},
+			wantErr:       true,
+			wantErrString: "123",
+		},
+		{
+			name: "Case26",
+			register: []interface{}{
+				SimpleString("QWERT"),
+				func(s SimpleString) error {
+					return fmt.Errorf(string(s))
+				},
+			},
+			wantErr:       true,
+			wantErrString: "QWERT",
 		},
 	}
 	for _, tt := range tests {

@@ -20,9 +20,9 @@ require (
 	github.com/prometheus/client_golang v1.18.0
 	github.com/prometheus/client_model v0.5.0
 	go.osspkg.com/goppy/env v0.3.0
-	go.osspkg.com/goppy/plugins v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/syscall v0.3.0
-	go.osspkg.com/goppy/web v0.3.0
+	go.osspkg.com/goppy/web v0.3.1
 	go.osspkg.com/goppy/xc v0.3.0
 	go.osspkg.com/goppy/xlog v0.3.0
 	go.osspkg.com/goppy/xnet v0.3.0

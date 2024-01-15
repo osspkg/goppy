@@ -20,7 +20,7 @@ require (
 	github.com/lib/pq v1.10.9
 	go.osspkg.com/goppy/errors v0.3.0
 	go.osspkg.com/goppy/orm v0.3.0
-	go.osspkg.com/goppy/plugins v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/routine v0.3.0
 	go.osspkg.com/goppy/sqlcommon v0.3.0
 	go.osspkg.com/goppy/xc v0.3.0

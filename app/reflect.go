@@ -19,19 +19,28 @@ func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
 		return fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()), true
 	}
 	switch t.Kind() {
-	case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
-		if t.Implements(errType) {
-			return errName, false
-		}
-		if len(t.Elem().PkgPath()) > 0 {
-			return fmt.Sprintf("%s.%s", t.Elem().PkgPath(), t.Elem().Name()), true
-		}
 	case reflect.Func:
 		if v == nil {
 			return t.String(), false
 		}
 		p := reflect.ValueOf(v).Pointer()
 		return fmt.Sprintf("0x%x.%s", p, t.String()), true
+	case reflect.Ptr:
+		if t.Implements(errType) {
+			return errName, false
+		}
+		if len(t.Elem().PkgPath()) > 0 {
+			return fmt.Sprintf("%s.%s", t.Elem().PkgPath(), t.Elem().Name()), true
+		}
+	case reflect.Bool,
+		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Float32, reflect.Float64,
+		reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String,
+		reflect.Struct:
+		if len(t.PkgPath()) > 0 {
+			return fmt.Sprintf("%s.%s", t.PkgPath(), t.Elem().Name()), true
+		}
 	}
 	return t.String(), false
 }

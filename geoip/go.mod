@@ -17,8 +17,8 @@ replace (
 
 require (
 	github.com/oschwald/geoip2-golang v1.9.0
-	go.osspkg.com/goppy/plugins v0.3.0
-	go.osspkg.com/goppy/web v0.3.0
+	go.osspkg.com/goppy/plugins v0.3.1
+	go.osspkg.com/goppy/web v0.3.1
 )
 
 require (

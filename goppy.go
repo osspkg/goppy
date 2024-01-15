@@ -77,16 +77,15 @@ func (v *_app) Logger(l xlog.Logger) {
 // Plugins setting the list of plugins to initialize
 func (v *_app) Plugins(args ...plugins.Plugin) {
 	for _, arg := range args {
-		reflectResolve(arg.Config, reflect.Ptr, func(in interface{}) {
+		reflectResolve(arg.Config, plugins.AllowedKindConfig, func(in interface{}) {
 			v.configs = append(v.configs, in)
-		}, "Plugin.Config can only be a reference to an object")
-		reflectResolve(arg.Inject, reflect.Func, func(in interface{}) {
+		})
+		reflectResolve(arg.Inject, plugins.AllowedKindInject, func(in interface{}) {
 			v.plugins = append(v.plugins, in)
-		}, "Plugin.Inject can only be a function that accepts "+
-			"dependencies and returns a reference to the initialized service")
-		reflectResolve(arg.Resolve, reflect.Func, func(in interface{}) {
+		})
+		reflectResolve(arg.Resolve, plugins.AllowedKindResolve, func(in interface{}) {
 			v.plugins = append(v.plugins, in)
-		}, "Plugin.Resolve can only be a function that accepts dependencies")
+		})
 	}
 }
 
@@ -118,13 +117,11 @@ func (v *_app) Run() {
 	apps.Run()
 }
 
-func reflectResolve(arg interface{}, k reflect.Kind, call func(interface{}), comment string) {
+func reflectResolve(arg interface{}, k plugins.AllowedKind, call func(interface{})) {
 	if arg == nil {
 		return
 	}
-	if reflect.TypeOf(arg).Kind() != k {
-		panic(comment)
-	}
+	k.MustValidate(arg)
 	call(arg)
 }
 
