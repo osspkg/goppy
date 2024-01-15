@@ -7,6 +7,7 @@ package internal
 
 import (
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -24,11 +25,12 @@ var (
 	ErrUnknownEventID = errors.New("unknown event id")
 )
 
-func NewUpgrader() websocket.Upgrader {
-	return websocket.Upgrader{
-		EnableCompression: true,
+func NewUpgrader() *websocket.Upgrader {
+	return &websocket.Upgrader{
+		EnableCompression: false,
 		ReadBufferSize:    1024,
 		WriteBufferSize:   1024,
+		WriteBufferPool:   &sync.Pool{},
 		CheckOrigin: func(_ *http.Request) bool {
 			return true
 		},

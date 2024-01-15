@@ -20,7 +20,7 @@ import (
 type Server struct {
 	clients map[string]*Connect
 	events  map[event.Id]EventHandler
-	upgrade websocket.Upgrader
+	upgrade *websocket.Upgrader
 	logger  xlog.Logger
 	ctx     context.Context
 	cancel  context.CancelFunc
@@ -28,7 +28,7 @@ type Server struct {
 	wg      iosync.Group
 }
 
-func New(l xlog.Logger, ctx context.Context, opts ...func(u websocket.Upgrader)) *Server {
+func New(l xlog.Logger, ctx context.Context, opts ...func(u *websocket.Upgrader)) *Server {
 	up := internal.NewUpgrader()
 	c, cancel := context.WithCancel(ctx)
 	for _, opt := range opts {
