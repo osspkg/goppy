@@ -19,7 +19,7 @@ require (
 	go.osspkg.com/goppy/console v0.3.0
 	go.osspkg.com/goppy/env v0.3.0
 	go.osspkg.com/goppy/errors v0.3.0
-	go.osspkg.com/goppy/iofile v0.3.0
+	go.osspkg.com/goppy/iofile v0.3.1
 	go.osspkg.com/goppy/iosync v0.3.0
 	go.osspkg.com/goppy/syscall v0.3.0
 	go.osspkg.com/goppy/xc v0.3.0
