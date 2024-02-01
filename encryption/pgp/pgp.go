@@ -60,7 +60,10 @@ func New() Signer {
 
 func (v *store) SetKey(b []byte, passwd string) error {
 	r := bytes.NewReader(b)
-	return v.readKey(r, passwd)
+	if err := v.readKey(r, passwd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (v *store) SetHash(hash crypto.Hash, bits int) {
@@ -82,7 +85,11 @@ func (v *store) SetKeyFromFile(filename string, passwd string) error {
 	if err != nil {
 		return errors.Wrapf(err, "read key from file")
 	}
-	return v.readKey(r, passwd)
+	defer r.Close() //nolint: errcheck
+	if err = v.readKey(r, passwd); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (v *store) PublicKey() ([]byte, error) {
