@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"sync"
+	"time"
 )
 
 type Formatter interface {
@@ -67,16 +68,13 @@ func (v *FormatString) Encode(m *Message) ([]byte, error) {
 		poolBuff.Put(b)
 	}()
 
-	fmt.Fprintf(b, "time: %d%slvl: %s%smsg: %s", m.Time, v.delim, m.Level, v.delim, m.Message)
+	fmt.Fprintf(b, "time=%s%slvl=%s%smsg=%#v", time.Unix(m.UnixTime, 0).Format(time.RFC3339), v.delim, m.Level, v.delim, m.Message)
 	if len(m.Ctx) > 0 {
-		b.WriteString(v.delim + "ctx: [")
 		for key, value := range m.Ctx {
-			fmt.Fprintf(b, "[%s: %+v]", key, value)
+			fmt.Fprintf(b, "%s%s=%#v", v.delim, key, value)
 		}
-		b.WriteString("]\n")
-	} else {
-		b.WriteString("\n")
 	}
+	b.WriteString("\n")
 
 	return append(make([]byte, 0, b.Len()), b.Bytes()...), nil
 }

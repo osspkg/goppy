@@ -109,7 +109,7 @@ func (v *_app) Run() {
 
 	if params := v.args.Next(); len(params) > 0 {
 		if cmd, ok := v.commands[params[0]]; ok {
-			apps.Invoke(cmd)
+			apps.Call(cmd)
 			return
 		}
 		console.Fatalf("<%s> command not found", params[0])
@@ -189,9 +189,12 @@ func recoveryConfig(filename string, configs ...interface{}) error {
 		return err
 	}
 	b, err := yaml.Marshal(&app.Config{
-		Env:     "dev",
-		Level:   4,
-		LogFile: "/dev/stdout",
+		Env: "dev",
+		Log: app.LogConfig{
+			Level:    4,
+			FilePath: "/dev/stdout",
+			Format:   "string",
+		},
 	})
 	if err != nil {
 		return err

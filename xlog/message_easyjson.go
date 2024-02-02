@@ -4,6 +4,7 @@ package xlog
 
 import (
 	json "encoding/json"
+
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -37,7 +38,7 @@ func easyjson4086215fDecodeGoOsspkgComGoppyXlog(in *jlexer.Lexer, out *Message) 
 		}
 		switch key {
 		case "time":
-			out.Time = int64(in.Int64())
+			out.UnixTime = int64(in.Int64())
 		case "lvl":
 			out.Level = string(in.String())
 		case "msg":
@@ -85,7 +86,7 @@ func easyjson4086215fEncodeGoOsspkgComGoppyXlog(out *jwriter.Writer, in Message)
 	{
 		const prefix string = ",\"time\":"
 		out.RawString(prefix[1:])
-		out.Int64(int64(in.Time))
+		out.Int64(int64(in.UnixTime))
 	}
 	{
 		const prefix string = ",\"lvl\":"

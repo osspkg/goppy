@@ -22,20 +22,21 @@ type (
 		PidFile(filename string) App
 		Run()
 		Invoke(call interface{})
+		Call(call interface{})
 		ExitFunc(call func(code int)) App
 	}
 
 	_app struct {
-		cfile    string
-		pidfile  string
-		configs  Modules
-		modules  Modules
-		sources  iofile.FileCodec
-		packages Container
-		logout   *_log
-		log      xlog.Logger
-		ctx      xc.Context
-		exitFunc func(code int)
+		configFilePath string
+		pidFilePath    string
+		configs        Modules
+		modules        Modules
+		sources        iofile.FileCodec
+		packages       Container
+		logHandler     *_log
+		log            xlog.Logger
+		appContext     xc.Context
+		exitFunc       func(code int)
 	}
 )
 
@@ -43,11 +44,11 @@ type (
 func New() App {
 	ctx := xc.New()
 	return &_app{
-		modules:  Modules{},
-		configs:  Modules{},
-		packages: NewContainer(ctx),
-		ctx:      ctx,
-		exitFunc: func(_ int) {},
+		modules:    Modules{},
+		configs:    Modules{},
+		packages:   NewContainer(ctx),
+		appContext: ctx,
+		exitFunc:   func(_ int) {},
 	}
 }
 
@@ -73,7 +74,7 @@ func (a *_app) Modules(modules ...interface{}) App {
 
 // ConfigFile set config file path and configs models
 func (a *_app) ConfigFile(filename string, configs ...interface{}) App {
-	a.cfile = filename
+	a.configFilePath = filename
 	for _, config := range configs {
 		a.configs = a.configs.Add(config)
 	}
@@ -82,7 +83,7 @@ func (a *_app) ConfigFile(filename string, configs ...interface{}) App {
 }
 
 func (a *_app) PidFile(filename string) App {
-	a.pidfile = filename
+	a.pidFilePath = filename
 	return a
 }
 
@@ -91,7 +92,7 @@ func (a *_app) ExitFunc(v func(code int)) App {
 	return a
 }
 
-// Run application
+// Run application with all dependencies
 func (a *_app) Run() {
 	a.prepareConfig(false)
 
@@ -108,11 +109,11 @@ func (a *_app) Run() {
 		},
 		func(er bool) {
 			if er {
-				a.ctx.Close()
+				a.appContext.Close()
 				return
 			}
-			go syscall.OnStop(a.ctx.Close)
-			<-a.ctx.Done()
+			go syscall.OnStop(a.appContext.Close)
+			<-a.appContext.Done()
 		},
 		[]step{
 			{
@@ -121,14 +122,14 @@ func (a *_app) Run() {
 			},
 		},
 	)
-	console.FatalIfErr(a.logout.Close(), "close log file")
+	console.FatalIfErr(a.logHandler.Close(), "close log file")
 	if result {
 		a.exitFunc(1)
 	}
 	a.exitFunc(0)
 }
 
-// Invoke run application
+// Invoke run application with all dependencies and call function after starting
 func (a *_app) Invoke(call interface{}) {
 	a.prepareConfig(true)
 
@@ -151,7 +152,40 @@ func (a *_app) Invoke(call interface{}) {
 			},
 		},
 	)
-	console.FatalIfErr(a.logout.Close(), "close log file")
+	console.FatalIfErr(a.logHandler.Close(), "close log file")
+	if result {
+		a.exitFunc(1)
+	}
+	a.exitFunc(0)
+}
+
+// Call function with dependency and without starting all app
+func (a *_app) Call(call interface{}) {
+	a.prepareConfig(true)
+
+	result := a.steps(
+		[]step{
+			{
+				Call: func() error { return a.packages.Register(a.modules...) },
+			},
+			{
+				Call: func() error { return a.packages.Register(call) },
+			},
+			{
+				Call: func() error { return a.packages.BreakPoint(call) },
+			},
+			{
+				Call: func() error { return a.packages.Start() },
+			},
+		},
+		func(_ bool) {},
+		[]step{
+			{
+				Call: func() error { return a.packages.Stop() },
+			},
+		},
+	)
+	console.FatalIfErr(a.logHandler.Close(), "close log file")
 	if result {
 		a.exitFunc(1)
 	}
@@ -160,34 +194,35 @@ func (a *_app) Invoke(call interface{}) {
 
 func (a *_app) prepareConfig(interactive bool) {
 	var err error
-	if len(a.cfile) == 0 {
-		a.logout = newLog(&Config{
-			Level:   4,
-			LogFile: "/dev/stdout",
+	if len(a.configFilePath) == 0 {
+		a.logHandler = newLog(LogConfig{
+			Level:    4,
+			FilePath: "/dev/stdout",
+			Format:   "string",
 		})
 		if a.log == nil {
 			a.log = xlog.Default()
 		}
-		a.logout.Handler(a.log)
+		a.logHandler.Handler(a.log)
 	}
-	if len(a.cfile) > 0 {
+	if len(a.configFilePath) > 0 {
 		// read config file
-		a.sources = iofile.FileCodec(a.cfile)
+		a.sources = iofile.FileCodec(a.configFilePath)
 
 		// init logger
 		config := &Config{}
 		if err = a.sources.Decode(config); err != nil {
-			console.FatalIfErr(err, "decode config file: %s", a.cfile)
+			console.FatalIfErr(err, "decode config file: %s", a.configFilePath)
 		}
 		if interactive {
-			config.Level = 4
-			config.LogFile = "/dev/stdout"
+			config.Log.Level = 4
+			config.Log.FilePath = "/dev/stdout"
 		}
-		a.logout = newLog(config)
+		a.logHandler = newLog(config.Log)
 		if a.log == nil {
 			a.log = xlog.Default()
 		}
-		a.logout.Handler(a.log)
+		a.logHandler.Handler(a.log)
 		a.modules = a.modules.Add(
 			env.ENV(config.Env),
 		)
@@ -203,18 +238,18 @@ func (a *_app) prepareConfig(interactive bool) {
 		}
 		a.modules = a.modules.Add(configs...)
 
-		if !interactive && len(a.pidfile) > 0 {
-			if err = syscall.Pid(a.pidfile); err != nil {
+		if !interactive && len(a.pidFilePath) > 0 {
+			if err = syscall.Pid(a.pidFilePath); err != nil {
 				a.log.WithFields(xlog.Fields{
 					"err":  err.Error(),
-					"file": a.pidfile,
+					"file": a.pidFilePath,
 				}).Fatalf("Create pid file")
 			}
 		}
 	}
 	a.modules = a.modules.Add(
 		func() xlog.Logger { return a.log },
-		func() xc.Context { return a.ctx },
+		func() xc.Context { return a.appContext },
 	)
 }
 

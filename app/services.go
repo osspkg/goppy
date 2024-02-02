@@ -100,7 +100,7 @@ func (s *serviceTree) IsOff() bool {
 
 func (s *serviceTree) MakeAsUp() error {
 	if !s.status.On() {
-		return errDepAlreadyRunned
+		return errDepAlreadyRunning
 	}
 	return nil
 }
