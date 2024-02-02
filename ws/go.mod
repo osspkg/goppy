@@ -19,7 +19,7 @@ require (
 	go.osspkg.com/goppy/iosync v0.3.0
 	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/xc v0.3.0
-	go.osspkg.com/goppy/xlog v0.3.0
+	go.osspkg.com/goppy/xlog v0.3.1
 	go.osspkg.com/goppy/xtest v0.3.0
 )
 
