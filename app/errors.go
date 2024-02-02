@@ -8,8 +8,10 @@ package app
 import "go.osspkg.com/goppy/errors"
 
 var (
-	errDepAlreadyRunned = errors.New("dependencies are already running")
-	errDepNotRunning    = errors.New("dependencies are not running yet")
-	errServiceUnknown   = errors.New("unknown service")
-	errIsTypeError      = errors.New("ERROR")
+	errDepAlreadyRunning = errors.New("dependencies are already running")
+	errDepNotRunning     = errors.New("dependencies are not running yet")
+	errServiceUnknown    = errors.New("unknown service")
+	errIsTypeError       = errors.New("ERROR")
+	errBreakPointType    = errors.New("breakpoint can only be a function")
+	errBreakPointAddress = errors.New("invalid breakpoint address")
 )

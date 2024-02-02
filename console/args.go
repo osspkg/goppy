@@ -22,17 +22,17 @@ func NewArgument() *Argument {
 }
 
 type (
-	//Args list model
+	// Args list model
 	Args struct {
 		list []Arg
 		next []string
 	}
-	//Arg model
+	// Arg model
 	Arg struct {
 		Key   string
 		Value string
 	}
-	//ArgGetter argument getter interface
+	// ArgGetter argument getter interface
 	ArgGetter interface {
 		Has(name string) bool
 		Get(name string) *string

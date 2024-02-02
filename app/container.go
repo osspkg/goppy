@@ -27,6 +27,7 @@ type (
 		Start() error
 		Register(items ...interface{}) error
 		Invoke(item interface{}) error
+		BreakPoint(item interface{}) error
 		Stop() error
 	}
 )
@@ -51,7 +52,7 @@ func (v *container) Stop() error {
 // Start - initialize dependencies and start
 func (v *container) Start() error {
 	if !v.status.On() {
-		return errDepAlreadyRunned
+		return errDepAlreadyRunning
 	}
 	if err := v.srv.MakeAsUp(); err != nil {
 		return err
@@ -67,7 +68,7 @@ func (v *container) Start() error {
 
 func (v *container) Register(items ...interface{}) error {
 	if v.srv.IsOn() {
-		return errDepAlreadyRunned
+		return errDepAlreadyRunning
 	}
 
 	for _, item := range items {
@@ -82,6 +83,24 @@ func (v *container) Register(items ...interface{}) error {
 			return err
 		}
 	}
+	return nil
+}
+
+func (v *container) BreakPoint(item interface{}) error {
+	if v.srv.IsOn() {
+		return errDepAlreadyRunning
+	}
+	ref := reflect.TypeOf(item)
+	switch ref.Kind() {
+	case reflect.Func:
+	default:
+		return errBreakPointType
+	}
+	address, ok := getReflectAddress(ref, item)
+	if !ok {
+		return errBreakPointAddress
+	}
+	v.kahn.BreakPoint(address)
 	return nil
 }
 

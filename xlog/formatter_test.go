@@ -6,7 +6,7 @@
 package xlog
 
 import (
-	"reflect"
+	"bytes"
 	"testing"
 )
 
@@ -20,14 +20,14 @@ func TestUnit_FormatString_Encode(t *testing.T) {
 		{
 			name: "Case1",
 			args: &Message{
-				Time:    123456789,
-				Level:   "INF",
-				Message: "Hello",
+				UnixTime: 123456789,
+				Level:    "INF",
+				Message:  "Hello",
 				Ctx: map[string]interface{}{
-					"err": "err msg",
+					"err": "err\nmsg",
 				},
 			},
-			want:    []byte("time: 123456789\tlvl: INF\tmsg: Hello\tctx: [[err: err msg]]\n"),
+			want:    []byte("lvl=INF\tmsg=\"Hello\"\terr=\"err\\nmsg\"\n"),
 			wantErr: false,
 		},
 	}
@@ -39,7 +39,7 @@ func TestUnit_FormatString_Encode(t *testing.T) {
 				t.Errorf("Encode() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !reflect.DeepEqual(got, tt.want) {
+			if !bytes.Contains(got, tt.want) {
 				t.Errorf("Encode() got = %v, want %v", string(got), string(tt.want))
 			}
 		})

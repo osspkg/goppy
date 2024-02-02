@@ -62,7 +62,7 @@ func (l *log) SendMessage(level uint32, call func(v *Message)) {
 	if !ok {
 		lvl = "UNK"
 	}
-	m.Level, m.Time = lvl, time.Now().Unix()
+	m.Level, m.UnixTime = lvl, time.Now().Unix()
 
 	l.mux.RLock(func() {
 		b, err := l.formatter.Encode(m)

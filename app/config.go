@@ -5,9 +5,16 @@
 
 package app
 
-// Config config model
-type Config struct {
-	Env     string `yaml:"env"`
-	Level   uint32 `yaml:"level"`
-	LogFile string `yaml:"log"`
-}
+type (
+	// Config config model
+	Config struct {
+		Env string    `yaml:"env"`
+		Log LogConfig `yaml:"log"`
+	}
+
+	LogConfig struct {
+		Level    uint32 `yaml:"level"`
+		FilePath string `yaml:"file_path"`
+		Format   string `yaml:"format"`
+	}
+)
