@@ -52,10 +52,8 @@ func NewTest2(_ *Test0) *Test2 {
 func main() {
 	app.New().
 		Logger(xlog.Default()).
-		ConfigFile(
-			"./config.yaml",
-			Config{},
-		).
+		ConfigFile("./config.yaml").
+		ConfigModels(Config{}).
 		Modules(
 			&Test1{},
 			NewTest0,

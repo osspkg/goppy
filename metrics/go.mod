@@ -22,9 +22,9 @@ require (
 	go.osspkg.com/goppy/env v0.3.0
 	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/syscall v0.3.0
-	go.osspkg.com/goppy/web v0.3.2
+	go.osspkg.com/goppy/web v0.3.3
 	go.osspkg.com/goppy/xc v0.3.0
-	go.osspkg.com/goppy/xlog v0.3.1
+	go.osspkg.com/goppy/xlog v0.3.2
 	go.osspkg.com/goppy/xnet v0.3.0
 	go.osspkg.com/goppy/xtest v0.3.0
 	google.golang.org/protobuf v1.32.0

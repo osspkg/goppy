@@ -5,6 +5,7 @@ use (
 	./acl
 	./app
 	./auth
+	./config
 	./console
 	./domain
 	./encryption

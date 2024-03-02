@@ -14,9 +14,9 @@ import (
 )
 
 type (
-	//Simple model
+	// Simple model
 	Simple struct{}
-	//Config model
+	// Config model
 	Config1 struct {
 		Env string `yaml:"env"`
 	}
@@ -48,10 +48,8 @@ func (s *Simple) Down(_ xc.Context) error {
 func main() {
 	app.New().
 		Logger(xlog.Default()).
-		ConfigFile(
-			"./config.yaml",
-			Config1{},
-		).
+		ConfigFile("./config.yaml").
+		ConfigModels(Config1{}).
 		Modules(
 			Config2{Env: "prod"},
 			NewSimple,

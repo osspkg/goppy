@@ -18,7 +18,7 @@ replace (
 require (
 	github.com/oschwald/geoip2-golang v1.9.0
 	go.osspkg.com/goppy/plugins v0.3.1
-	go.osspkg.com/goppy/web v0.3.2
+	go.osspkg.com/goppy/web v0.3.3
 )
 
 require (
@@ -30,7 +30,7 @@ require (
 	go.osspkg.com/goppy/ioutil v0.3.0 // indirect
 	go.osspkg.com/goppy/syscall v0.3.0 // indirect
 	go.osspkg.com/goppy/xc v0.3.0 // indirect
-	go.osspkg.com/goppy/xlog v0.3.1 // indirect
+	go.osspkg.com/goppy/xlog v0.3.2 // indirect
 	go.osspkg.com/goppy/xnet v0.3.0 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/sys v0.16.0 // indirect
