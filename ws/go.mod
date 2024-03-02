@@ -26,5 +26,5 @@ require (
 require (
 	github.com/josharian/intern v1.0.0 // indirect
 	go.osspkg.com/goppy/syscall v0.3.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
 )
