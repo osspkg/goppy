@@ -17,7 +17,7 @@ replace (
 
 require (
 	go.osspkg.com/algorithms v1.3.1
-	go.osspkg.com/goppy/config v0.0.1
+	go.osspkg.com/goppy/config v0.0.2
 	go.osspkg.com/goppy/console v0.3.1
 	go.osspkg.com/goppy/env v0.3.0
 	go.osspkg.com/goppy/errors v0.3.0
