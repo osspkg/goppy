@@ -24,7 +24,7 @@ require (
 require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/oschwald/maxminddb-golang v1.11.0 // indirect
+	github.com/oschwald/maxminddb-golang v1.12.0 // indirect
 	go.osspkg.com/goppy/errors v0.3.0 // indirect
 	go.osspkg.com/goppy/iosync v0.3.0 // indirect
 	go.osspkg.com/goppy/ioutil v0.3.0 // indirect
@@ -33,5 +33,5 @@ require (
 	go.osspkg.com/goppy/xlog v0.3.2 // indirect
 	go.osspkg.com/goppy/xnet v0.3.0 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
 )

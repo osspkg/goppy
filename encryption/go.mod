@@ -13,7 +13,7 @@ require (
 	go.osspkg.com/goppy/errors v0.3.0
 	go.osspkg.com/goppy/random v0.3.0
 	go.osspkg.com/goppy/xtest v0.3.0
-	golang.org/x/crypto v0.18.0
+	golang.org/x/crypto v0.20.0
 )
 
 require go.osspkg.com/goppy/syscall v0.3.0 // indirect

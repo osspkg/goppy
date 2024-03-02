@@ -13,7 +13,7 @@ replace (
 )
 
 require (
-	github.com/miekg/dns v1.1.57
+	github.com/miekg/dns v1.1.58
 	go.osspkg.com/goppy/errors v0.3.0
 	go.osspkg.com/goppy/iosync v0.3.0
 	go.osspkg.com/goppy/plugins v0.3.1
@@ -26,8 +26,8 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	go.osspkg.com/goppy/syscall v0.3.0 // indirect
-	golang.org/x/mod v0.12.0 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/tools v0.13.0 // indirect
+	golang.org/x/mod v0.15.0 // indirect
+	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/tools v0.18.0 // indirect
 )
