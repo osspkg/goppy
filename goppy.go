@@ -11,10 +11,10 @@ import (
 	"reflect"
 
 	"go.osspkg.com/goppy/app"
+	"go.osspkg.com/goppy/config"
 	"go.osspkg.com/goppy/console"
 	"go.osspkg.com/goppy/env"
 	"go.osspkg.com/goppy/errors"
-	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/plugins"
 	"go.osspkg.com/goppy/xlog"
 	"gopkg.in/yaml.v3"
@@ -26,6 +26,7 @@ type (
 		commands    map[string]interface{}
 		plugins     []interface{}
 		configs     []interface{}
+		resolvers   []config.Resolver
 		args        *console.Args
 		info        *env.AppInfo
 	}
@@ -37,6 +38,7 @@ type (
 		Logger(l xlog.Logger)
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
+		ConfigResolvers(rc ...config.Resolver)
 		Run()
 	}
 )
@@ -47,10 +49,11 @@ func New() Goppy {
 		application: app.New().ExitFunc(func(code int) {
 			os.Exit(code)
 		}),
-		commands: make(map[string]interface{}),
-		plugins:  make([]interface{}, 0, 100),
-		configs:  make([]interface{}, 0, 100),
-		args:     console.NewArgs().Parse(os.Args[1:]),
+		commands:  make(map[string]interface{}),
+		plugins:   make([]interface{}, 0, 100),
+		configs:   make([]interface{}, 0, 100),
+		resolvers: make([]config.Resolver, 0, 100),
+		args:      console.NewArgs().Parse(os.Args[1:]),
 		info: func() *env.AppInfo {
 			info := env.NewAppInfo()
 			return &info
@@ -74,6 +77,10 @@ func (v *_app) Logger(l xlog.Logger) {
 	v.application.Logger(l)
 }
 
+func (v *_app) ConfigResolvers(rc ...config.Resolver) {
+	v.application.ConfigResolvers(rc...)
+}
+
 // Plugins setting the list of plugins to initialize
 func (v *_app) Plugins(args ...plugins.Plugin) {
 	for _, arg := range args {
@@ -95,13 +102,19 @@ func (v *_app) Command(name string, call interface{}) {
 
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
+	if len(v.resolvers) == 0 {
+		v.ConfigResolvers(config.EnvResolver())
+	}
+
 	apps := v.application.Modules(v.plugins...)
 	apps.Modules(v.info.AppName, v.info.AppVersion, v.info.AppDescription, *v.info)
 
-	config := v.parseConfigFlag()
-	console.FatalIfErr(recoveryConfig(config, v.configs...), "config recovery")
-	console.FatalIfErr(validateConfig(config, v.configs...), "config validate")
-	apps.ConfigFile(config, v.configs...)
+	appConfig := v.parseConfigFlag()
+	console.FatalIfErr(v.recoveryConfig(appConfig), "config recovery")
+	console.FatalIfErr(v.validateConfig(appConfig), "config validate")
+	apps.ConfigFile(appConfig)
+	apps.ConfigModels(v.configs...)
+	apps.ConfigResolvers(v.resolvers...)
 
 	pid, err := v.parsePIDFileFlag()
 	console.FatalIfErr(err, "check pid file")
@@ -148,28 +161,28 @@ func (v *_app) parsePIDFileFlag() (string, error) {
 	return *pid, nil
 }
 
-func validateConfig(filename string, configs ...interface{}) error {
+func (v *_app) validateConfig(filename string) error {
 	if len(filename) == 0 {
 		return nil
 	}
-	_, err := os.Stat(filename)
-	if err == nil {
-		return nil
+	rc := config.NewConfigResolve(v.resolvers...)
+	if err := rc.OpenFile(filename); err != nil {
+		return err
 	}
-	if !errors.Is(err, os.ErrNotExist) {
+	if err := rc.Build(); err != nil {
 		return err
 	}
 	defType := reflect.TypeOf(new(plugins.Validator)).Elem()
-	for _, cfg := range configs {
+	for _, cfg := range v.configs {
 		if reflect.TypeOf(cfg).AssignableTo(defType) {
-			if err = iofile.FileCodec(filename).Decode(cfg); err != nil {
+			if err := rc.Decode(cfg); err != nil {
 				return fmt.Errorf("decode config %T error: %w", cfg, err)
 			}
 			vv, ok := cfg.(plugins.Validator)
 			if !ok {
 				continue
 			}
-			if err = vv.Validate(); err != nil {
+			if err := vv.Validate(); err != nil {
 				return fmt.Errorf("validate config %T error: %w", cfg, err)
 			}
 		}
@@ -177,7 +190,7 @@ func validateConfig(filename string, configs ...interface{}) error {
 	return nil
 }
 
-func recoveryConfig(filename string, configs ...interface{}) error {
+func (v *_app) recoveryConfig(filename string) error {
 	if len(filename) == 0 {
 		return nil
 	}
@@ -200,7 +213,7 @@ func recoveryConfig(filename string, configs ...interface{}) error {
 		return err
 	}
 	defType := reflect.TypeOf(new(plugins.Defaulter)).Elem()
-	for _, cfg := range configs {
+	for _, cfg := range v.configs {
 		if reflect.TypeOf(cfg).AssignableTo(defType) {
 			reflect.ValueOf(cfg).MethodByName("Default").Call([]reflect.Value{})
 		}

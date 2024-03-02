@@ -6,9 +6,9 @@
 package app
 
 import (
+	"go.osspkg.com/goppy/config"
 	"go.osspkg.com/goppy/console"
 	"go.osspkg.com/goppy/env"
-	"go.osspkg.com/goppy/iofile"
 	"go.osspkg.com/goppy/syscall"
 	"go.osspkg.com/goppy/xc"
 	"go.osspkg.com/goppy/xlog"
@@ -18,7 +18,9 @@ type (
 	App interface {
 		Logger(log xlog.Logger) App
 		Modules(modules ...interface{}) App
-		ConfigFile(filename string, configs ...interface{}) App
+		ConfigResolvers(res ...config.Resolver) App
+		ConfigFile(filename string) App
+		ConfigModels(configs ...interface{}) App
 		PidFile(filename string) App
 		Run()
 		Invoke(call interface{})
@@ -29,9 +31,9 @@ type (
 	_app struct {
 		configFilePath string
 		pidFilePath    string
+		resolvers      []config.Resolver
 		configs        Modules
 		modules        Modules
-		sources        iofile.FileCodec
 		packages       Container
 		logHandler     *_log
 		log            xlog.Logger
@@ -44,6 +46,7 @@ type (
 func New() App {
 	ctx := xc.New()
 	return &_app{
+		resolvers:  make([]config.Resolver, 0, 2),
 		modules:    Modules{},
 		configs:    Modules{},
 		packages:   NewContainer(ctx),
@@ -68,17 +71,28 @@ func (a *_app) Modules(modules ...interface{}) App {
 			a.modules = a.modules.Add(v)
 		}
 	}
-
 	return a
 }
 
-// ConfigFile set config file path and configs models
-func (a *_app) ConfigFile(filename string, configs ...interface{}) App {
+// ConfigFile set config file path
+func (a *_app) ConfigFile(filename string) App {
 	a.configFilePath = filename
-	for _, config := range configs {
-		a.configs = a.configs.Add(config)
-	}
+	return a
+}
 
+// ConfigModels set configs models
+func (a *_app) ConfigModels(configs ...interface{}) App {
+	for _, c := range configs {
+		a.configs = a.configs.Add(c)
+	}
+	return a
+}
+
+// ConfigResolvers set configs resolvers
+func (a *_app) ConfigResolvers(crs ...config.Resolver) App {
+	for _, r := range crs {
+		a.resolvers = append(a.resolvers, r)
+	}
 	return a
 }
 
@@ -207,29 +221,36 @@ func (a *_app) prepareConfig(interactive bool) {
 	}
 	if len(a.configFilePath) > 0 {
 		// read config file
-		a.sources = iofile.FileCodec(a.configFilePath)
-
-		// init logger
-		config := &Config{}
-		if err = a.sources.Decode(config); err != nil {
+		resolver := config.NewConfigResolve(a.resolvers...)
+		if err = resolver.OpenFile(a.configFilePath); err != nil {
+			console.FatalIfErr(err, "open config file: %s", a.configFilePath)
+		}
+		if err = resolver.Build(); err != nil {
+			console.FatalIfErr(err, "prepare config file: %s", a.configFilePath)
+		}
+		appConfig := &Config{}
+		if err = resolver.Decode(appConfig); err != nil {
 			console.FatalIfErr(err, "decode config file: %s", a.configFilePath)
 		}
 		if interactive {
-			config.Log.Level = 4
-			config.Log.FilePath = "/dev/stdout"
+			appConfig.Log.Level = 4
+			appConfig.Log.FilePath = "/dev/stdout"
 		}
-		a.logHandler = newLog(config.Log)
+
+		// init logger
+		a.logHandler = newLog(appConfig.Log)
 		if a.log == nil {
 			a.log = xlog.Default()
 		}
 		a.logHandler.Handler(a.log)
 		a.modules = a.modules.Add(
-			env.ENV(config.Env),
+			env.ENV(appConfig.Env),
 		)
+
 		// decode all configs
 		var configs []interface{}
-		configs, err = typingReflectPtr(a.configs, func(i interface{}) error {
-			return a.sources.Decode(i)
+		configs, err = typingReflectPtr(a.configs, func(c interface{}) error {
+			return resolver.Decode(c)
 		})
 		if err != nil {
 			a.log.WithFields(xlog.Fields{

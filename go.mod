@@ -4,6 +4,7 @@ go 1.20
 
 replace (
 	go.osspkg.com/goppy/app => ./app
+	go.osspkg.com/goppy/config => ./config
 	go.osspkg.com/goppy/console => ./console
 	go.osspkg.com/goppy/env => ./env
 	go.osspkg.com/goppy/errors => ./errors
@@ -18,10 +19,10 @@ replace (
 
 require (
 	go.osspkg.com/goppy/app v0.3.3
+	go.osspkg.com/goppy/config v0.0.0-00010101000000-000000000000
 	go.osspkg.com/goppy/console v0.3.1
 	go.osspkg.com/goppy/env v0.3.0
 	go.osspkg.com/goppy/errors v0.3.0
-	go.osspkg.com/goppy/iofile v0.3.1
 	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/xlog v0.3.1
 	gopkg.in/yaml.v3 v3.0.1
