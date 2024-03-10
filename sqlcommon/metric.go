@@ -13,11 +13,11 @@ type (
 	metric struct {
 		metrics MetricWriter
 	}
-	//MetricExecutor interface
+	// MetricExecutor interface
 	MetricExecutor interface {
 		ExecutionTime(name string, call func())
 	}
-	//MetricWriter interface
+	// MetricWriter interface
 	MetricWriter interface {
 		Metric(name string, time time.Duration)
 	}

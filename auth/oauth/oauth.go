@@ -66,7 +66,7 @@ func (v *OAuth) Request(name string) func(http.ResponseWriter, *http.Request) {
 	if err != nil {
 		return func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error())) //nolint: errcheck
+			w.Write([]byte(err.Error())) // nolint: errcheck
 		}
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -79,7 +79,7 @@ func (v *OAuth) CallBack(name string, call CallBack) func(w http.ResponseWriter,
 	if err != nil {
 		return func(w http.ResponseWriter, _ *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error())) //nolint: errcheck
+			w.Write([]byte(err.Error())) // nolint: errcheck
 		}
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +87,7 @@ func (v *OAuth) CallBack(name string, call CallBack) func(w http.ResponseWriter,
 		u, err := p.Exchange(r.Context(), code)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write([]byte(err.Error())) //nolint: errcheck
+			w.Write([]byte(err.Error())) // nolint: errcheck
 			return
 		}
 		call(w, r, u)

@@ -4,13 +4,13 @@ level: 4
 log: /dev/stdout
 
 sqlite:
-    - name: main
-      file: ./sqlite.db
-      cache: private
-      mode: rwc
-      journal: TRUNCATE
-      locking_mode: EXCLUSIVE
-      other_params: ""
+  - name: main
+    file: ./sqlite.db
+    cache: private
+    mode: rwc
+    journal: TRUNCATE
+    locking_mode: EXCLUSIVE
+    other_params: ""
 sqlite_migrate:
-    - pool: main
-      dir: ./
+  - pool: main
+    dir: ./

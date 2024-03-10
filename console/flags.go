@@ -11,11 +11,11 @@ import (
 )
 
 type (
-	//Flags model
+	// Flags model
 	Flags struct {
 		d []FlagItem
 	}
-	//FlagItem element of flag model
+	// FlagItem element of flag model
 	FlagItem struct {
 		req   bool
 		name  string

@@ -27,7 +27,7 @@ type (
 		l xlog.Logger
 	}
 
-	//Context request and response interface
+	// Context request and response interface
 	Context interface {
 		URL() *url.URL
 		Redirect(uri string)
@@ -73,7 +73,7 @@ func (v *_ctx) Response() http.ResponseWriter {
 /**********************************************************************************************************************/
 
 type (
-	//Param interface for typing a parameter from a URL
+	// Param interface for typing a parameter from a URL
 	Param interface {
 		String() (string, error)
 		Int() (int64, error)
@@ -182,7 +182,7 @@ type (
 
 // Get getting cookies from a key request
 func (v *_cookie) Get(key string) *http.Cookie {
-	c, _ := v.r.Cookie(key) //nolint: errcheck
+	c, _ := v.r.Cookie(key) // nolint: errcheck
 	return c
 }
 
@@ -244,7 +244,7 @@ func (v *_ctx) ErrorJSON(code int, err error, ctx ErrCtx) {
 		Message: err.Error(),
 		Ctx:     ctx,
 	}
-	b, _ := json.Marshal(&model) //nolint: errcheck
+	b, _ := json.Marshal(&model) // nolint: errcheck
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
 	if _, err = v.w.Write(b); err != nil {

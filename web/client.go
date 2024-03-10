@@ -84,7 +84,7 @@ func (v *ClientHttp) Call(ctx context.Context, method, uri string, in interface{
 		}
 	}
 
-	resp, err := v.cli.Do(req) //nolint: bodyclose
+	resp, err := v.cli.Do(req) // nolint: bodyclose
 	if err != nil {
 		return err
 	}

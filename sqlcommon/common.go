@@ -23,23 +23,23 @@ const (
 )
 
 type (
-	//ConfigInterface interface of configs
+	// ConfigInterface interface of configs
 	ConfigInterface interface {
 		List() []ItemInterface
 	}
-	//ItemInterface config item interface
+	// ItemInterface config item interface
 	ItemInterface interface {
 		GetName() string
 		GetDSN() string
 		Setup(SetupInterface)
 	}
-	//SetupInterface connections setup interface
+	// SetupInterface connections setup interface
 	SetupInterface interface {
 		SetMaxIdleConns(int)
 		SetMaxOpenConns(int)
 		SetConnMaxLifetime(time.Duration)
 	}
-	//Connector interface of connection
+	// Connector interface of connection
 	Connector interface {
 		Dialect() string
 		Pool(string) (*sql.DB, error)

@@ -10,7 +10,7 @@ import (
 	"reflect"
 )
 
-func Combine(multi ...cc.Context) (cc.Context, cc.CancelFunc) {
+func Join(multi ...cc.Context) (cc.Context, cc.CancelFunc) {
 	ctx, cancel := cc.WithCancel(cc.Background())
 
 	go func() {

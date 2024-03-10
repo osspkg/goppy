@@ -40,10 +40,10 @@ func main() {
 	route.Route("/oauth/callback/google", authServ.CallBack(oauth.CodeGoogle, oauthCallBackHandler), http.MethodGet)
 
 	serv := web.NewServer("OAuth", servConf, route, xlog.Default())
-	serv.Up(ctx) //nolint: errcheck
+	serv.Up(ctx) // nolint: errcheck
 	<-time.After(60 * time.Minute)
 	ctx.Close()
-	serv.Down() //nolint: errcheck
+	serv.Down() // nolint: errcheck
 }
 
 const out = `

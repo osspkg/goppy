@@ -69,8 +69,8 @@ func (v *ConfigMysql) Default() {
 	}
 }
 
-// WithMySQL launch MySQL connection pool
-func WithMySQL() plugins.Plugin {
+// WithClient launch MySQL connection pool
+func WithClient() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
 		Inject: func(c *ConfigMysql, l xlog.Logger) MySQL {
@@ -102,7 +102,7 @@ type (
 		active  bool
 	}
 
-	//MySQL connection MySQL interface
+	// MySQL connection MySQL interface
 	MySQL interface {
 		Pool(name string) orm.Stmt
 	}

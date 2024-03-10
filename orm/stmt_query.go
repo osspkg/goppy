@@ -32,15 +32,13 @@ func (v *query) Reset() *query {
 	return v
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type (
-	//Scanner interface for bind data
+	// Scanner interface for bind data
 	Scanner interface {
 		Scan(args ...interface{}) error
 	}
 
-	//Querier interface for generate query
+	// Querier interface for generate query
 	Querier interface {
 		SQL(query string, args ...interface{})
 		Bind(call func(bind Scanner) error)
@@ -67,7 +65,7 @@ func callQueryContext(ctx context.Context, db dbGetter, call func(q Querier)) er
 	if err != nil {
 		return err
 	}
-	defer rows.Close() //nolint: errcheck
+	defer rows.Close() // nolint: errcheck
 	if q.B != nil {
 		for rows.Next() {
 			if err = q.B(rows); err != nil {

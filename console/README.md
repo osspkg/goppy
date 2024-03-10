@@ -3,7 +3,7 @@
 ## Сreating console application
 
 ```go
-import "go.osspkg.com/goppy/sdk/console"
+import "go.osspkg.com/goppy/console"
 
 // creating an instance of the application, 
 // specifying its name and description for flag: --help 
@@ -19,7 +19,7 @@ root.Exec()
 ## Creating a simple command
 
 ```go
-import "go.osspkg.com/goppy/sdk/console"
+import "go.osspkg.com/goppy/console"
 // creating a new team with settings
 console.NewCommand(func(setter console.CommandSetter) {
 	// passing the command name and description
@@ -54,40 +54,41 @@ console.NewCommand(func(setter console.CommandSetter) {
 
 ### example of execution results
 
-**go run main.go  --help**
+**go run main.go --help**
+
 ```text
-Usage: 
-  tool  [command] [args]
-
-Available Commands:
-  simple    first-level command
-
-_____________________________________________________
-Use flag --help for more information about a command.
+NAME:
+        tool - help tool
+SYNOPSIS:
+        tool   [arg]
+COMMANDS:
+        one   first level
 
 ```
-**go run main.go simple  --help**
+
+**go run main.go simple --help**
+
 ```text
-Usage: 
-  tool simple [arg]  -a=demo -b=1 --cc=1e-05 -d
+NAME
+        tool - help tool
+SYNOPSIS
+        tool simple [arg]
+DESCRIPTION
+        first-level command
+ARGUMENTS
+        -a       this is a string argument (default: demo)
+        -b       this is a int64 argument (default: 1)
+        --cc     this is a float64 argument (default: 1e-05)
+        -e       this is a bool argument (default: false)
 
-Flags:
-  -a     this is a string argument (default: demo)
-  -b     this is a int64 argument (default: 1)
-  --cc    this is a float64 argument (default: 1e-05)
-  -d     this is a bool argument (default: true)
-
-
-Examples:
-  tool simple aa/bb/cc -a=hello -b=123 --cc=123.456 -e
 ```
 
 ## Creating multi-level command tree
 
-To create a multi-level command tree, 
+To create a multi-level command tree,
 you need to add the child command to the parent via the `AddCommand` method.
 
-At the same time, in the parent command, it is enough to 
+At the same time, in the parent command, it is enough to
 specify only the name and description via the `Setup` method.
 
 ```go
@@ -110,58 +111,4 @@ oneCmd := console.NewCommand(func(setter console.CommandSetter) {
 
 root.AddCommand(oneCmd)
 root.Exec()
-```
-
-### example of execution results
-
-**go run main.go  --help**
-
-```text
-Usage: 
-  tool  [command] [args]
-
-Available Commands:
-  one    first level
-
-_____________________________________________________
-Use flag --help for more information about a command.
-```
-**go run main.go one  --help**
-
-```text
-Usage: 
-  tool one [command] [args]
-
-Available Commands:
-  two    second level
-
-_____________________________________________________
-Use flag --help for more information about a command.
-```
-**go run main.go one two  --help**
-```text
-Usage: 
-  tool one two [command] [args]
-
-Available Commands:
-  simple    third level
-
-_____________________________________________________
-Use flag --help for more information about a command.
-```
-**go run main.go one two simple  --help**
-```text
-Usage: 
-  tool one two simple [arg]  -a=demo -b=1 --cc=1e-05 -d
-
-Flags:
-  -a     this is a string argument (default: demo)
-  -b     this is a int64 argument (default: 1)
-  --cc    this is a float64 argument (default: 1e-05)
-  -d     this is a bool argument (default: false)
-
-
-Examples:
-  tool simple aa/bb/cc -a=hello -b=123 --cc=123.456 -e
-
 ```

@@ -53,7 +53,7 @@ func newServerProvider(c *Config, l xlog.Logger) *serverProvider {
 	}
 }
 
-func (v *serverProvider) Up(ctx xc.Context) (err error) {
+func (v *serverProvider) Up(ctx xc.Context) error {
 	v.serv.ErrorLog(func(err error) {
 		v.log.WithError("err", err).Errorf("unix")
 	})
@@ -70,7 +70,7 @@ func (v *serverProvider) Up(ctx xc.Context) (err error) {
 			"path": v.config.Path,
 		}).Infof("Unix server stopped")
 	})
-	return
+	return nil
 }
 
 func (v *serverProvider) Down() error {

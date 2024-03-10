@@ -7,8 +7,8 @@ package web
 
 import "go.osspkg.com/goppy/plugins"
 
-// WithHTTPClient init pool http clients
-func WithHTTPClient() plugins.Plugin {
+// WithClient init pool http clients
+func WithClient() plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func() ClientHttpPool {
 			return newClientHttp()

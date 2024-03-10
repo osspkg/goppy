@@ -1,3 +1,4 @@
-CREATE TABLE `demo` (
-  `id` INTEGER PRIMARY KEY
+CREATE TABLE `demo`
+(
+    `id` INTEGER PRIMARY KEY
 );

@@ -20,7 +20,7 @@ func IsValidHash(filename string, h hash.Hash, valid string) error {
 	if err != nil {
 		return err
 	}
-	defer r.Close() //nolint: errcheck
+	defer r.Close() // nolint: errcheck
 	if _, err = io.Copy(h, r); err != nil {
 		return errors.Wrapf(err, "calculate file hash")
 	}
@@ -37,7 +37,7 @@ func Hash(filename string, h hash.Hash) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer r.Close() //nolint: errcheck
+	defer r.Close() // nolint: errcheck
 	if _, err = io.Copy(h, r); err != nil {
 		return "", errors.Wrapf(err, "calculate file hash")
 	}

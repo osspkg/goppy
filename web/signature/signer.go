@@ -25,7 +25,7 @@ type (
 		lock     sync.Mutex
 	}
 
-	//Signature interface
+	// Signature interface
 	Signature interface {
 		ID() string
 		Algorithm() string
@@ -93,8 +93,6 @@ func (s *_sig) Validate(b []byte, ex string) bool {
 	}
 	return hmac.Equal(s.Create(b), v)
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // _store storage
 type (

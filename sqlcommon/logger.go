@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	//StdOutLog simple stdout debug log
+	// StdOutLog simple stdout debug log
 	StdOutLog = func() xlog.Logger {
 		l := xlog.Default()
 		l.SetLevel(xlog.LevelDebug)

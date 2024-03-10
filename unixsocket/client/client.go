@@ -28,7 +28,7 @@ func (v *Client) Exec(name string, b []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "open connect [unix:%s]", v.path)
 	}
-	defer conn.Close() //nolint: errcheck
+	defer conn.Close() // nolint: errcheck
 	if err = ioutil.WriteBytes(conn, append([]byte(name+internal.DivideStr), b...), internal.NewLine); err != nil {
 		return nil, err
 	}

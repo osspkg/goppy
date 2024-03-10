@@ -16,7 +16,7 @@ import (
 	"go.osspkg.com/goppy/xlog"
 )
 
-func WithWebsocketClient() plugins.Plugin {
+func WithClient() plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(l xlog.Logger) WebsocketClient {
 			return newWSClientProvider(l)

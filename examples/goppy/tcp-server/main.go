@@ -41,8 +41,8 @@ func (e *Echo) HandlerTCP(c tcp.Connect) {
 	}
 	fmt.Println(string(b))
 	fmt.Fprintf(c, "HTTP/2.0 200 OK\n\r\n")
-	//fmt.Fprintf(c, "HTTP/2.0 200 OK\nConnection: close\n\r\n")
-	//c.Close()
+	// fmt.Fprintf(c, "HTTP/2.0 200 OK\nConnection: close\n\r\n")
+	// c.Close()
 }
 
 func (e *Echo) ErrHandlerTCP(c tcp.ErrConnect) {

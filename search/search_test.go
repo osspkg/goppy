@@ -59,7 +59,7 @@ func TestUnit_NewSearch(t *testing.T) {
 		CreatedAt: time.Now(),
 	}))
 	result := make([]TestDataSearch, 0, 10)
-	//xtest.NoError(t, srv.Search("demo", "h* worl*", &result))
+	// xtest.NoError(t, srv.Search("demo", "h* worl*", &result))
 	xtest.NoError(t, srv.Search(context.TODO(), "demo", "Hello world", true, &result))
 	fmt.Println(result)
 	xtest.True(t, len(result) == 2)

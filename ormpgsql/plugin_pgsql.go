@@ -65,8 +65,8 @@ func (v *ConfigPgsql) Default() {
 	}
 }
 
-// WithPostgreSQL launch PostgreSQL connection pool
-func WithPostgreSQL() plugins.Plugin {
+// WithClient launch PostgreSQL connection pool
+func WithClient() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigPgsql{},
 		Inject: func(c *ConfigPgsql, l xlog.Logger) PgSQL {
@@ -98,7 +98,7 @@ type (
 		active  bool
 	}
 
-	//PgSQL connection PostgreSql interface
+	// PgSQL connection PostgreSql interface
 	PgSQL interface {
 		Pool(name string) orm.Stmt
 	}

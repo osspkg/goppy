@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/lib/pq" //nolint: golint
+	_ "github.com/lib/pq" // nolint: golint
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/sqlcommon"
 )
@@ -28,12 +28,12 @@ var (
 )
 
 type (
-	//Config pool of configs
+	// Config pool of configs
 	Config struct {
 		Pool []Item `yaml:"postgresql"`
 	}
 
-	//Item config model
+	// Item config model
 	Item struct {
 		Name        string        `yaml:"name"`
 		Host        string        `yaml:"host"`
@@ -85,30 +85,30 @@ func (i Item) GetDSN() string {
 		params = url.Values{}
 	}
 
-	//---
+	// ---
 	if len(i.Charset) == 0 {
 		i.Charset = "UTF8"
 	}
 	params.Add("client_encoding", i.Charset)
-	//---
+	// ---
 	if i.SSLMode {
 		params.Add("sslmode", "prefer")
 	} else {
 		params.Add("sslmode", "disable")
 	}
-	//---
+	// ---
 	if i.Timeout == 0 {
 		i.Timeout = defaultTimeoutConn
 	}
 	params.Add("connect_timeout", fmt.Sprintf("%.0f", i.Timeout.Seconds()))
-	//---
+	// ---
 	if len(i.AppName) == 0 {
 		i.AppName = "go_app"
 	}
 	params.Add("application_name", i.AppName)
-	//---
+	// ---
 
-	//---
+	// ---
 	return fmt.Sprintf("postgres://%s:%s@%s:%d/%s?%s", i.User, i.Password, i.Host, i.Port, i.Schema, params.Encode())
 }
 

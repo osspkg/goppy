@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/go-sql-driver/mysql" //nolint: golint
+	_ "github.com/go-sql-driver/mysql" // nolint: golint
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/sqlcommon"
 )
@@ -28,12 +28,12 @@ var (
 )
 
 type (
-	//Config pool of configs
+	// Config pool of configs
 	Config struct {
 		Pool []Item `yaml:"mysql"`
 	}
 
-	//Item config model
+	// Item config model
 	Item struct {
 		Name              string        `yaml:"name"`
 		Host              string        `yaml:"host"`
@@ -92,43 +92,43 @@ func (i Item) GetDSN() string {
 	params.Add("autocommit", "true")
 	params.Add("interpolateParams", fmt.Sprintf("%t", i.InterpolateParams))
 
-	//---
+	// ---
 	if len(i.Charset) == 0 {
 		i.Charset = "utf8mb4"
 	}
 	params.Add("charset", i.Charset)
-	//---
+	// ---
 	if len(i.Collation) == 0 {
 		i.Collation = "utf8mb4_unicode_ci"
 	}
 	params.Add("collation", i.Collation)
-	//---
+	// ---
 	if i.Timeout == 0 {
 		i.Timeout = defaultTimeoutConn
 	}
 	params.Add("timeout", i.Timeout.String())
-	//---
+	// ---
 	if i.ReadTimeout == 0 {
 		i.ReadTimeout = defaultTimeout
 	}
 	params.Add("readTimeout", i.ReadTimeout.String())
-	//---
+	// ---
 	if i.WriteTimeout == 0 {
 		i.WriteTimeout = defaultTimeout
 	}
 	params.Add("writeTimeout", i.WriteTimeout.String())
-	//---
+	// ---
 	if len(i.TxIsolationLevel) > 0 {
 		params.Add("transaction_isolation", i.TxIsolationLevel)
 	}
-	//---
+	// ---
 	if len(i.Timezone) == 0 {
 		i.Timezone = "UTC"
 	}
 	params.Add("loc", i.Timezone)
-	//---
+	// ---
 
-	//---
+	// ---
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?%s", i.User, i.Password, i.Host, i.Port, i.Schema, params.Encode())
 }
 

@@ -46,7 +46,40 @@ func output(msg string, vars []string, def string) {
 	if len(vars) > 0 {
 		v = fmt.Sprintf(" (%s)", strings.Join(vars, "/"))
 	}
-	Infof("%s%s%s: ", msg, v, def)
+	Rawf("%s%s%s: ", msg, v, def)
+}
+
+// Switch console multi input requests
+func Switch(msg string, vars [][]string, exit string, call func(s string)) {
+	fmt.Printf("%s\n", msg)
+
+	list := make(map[string]string, len(vars)*4)
+	i := 0
+	for _, blocks := range vars {
+		for _, name := range blocks {
+			i++
+			fmt.Printf("(%d) %s, ", i, name)
+			list[fmt.Sprintf("%d", i)] = name
+		}
+		fmt.Printf("\n")
+	}
+	fmt.Printf("and (%s) Done: \n", exit)
+
+	for {
+		if scan.Scan() {
+			r := scan.Text()
+			if r == exit {
+				fmt.Printf("\u001B[1A\u001B[K: Done\n\n")
+				return
+			}
+			if name, ok := list[r]; ok {
+				call(name)
+				fmt.Printf("\033[1A\033[K + %s\n", name)
+				continue
+			}
+			fmt.Printf("\u001B[1A\u001B[KBad answer! Try again: ")
+		}
+	}
 }
 
 // Input console input request
@@ -82,35 +115,31 @@ func InputBool(msg string, def bool) bool {
 	return v == "y"
 }
 
-func color(c, msg string, args []interface{}) {
-	fmt.Printf(c+msg+cRESET, args...)
-}
-
-func colorln(c, msg string, args []interface{}) {
+func writeWithColor(c, msg string, args []interface{}) {
 	if !strings.HasSuffix(msg, eof) {
 		msg += eof
 	}
-	color(c, msg, args)
+	fmt.Printf(c+msg+cRESET, args...)
 }
 
 // Rawf console message writer without level info
 func Rawf(msg string, args ...interface{}) {
-	colorln(cRESET, msg, args)
+	writeWithColor(cRESET, msg, args)
 }
 
 // Infof console message writer for info level
 func Infof(msg string, args ...interface{}) {
-	colorln(cRESET, "[INF] "+msg, args)
+	writeWithColor(cRESET, "[INF] "+msg, args)
 }
 
 // Warnf console message writer for warning level
 func Warnf(msg string, args ...interface{}) {
-	colorln(cYELLOW, "[WAR] "+msg, args)
+	writeWithColor(cYELLOW, "[WAR] "+msg, args)
 }
 
 // Errorf console message writer for error level
 func Errorf(msg string, args ...interface{}) {
-	colorln(cRED, "[ERR] "+msg, args)
+	writeWithColor(cRED, "[ERR] "+msg, args)
 }
 
 // ShowDebug init show debug
@@ -125,7 +154,7 @@ func ShowDebug(ok bool) {
 // Debugf console message writer for debug level
 func Debugf(msg string, args ...interface{}) {
 	if atomic.LoadUint32(&debugLevel) > 0 {
-		colorln(cBLUE, "[DEB] "+msg, args)
+		writeWithColor(cBLUE, "[DEB] "+msg, args)
 	}
 }
 
@@ -138,6 +167,6 @@ func FatalIfErr(err error, msg string, args ...interface{}) {
 
 // Fatalf console message writer with exit code 1
 func Fatalf(msg string, args ...interface{}) {
-	colorln(cRED, "[ERR] "+msg, args)
+	writeWithColor(cRED, "[ERR] "+msg, args)
 	os.Exit(1)
 }

@@ -1,4 +1,3 @@
-
 # options for analysis running
 run:
   # timeout for analysis, e.g. 30s, 5m, default is 1m
@@ -160,10 +159,10 @@ linters-settings:
     # If 'custom-order' is 'true', it follows the order of 'sections' option.
     # Default: ["standard", "default"]
     #sections:
-      #- standard # Standard section: captures all standard packages.
-      #- default # Default section: contains all imports that could not be matched to another section type.
-      #- blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
-      #- dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
+    #- standard # Standard section: captures all standard packages.
+    #- default # Default section: contains all imports that could not be matched to another section type.
+    #- blank # Blank section: contains all blank imports. This section is not present unless explicitly enabled.
+    #- dot # Dot section: contains all dot imports. This section is not present unless explicitly enabled.
     # Skip generated files.
     # Default: true
     skip-generated: true

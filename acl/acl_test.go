@@ -14,7 +14,7 @@ import (
 
 func TestUnit_NewACL(t *testing.T) {
 	store := acl2.NewInMemoryStorage()
-	acl := acl2.NewACL(store, 3)
+	acl := acl2.New(store, 3)
 
 	email := "demo@example.com"
 

@@ -33,7 +33,7 @@ envs:
 	err := os.WriteFile(filename, []byte(data), 0755)
 	xtest.NoError(t, err)
 
-	res := config.NewConfigResolve(config.EnvResolver())
+	res := config.New(config.EnvResolver())
 
 	err = res.OpenFile(filename)
 	xtest.NoError(t, err)

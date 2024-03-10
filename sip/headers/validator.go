@@ -5,11 +5,11 @@
 
 package headers
 
-//var validators = map[string]func(s string) (string, error){
+// var validators = map[string]func(s string) (string, error){
 //	"Request-URI": hvUnknown,
 //	"To":          hvUnknown,
-//}
+// }
 //
-//func hvUnknown(s string) (string, error) {
+// func hvUnknown(s string) (string, error) {
 //	return "", fmt.Errorf("unsupported header: %s", s)
-//}
+// }

@@ -33,19 +33,19 @@ type (
 	}
 )
 
-type _acl struct {
+type object struct {
 	cache *cache
 	store Storage
 }
 
-func NewACL(store Storage, size uint) ACL {
-	return &_acl{
+func New(store Storage, size uint) ACL {
+	return &object{
 		store: store,
 		cache: newCache(size),
 	}
 }
 
-func (v *_acl) AutoFlush(ctx context.Context, interval time.Duration) {
+func (v *object) AutoFlush(ctx context.Context, interval time.Duration) {
 	tick := time.NewTicker(interval)
 	defer tick.Stop()
 
@@ -59,7 +59,7 @@ func (v *_acl) AutoFlush(ctx context.Context, interval time.Duration) {
 	}
 }
 
-func (v *_acl) GetAll(email string) ([]uint8, error) {
+func (v *object) GetAll(email string) ([]uint8, error) {
 	if !v.cache.Has(email) {
 		if err := v.loadFromStore(email); err != nil {
 			return nil, err
@@ -69,7 +69,7 @@ func (v *_acl) GetAll(email string) ([]uint8, error) {
 	return v.cache.GetAll(email)
 }
 
-func (v *_acl) Get(email string, feature uint16) (uint8, error) {
+func (v *object) Get(email string, feature uint16) (uint8, error) {
 	if !v.cache.Has(email) {
 		if err := v.loadFromStore(email); err != nil {
 			return 0, err
@@ -79,7 +79,7 @@ func (v *_acl) Get(email string, feature uint16) (uint8, error) {
 	return v.cache.Get(email, feature)
 }
 
-func (v *_acl) Set(email string, feature uint16, level uint8) error {
+func (v *object) Set(email string, feature uint16, level uint8) error {
 	if !v.cache.Has(email) {
 		if err := v.loadFromStore(email); err != nil {
 			return err
@@ -92,11 +92,11 @@ func (v *_acl) Set(email string, feature uint16, level uint8) error {
 	return v.saveToStore(email)
 }
 
-func (v *_acl) Flush(email string) {
+func (v *object) Flush(email string) {
 	v.cache.Flush(email)
 }
 
-func (v *_acl) loadFromStore(email string) error {
+func (v *object) loadFromStore(email string) error {
 	access, err := v.store.FindACL(email)
 	if err != nil {
 		return errors.Wrap(err, errUserNotFound)
@@ -105,7 +105,7 @@ func (v *_acl) loadFromStore(email string) error {
 	return nil
 }
 
-func (v *_acl) saveToStore(email string) error {
+func (v *object) saveToStore(email string) error {
 	access, err := v.cache.GetAll(email)
 	if err != nil {
 		return err

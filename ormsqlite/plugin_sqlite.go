@@ -59,8 +59,8 @@ func (v *ConfigSqlite) List() (list []sqlcommon.ItemInterface) {
 	return
 }
 
-// WithSQLite launch SQLite connection pool
-func WithSQLite() plugins.Plugin {
+// WithClient launch SQLite connection pool
+func WithClient() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
 		Inject: func(c *ConfigSqlite, l xlog.Logger) SQLite {
@@ -92,7 +92,7 @@ type (
 		active  bool
 	}
 
-	//SQLite connection SQLite interface
+	// SQLite connection SQLite interface
 	SQLite interface {
 		Pool(name string) orm.Stmt
 	}

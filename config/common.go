@@ -26,7 +26,7 @@ type (
 	}
 )
 
-func NewConfigResolve(rs ...Resolver) *Config {
+func New(rs ...Resolver) *Config {
 	return &Config{
 		blob:      nil,
 		resolvers: rs,

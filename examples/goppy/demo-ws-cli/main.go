@@ -21,7 +21,7 @@ import (
 func main() {
 	application := goppy.New()
 	application.Plugins(
-		ws.WithWebsocketClient(),
+		ws.WithClient(),
 	)
 	application.Plugins(
 		plugins.Plugin{

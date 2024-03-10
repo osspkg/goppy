@@ -37,7 +37,7 @@ func (v *ConfigMetrics) Default() {
 	}
 }
 
-func WithMetrics() plugins.Plugin {
+func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMetrics{},
 		Inject: func(app env.AppInfo, c *ConfigMetrics, l xlog.Logger) Metrics {

@@ -124,7 +124,7 @@ var (
 
 func PipeTimeout(t time.Duration) PipeFunc {
 	return func(ctx context.Context) context.Context {
-		c, _ := context.WithTimeout(ctx, t) //nolint: govet
+		c, _ := context.WithTimeout(ctx, t) // nolint: govet
 		return c
 	}
 }

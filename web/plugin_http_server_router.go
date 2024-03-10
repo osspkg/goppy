@@ -22,13 +22,13 @@ type (
 		route  *route
 	}
 
-	//RouterPool router pool handler
+	// RouterPool router pool handler
 	RouterPool interface {
-		//All method to get all route handlers
+		// All method to get all route handlers
 		All(call func(name string, router Router))
-		//Main method to get Main route handler
+		// Main method to get Main route handler
 		Main() Router
-		//Get method to get route handler by key
+		// Get method to get route handler by key
 		Get(name string) Router
 	}
 
@@ -92,8 +92,6 @@ func (v *routeProvider) Down() error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type (
 	route struct {
 		name   string
@@ -103,14 +101,14 @@ type (
 		log    xlog.Logger
 	}
 
-	//Router router handler interface
+	// Router router handler interface
 	Router interface {
 		Use(args ...Middleware)
 		NotFoundHandler(call func(ctx Context))
 		RouteCollector
 	}
 
-	//RouteCollector interface of the router collection
+	// RouteCollector interface of the router collection
 	RouteCollector interface {
 		Get(path string, call func(ctx Context))
 		Head(path string, call func(ctx Context))
@@ -180,8 +178,6 @@ func (v *route) Collection(prefix string, args ...Middleware) RouteCollector {
 		r: v,
 	}
 }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 type rc struct {
 	p string

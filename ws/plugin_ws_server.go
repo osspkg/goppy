@@ -17,19 +17,19 @@ import (
 	"go.osspkg.com/goppy/xlog"
 )
 
-func WebsocketServerOptionCompression(enable bool) func(*websocket.Upgrader) {
+func OptionCompression(enable bool) func(*websocket.Upgrader) {
 	return func(u *websocket.Upgrader) {
 		u.EnableCompression = enable
 	}
 }
 
-func WebsocketServerOptionBuffer(read, write int) func(*websocket.Upgrader) {
+func OptionBuffer(read, write int) func(*websocket.Upgrader) {
 	return func(u *websocket.Upgrader) {
 		u.ReadBufferSize, u.WriteBufferSize = read, write
 	}
 }
 
-func WithWebsocketServer(options ...func(*websocket.Upgrader)) plugins.Plugin {
+func WithServer(options ...func(*websocket.Upgrader)) plugins.Plugin {
 	return plugins.Plugin{
 		Inject: func(l xlog.Logger, ctx xc.Context) (*wssProvider, WebsocketServer) {
 			wsp := newWsServerProvider(l, ctx, options...)

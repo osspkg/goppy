@@ -23,5 +23,5 @@ func setBuf(b []byte) {
 	if len(b) != bodyMaxSize {
 		return
 	}
-	bytesPool.Put(b) //nolint: staticcheck
+	bytesPool.Put(b) // nolint: staticcheck
 }

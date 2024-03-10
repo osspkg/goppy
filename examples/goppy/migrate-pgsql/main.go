@@ -14,7 +14,7 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		ormpgsql.WithPostgreSQL(),
+		ormpgsql.WithClient(),
 	)
 	app.Run()
 

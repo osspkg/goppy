@@ -63,8 +63,6 @@ func (v *Config) ToSubject() pkix.Name {
 	return result
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 func generate(c *Config, ttl time.Duration, sn int64, ca *Cert, cn ...string) (*Cert, error) {
 	crt := &cx509.Certificate{
 		SerialNumber: big.NewInt(sn),

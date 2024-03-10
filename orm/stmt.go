@@ -17,7 +17,7 @@ var (
 )
 
 type (
-	//Stmt statement model
+	// Stmt statement model
 	Stmt interface {
 		Ping() error
 		CallContext(name string, ctx context.Context, callFunc func(context.Context, *sql.DB) error) error

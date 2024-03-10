@@ -77,7 +77,7 @@ func Copy(dst, src string, mode os.FileMode) error {
 	if err != nil {
 		return err
 	}
-	defer source.Close() //nolint: errcheck
+	defer source.Close() // nolint: errcheck
 
 	if mode == 0 {
 		fi, err0 := source.Stat()
@@ -91,7 +91,7 @@ func Copy(dst, src string, mode os.FileMode) error {
 	if err != nil {
 		return err
 	}
-	defer dist.Close() //nolint: errcheck
+	defer dist.Close() // nolint: errcheck
 
 	_, err = io.Copy(dist, source)
 	return err

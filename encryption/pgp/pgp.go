@@ -29,8 +29,6 @@ type (
 	}
 )
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type (
 	store struct {
 		key     *openpgp.Entity
@@ -85,7 +83,7 @@ func (v *store) SetKeyFromFile(filename string, passwd string) error {
 	if err != nil {
 		return errors.Wrapf(err, "read key from file")
 	}
-	defer r.Close() //nolint: errcheck
+	defer r.Close() // nolint: errcheck
 	if err = v.readKey(r, passwd); err != nil {
 		return err
 	}
@@ -166,14 +164,12 @@ func (v *store) Sign(in io.Reader, out io.Writer) error {
 	return nil
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 func generatePrivateKey(key *openpgp.Entity, w io.Writer, headers map[string]string) error {
 	enc, err := armor.Encode(w, openpgp.PrivateKeyType, headers)
 	if err != nil {
 		return errors.Wrapf(err, "init armor encoder")
 	}
-	defer enc.Close() //nolint: errcheck
+	defer enc.Close() // nolint: errcheck
 
 	if err = key.SerializePrivate(enc, nil); err != nil {
 		return errors.Wrapf(err, "serialize private key")
@@ -187,7 +183,7 @@ func generatePublicKey(key *openpgp.Entity, w io.Writer, headers map[string]stri
 	if err != nil {
 		return errors.Wrapf(err, "create OpenPGP armor")
 	}
-	defer enc.Close() //nolint: errcheck
+	defer enc.Close() // nolint: errcheck
 
 	if err = key.Serialize(enc); err != nil {
 		return errors.Wrapf(err, "serialize public key")
