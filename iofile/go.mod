@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/iosync v0.3.0
 	go.osspkg.com/goppy/xtest v0.3.0
 	gopkg.in/yaml.v3 v3.0.1

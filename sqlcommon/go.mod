@@ -11,8 +11,8 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.3.0
-	go.osspkg.com/goppy/xlog v0.3.2
+	go.osspkg.com/goppy/errors v0.3.1
+	go.osspkg.com/goppy/xlog v0.3.3
 	go.osspkg.com/goppy/xtest v0.3.0
 )
 

@@ -19,13 +19,13 @@ replace (
 require (
 	github.com/prometheus/client_golang v1.19.0
 	github.com/prometheus/client_model v0.6.0
-	go.osspkg.com/goppy/env v0.3.0
+	go.osspkg.com/goppy/env v0.3.1
 	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/syscall v0.3.0
-	go.osspkg.com/goppy/web v0.3.3
-	go.osspkg.com/goppy/xc v0.3.0
-	go.osspkg.com/goppy/xlog v0.3.2
-	go.osspkg.com/goppy/xnet v0.3.0
+	go.osspkg.com/goppy/web v0.3.4
+	go.osspkg.com/goppy/xc v0.3.1
+	go.osspkg.com/goppy/xlog v0.3.3
+	go.osspkg.com/goppy/xnet v0.3.1
 	go.osspkg.com/goppy/xtest v0.3.0
 	google.golang.org/protobuf v1.32.0
 )
@@ -37,9 +37,9 @@ require (
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/prometheus/common v0.48.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
-	go.osspkg.com/goppy/errors v0.3.0 // indirect
+	go.osspkg.com/goppy/errors v0.3.1 // indirect
 	go.osspkg.com/goppy/iosync v0.3.0 // indirect
-	go.osspkg.com/goppy/ioutil v0.3.0 // indirect
+	go.osspkg.com/goppy/ioutil v0.3.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 )
