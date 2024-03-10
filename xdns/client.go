@@ -21,28 +21,28 @@ type (
 		mux      iosync.Lock
 	}
 
-	ClientOption func(*dns.Client)
+	Option func(*dns.Client)
 )
 
-func ClientOptionNetTCP() ClientOption {
+func OptionNetTCP() Option {
 	return func(client *dns.Client) {
 		client.Net = "tcp"
 	}
 }
 
-func ClientOptionNetUDP() ClientOption {
+func OptionNetUDP() Option {
 	return func(client *dns.Client) {
 		client.Net = "udp"
 	}
 }
 
-func ClientOptionNetDOT() ClientOption {
+func OptionNetDOT() Option {
 	return func(client *dns.Client) {
 		client.Net = "tcp-tls"
 	}
 }
 
-func NewClient(opts ...ClientOption) *Client {
+func NewClient(opts ...Option) *Client {
 	cli := &Client{
 		cli: &dns.Client{
 			Net:          "udp",

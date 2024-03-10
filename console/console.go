@@ -55,7 +55,7 @@ func (c *Console) Exec() {
 	args := NewArgs().Parse(os.Args[1:])
 	cmd, cur, h := c.build(args)
 	if h {
-		help(c.name, c.description, cmd, cur)
+		helpView(c.name, c.description, cmd, cur)
 		return
 	}
 	c.run(cmd, args.Next()[len(cur):], args)
@@ -104,7 +104,7 @@ func (c *Console) run(command CommandGetter, a []string, args *Args) {
 	rv := make([]reflect.Value, 0)
 
 	if command == nil || command.Call() == nil {
-		Fatalf("command not found")
+		Fatalf("command not found (use --help for information)")
 	}
 
 	val, err := command.ArgCall(a)

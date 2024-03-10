@@ -74,8 +74,6 @@ func (e *entity) prepareMessage(format string, args ...interface{}) func(v *Mess
 	}
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // Infof info message
 func (e *entity) Infof(format string, args ...interface{}) {
 	e.log.SendMessage(LevelInfo, e.prepareMessage(format, args...))

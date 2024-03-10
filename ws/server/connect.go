@@ -44,7 +44,7 @@ func NewConnect(
 	act actionsApi, conn *websocket.Conn,
 	ctxs ...context.Context,
 ) *Connect {
-	ctx, cancel := context2.Combine(ctxs...)
+	ctx, cancel := context2.Join(ctxs...)
 	return &Connect{
 		id:        id,
 		header:    head,

@@ -4,11 +4,11 @@ level: 4
 log: /dev/stdout
 
 http:
-    main:
-        addr: 127.0.0.1:8080
+  main:
+    addr: 127.0.0.1:8080
 
 oauth:
-    - code: google
-      client_id: '****************.apps.googleusercontent.com'
-      client_secret: '****************'
-      redirect_url: https://example.com/oauth/callback/google
+  - code: google
+    client_id: '****************.apps.googleusercontent.com'
+    client_secret: '****************'
+    redirect_url: https://example.com/oauth/callback/google

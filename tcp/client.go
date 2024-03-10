@@ -49,7 +49,7 @@ func (v *Client) Do(ctx context.Context, r io.Reader) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer conn.Close() //nolint: errcheck
+	defer conn.Close() // nolint: errcheck
 	cp := newConnectProvider(ctx, conn, v.conf)
 	if _, err = cp.Write(b); err != nil {
 		return nil, err

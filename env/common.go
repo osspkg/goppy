@@ -6,7 +6,7 @@
 package env
 
 type (
-	//ENV type for environments (prod, dev, stage, etc)
+	// ENV type for environments (prod, dev, stage, etc)
 	ENV string
 
 	AppName        string

@@ -4,20 +4,20 @@ level: 4
 log: /dev/stdout
 
 pgsql:
-    - name: main
-      host: 127.0.0.1
-      port: 5432
-      schema: test
-      user: test
-      password: test
-      sslmode: false
-      app_name: goppy_app
-      charset: UTF8
-      maxidleconn: 5
-      maxopenconn: 5
-      maxconnttl: 50s
-      timeout: 5h
-      other_params: ""
+  - name: main
+    host: 127.0.0.1
+    port: 5432
+    schema: test
+    user: test
+    password: test
+    sslmode: false
+    app_name: goppy_app
+    charset: UTF8
+    maxidleconn: 5
+    maxopenconn: 5
+    maxconnttl: 50s
+    timeout: 5h
+    other_params: ""
 pgsql_migrate:
-    - pool: main
-      dir: ./
+  - pool: main
+    dir: ./

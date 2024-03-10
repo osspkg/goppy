@@ -18,13 +18,13 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/app v0.3.5
-	go.osspkg.com/goppy/config v0.0.2
-	go.osspkg.com/goppy/console v0.3.1
-	go.osspkg.com/goppy/env v0.3.0
-	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/app v0.3.6
+	go.osspkg.com/goppy/config v0.0.3
+	go.osspkg.com/goppy/console v0.3.2
+	go.osspkg.com/goppy/env v0.3.1
+	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/plugins v0.3.1
-	go.osspkg.com/goppy/xlog v0.3.2
+	go.osspkg.com/goppy/xlog v0.3.3
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -34,5 +34,5 @@ require (
 	go.osspkg.com/algorithms v1.3.1 // indirect
 	go.osspkg.com/goppy/iosync v0.3.0 // indirect
 	go.osspkg.com/goppy/syscall v0.3.0 // indirect
-	go.osspkg.com/goppy/xc v0.3.0 // indirect
+	go.osspkg.com/goppy/xc v0.3.1 // indirect
 )

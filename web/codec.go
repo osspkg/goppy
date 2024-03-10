@@ -22,7 +22,7 @@ func JSONEncode(w http.ResponseWriter, v interface{}) {
 	}
 	w.Header().Add("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(b) //nolint: errcheck
+	w.Write(b) // nolint: errcheck
 }
 
 func JSONDecode(r *http.Request, v interface{}) error {
@@ -41,7 +41,7 @@ func XMLEncode(w http.ResponseWriter, v interface{}) {
 	}
 	w.Header().Add("Content-Type", "application/xml; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
-	w.Write(b) //nolint: errcheck
+	w.Write(b) // nolint: errcheck
 }
 
 func XMLDecode(r *http.Request, v interface{}) error {
@@ -55,18 +55,18 @@ func XMLDecode(r *http.Request, v interface{}) error {
 func ErrorEncode(w http.ResponseWriter, v error) {
 	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(v.Error())) //nolint: errcheck
+	w.Write([]byte(v.Error())) // nolint: errcheck
 }
 
 func StreamEncode(w http.ResponseWriter, v []byte, filename string) {
 	w.Header().Add("Content-Type", "application/octet-stream")
 	w.Header().Add("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	w.WriteHeader(http.StatusOK)
-	w.Write(v) //nolint: errcheck
+	w.Write(v) // nolint: errcheck
 }
 
 func RawEncode(w http.ResponseWriter, v []byte) {
 	w.Header().Add("Content-Type", http.DetectContentType(v))
 	w.WriteHeader(http.StatusOK)
-	w.Write(v) //nolint: errcheck
+	w.Write(v) // nolint: errcheck
 }

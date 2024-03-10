@@ -112,18 +112,18 @@ func (v *Server) run(ctx context.Context) {
 			if tc, ok := conn.(*tls.Conn); ok {
 				if err = tc.HandshakeContext(ctx); err != nil {
 					fmt.Println(err)
-					conn.Close() //nolint: errcheck
+					conn.Close() // nolint: errcheck
 					continue
 				}
 			}
 
 			v.wg.Background(func() {
-				defer conn.Close() //nolint: errcheck
+				defer conn.Close() // nolint: errcheck
 				cp := newConnectProvider(ctx, conn, cpConfig{
 					MaxSize: v.conf.ClientMaxBodySize,
 					Timeout: v.conf.Timeout,
 				})
-				defer cp.Close() //nolint: errcheck
+				defer cp.Close() // nolint: errcheck
 				for {
 					if err = cp.Wait(); err != nil {
 						if !errors.Is(err, io.EOF) {

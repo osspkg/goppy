@@ -14,7 +14,7 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		ormmysql.WithMySQL(),
+		ormmysql.WithClient(),
 	)
 	app.Run()
 

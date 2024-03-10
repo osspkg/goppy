@@ -8,7 +8,7 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/errors v0.3.1
 	golang.org/x/image v0.15.0
 )
 

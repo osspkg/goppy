@@ -34,7 +34,7 @@ func (v *ZoneResolve) Resolve(name string) string {
 }
 
 func DefaultExchanger(dns ...string) HandlerDNS {
-	cli := NewClient(ClientOptionNetUDP())
+	cli := NewClient(OptionNetUDP())
 	cli.SetZoneResolver(NewSimpleZoneResolve())
 	return cli
 }

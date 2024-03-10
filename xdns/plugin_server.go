@@ -10,10 +10,10 @@ import (
 	"go.osspkg.com/goppy/xlog"
 )
 
-func WithDNSServer() plugins.Plugin {
+func WithServer() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &Config{},
-		Inject: func(c *Config, l xlog.Logger) *Server {
+		Config: &ConfigDNS{},
+		Inject: func(c *ConfigDNS, l xlog.Logger) *Server {
 			return NewServer(c.DNS, l)
 		},
 	}

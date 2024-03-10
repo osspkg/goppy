@@ -12,6 +12,7 @@ pig: /var/run/simple.pid
 ```
 
 level:
+
 * 0 - error only
 * 1 - + warning
 * 2 - + info
@@ -73,6 +74,7 @@ func main() {
 ## HowTo
 
 ***Run the app***
+
 ```go
 app.New()
     .ConfigFile(<path to config file: string>, <config objects separate by comma: ...interface{}>)
@@ -85,12 +87,14 @@ app.New()
 * Function that returns an object or interface
 
 *All incoming dependencies will be injected automatically*
+
 ```go
 type Simple1 struct{}
 func NewSimple1(_ *log.Logger) *Simple1 { return &Simple1{} }
 ```
 
 *Returns the interface*
+
 ```go
 type Simple2 struct{}
 type Simple2Interface interface{
@@ -102,7 +106,9 @@ func (s2 *Simple2) Get() string {
 }
 ```
 
-*If the object has the `Up(xc.Context) error` and `Down() error` methods, they will be called `Up(xc.Context) error`  when the app starts, and `Down() error` when it finishes. This allows you to automatically start and stop routine processes inside the module*
+*If the object has the `Up(xc.Context) error` and `Down() error` methods, they will be called `Up(xc.Context) error`
+when the app starts, and `Down() error` when it finishes. This allows you to automatically start and stop routine
+processes inside the module*
 
 ```go
 var _ service.IServiceCtx = (*Simple3)(nil)

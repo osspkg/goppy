@@ -16,24 +16,24 @@ import (
 
 func SHA1(v string) string {
 	h := sha1.New()
-	io.WriteString(h, v) //nolint: errcheck
+	io.WriteString(h, v) // nolint: errcheck
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func SHA256(v string) string {
 	h := sha256.New()
-	io.WriteString(h, v) //nolint: errcheck
+	io.WriteString(h, v) // nolint: errcheck
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func SHA512(v string) string {
 	h := sha512.New()
-	io.WriteString(h, v) //nolint: errcheck
+	io.WriteString(h, v) // nolint: errcheck
 	return fmt.Sprintf("%x", h.Sum(nil))
 }
 
 func MD5(v string) string {
 	h := md5.New()
-	io.WriteString(h, v) //nolint: errcheck
+	io.WriteString(h, v) // nolint: errcheck
 	return fmt.Sprintf("%x", h.Sum(nil))
 }

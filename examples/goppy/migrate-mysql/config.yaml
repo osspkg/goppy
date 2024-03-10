@@ -4,24 +4,24 @@ level: 4
 log: /dev/stdout
 
 mysql:
-    - name: main
-      host: 127.0.0.1
-      port: 3306
-      schema: test
-      user: test
-      password: test
-      timezone: UTC
-      txisolevel: ""
-      charset: utf8mb4
-      collation: utf8mb4_unicode_ci
-      maxidleconn: 5
-      maxopenconn: 5
-      interpolateparams: false
-      maxconnttl: 50s
-      timeout: 5s
-      readtimeout: 5s
-      writetimeout: 5s
-      other_params: ""
+  - name: main
+    host: 127.0.0.1
+    port: 3306
+    schema: test
+    user: test
+    password: test
+    timezone: UTC
+    txisolevel: ""
+    charset: utf8mb4
+    collation: utf8mb4_unicode_ci
+    maxidleconn: 5
+    maxopenconn: 5
+    interpolateparams: false
+    maxconnttl: 50s
+    timeout: 5s
+    readtimeout: 5s
+    writetimeout: 5s
+    other_params: ""
 mysql_migrate:
-    - pool: main
-      dir: ./
+  - pool: main
+    dir: ./

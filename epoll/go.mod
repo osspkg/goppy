@@ -13,11 +13,11 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/iosync v0.3.0
-	go.osspkg.com/goppy/xc v0.3.0
-	go.osspkg.com/goppy/xlog v0.3.2
-	go.osspkg.com/goppy/xnet v0.3.0
+	go.osspkg.com/goppy/xc v0.3.1
+	go.osspkg.com/goppy/xlog v0.3.3
+	go.osspkg.com/goppy/xnet v0.3.1
 	golang.org/x/sys v0.17.0
 )
 

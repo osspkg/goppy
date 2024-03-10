@@ -165,7 +165,7 @@ func (v *_app) validateConfig(filename string) error {
 	if len(filename) == 0 {
 		return nil
 	}
-	rc := config.NewConfigResolve(v.resolvers...)
+	rc := config.New(v.resolvers...)
 	if err := rc.OpenFile(filename); err != nil {
 		return err
 	}

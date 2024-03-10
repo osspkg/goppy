@@ -11,7 +11,7 @@ import (
 )
 
 type (
-	//_db connection storage
+	// _db connection storage
 	_db struct {
 		conn sqlcommon.Connector
 		opts *options

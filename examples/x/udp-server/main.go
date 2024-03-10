@@ -28,5 +28,5 @@ type Echo struct{}
 
 func (v *Echo) HandlerUDP(w server.Writer, addr net.Addr, b []byte) {
 	fmt.Println(addr.String(), ">  ", string(b))
-	w.WriteTo(b, addr) //nolint: errcheck
+	w.WriteTo(b, addr) // nolint: errcheck
 }

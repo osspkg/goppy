@@ -15,11 +15,11 @@ import (
 	"go.osspkg.com/goppy/xlog"
 )
 
-type Config struct {
+type ConfigTCP struct {
 	TCP []ConfigItem `yaml:"tcp"`
 }
 
-func (v *Config) Default() {
+func (v *ConfigTCP) Default() {
 	if len(v.TCP) == 0 {
 		v.TCP = append(v.TCP, ConfigItem{
 			Address: "0.0.0.0:8080",
@@ -49,8 +49,8 @@ type (
 
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &Config{},
-		Inject: func(c *Config, l xlog.Logger) ServerTCP {
+		Config: &ConfigTCP{},
+		Inject: func(c *ConfigTCP, l xlog.Logger) ServerTCP {
 			return &serverProvider{
 				log:   l,
 				conf:  c.TCP,

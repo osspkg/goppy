@@ -15,7 +15,7 @@ import (
 func main() {
 	app := goppy.New()
 	app.Plugins(
-		web.WithHTTP(),
+		web.WithServer(),
 		auth.WithOAuth(),
 	)
 	app.Plugins(

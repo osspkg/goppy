@@ -10,7 +10,7 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/errors v0.3.0
+	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/random v0.3.0
 	go.osspkg.com/goppy/xtest v0.3.0
 	golang.org/x/crypto v0.20.0

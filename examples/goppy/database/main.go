@@ -20,10 +20,10 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		metrics.WithMetrics(),
-		web.WithHTTP(),
-		ormmysql.WithMySQL(),
-		ormsqlite.WithSQLite(),
+		metrics.WithServer(),
+		web.WithServer(),
+		ormmysql.WithClient(),
+		ormsqlite.WithClient(),
 	)
 	app.Plugins(
 		plugins.Plugin{
@@ -63,7 +63,7 @@ func (v *Controller) Users(ctx web.Context) {
 }
 
 func (v *Controller) User(ctx web.Context) {
-	id, _ := ctx.Param("id").Int() //nolint: errcheck
+	id, _ := ctx.Param("id").Int() // nolint: errcheck
 
 	err := v.mdb.Pool("main").Ping()
 	if err != nil {

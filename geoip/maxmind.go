@@ -8,43 +8,45 @@ package geoip
 import (
 	"fmt"
 	"net"
+	"net/http"
 
 	"github.com/oschwald/geoip2-golang"
 	"go.osspkg.com/goppy/plugins"
+	"go.osspkg.com/goppy/web"
 )
 
-// MaxMindConfig MaxMind database config
-type MaxMindConfig struct {
+// ConfigMaxMind MaxMind database config
+type ConfigMaxMind struct {
 	DB string `yaml:"maxminddb"`
 }
 
-func (v *MaxMindConfig) Default() {
+func (v *ConfigMaxMind) Default() {
 	v.DB = "./GeoIP2-City.mmdb"
 }
 
 // WithMaxMindGeoIP information resolver through local MaxMind database
 func WithMaxMindGeoIP() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &MaxMindConfig{},
-		Inject: func(conf *MaxMindConfig) GeoIP {
-			return newMMDB(conf)
+		Config: &ConfigMaxMind{},
+		Inject: func(conf *ConfigMaxMind) GeoIP {
+			return newMaxMindGeoIP(conf)
 		},
 	}
 }
 
 type (
-	//GeoIP geo-ip information definition interface
+	// GeoIP geo-ip information definition interface
 	GeoIP interface {
 		Country(ip net.IP) (string, error)
 	}
 
 	maxmind struct {
-		conf *MaxMindConfig
+		conf *ConfigMaxMind
 		db   *geoip2.Reader
 	}
 )
 
-func newMMDB(c *MaxMindConfig) *maxmind {
+func newMaxMindGeoIP(c *ConfigMaxMind) *maxmind {
 	return &maxmind{
 		conf: c,
 	}
@@ -72,4 +74,25 @@ func (v *maxmind) Country(ip net.IP) (string, error) {
 		return "", err
 	}
 	return vv.Country.IsoCode, nil
+}
+
+// MaxMindMiddleware determine geo-ip information through local MaxMind database
+func MaxMindMiddleware(resolver GeoIP) web.Middleware {
+	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			cip := net.ParseIP(r.Header.Get("X-Real-IP"))
+			if len(cip) == 0 {
+				host, _, err := net.SplitHostPort(r.RemoteAddr)
+				if err == nil {
+					cip = net.ParseIP(host)
+				}
+			}
+			country, _ := resolver.Country(cip) // nolint: errcheck
+			ctx = SetCountryName(ctx, country)
+			ctx = SetClientIP(ctx, cip)
+			ctx = SetProxyIPs(ctx, parseXForwardedFor(r.Header.Get("X-Forwarded-For"), cip))
+			call(w, r.WithContext(ctx))
+		}
+	}
 }

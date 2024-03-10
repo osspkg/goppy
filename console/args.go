@@ -8,9 +8,9 @@ package console
 import "strings"
 
 type (
-	//ValidFunc validate argument interface
+	// ValidFunc validate argument interface
 	ValidFunc func([]string) ([]string, error)
-	//Argument model
+	// Argument model
 	Argument struct {
 		ValidFunc ValidFunc
 	}
@@ -98,7 +98,7 @@ func (a *Args) Parse(list []string) *Args {
 			a.list = append(a.list, arg)
 			continue
 		}
-		//commands
+		// commands
 		a.next = append(a.next, list[i])
 	}
 

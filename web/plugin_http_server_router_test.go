@@ -28,7 +28,7 @@ func Test_newRouter(t *testing.T) {
 		ctx.String(404, "NotFoundHandler")
 	})
 
-	//nolint: lll
+	// nolint: lll
 	api1 := r.Collection("api/", func(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			f(w, r)
@@ -40,7 +40,7 @@ func Test_newRouter(t *testing.T) {
 		ctx.String(200, "api1.Get [aaa] handler")
 	})
 
-	//nolint: lll
+	// nolint: lll
 	api2 := api1.Collection("/bbb/ccc", func(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			f(w, r)

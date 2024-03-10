@@ -21,8 +21,8 @@ func main() {
 	app.AppName("goppy_base_app")
 	app.AppVersion("v1.0.0")
 	app.Plugins(
-		metrics.WithMetrics(),
-		web.WithHTTP(),
+		metrics.WithServer(),
+		web.WithServer(),
 	)
 	app.Plugins(
 		plugins.Plugin{
@@ -56,7 +56,7 @@ func (v *Controller) Users(ctx web.Context) {
 }
 
 func (v *Controller) User(ctx web.Context) {
-	id, _ := ctx.Param("id").Int() //nolint: errcheck
+	id, _ := ctx.Param("id").Int() // nolint: errcheck
 	ctx.String(200, "user id: %d", id)
 	ctx.Log().Infof("user - %d", id)
 }

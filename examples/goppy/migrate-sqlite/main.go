@@ -14,7 +14,7 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		ormsqlite.WithSQLite(),
+		ormsqlite.WithClient(),
 	)
 	app.Run()
 

@@ -13,28 +13,17 @@ import (
 	"text/template"
 )
 
-var helpTemplate = `{{if len .Description | ne 0}}{{.Description}}{{end}}
-{{if .ShowCommand}}
-Current Command: 
-  {{.Name}} {{.Curr}} {{.Args}} {{range $ex := .FlagsEx}} {{$ex}}{{end}}
-
-Flags:
-{{range $ex := .Flags}}  {{$ex}}
-{{end}}
-Examples:
-{{range $ex := .Examples}}  {{$ex}}
-{{end}}
-_____________________________________________________{{end}}
-{{if len .Next | ne 0}}
-Usage: 
-  {{.Name}} {{.Curr}} [command] [args]
-
-Available Commands:
-{{range $ex := .Next}}  {{$ex}}
+var helpTemplate = `{{if len .Description | ne 0}}NAME
+	{{.Name}} - {{.Description}}
+{{end}}SYNOPSIS
+	{{.Name}} {{.Curr}} {{.Args}}
+{{if len .CurrDesc | ne 0}}DESCRIPTION
+	{{.CurrDesc}}
+{{end}}{{if len .Flags | ne 0}}ARGUMENTS
+{{range $ex := .Flags}}	{{$ex}}
+{{end}}{{end}}{{if len .Next | ne 0}}COMMANDS
+{{range $ex := .Next}}	{{$ex}}
 {{end}}{{end}}
-_____________________________________________________
-Use flag --help for more information about a command.
-
 `
 
 type helpModel struct {
@@ -42,22 +31,27 @@ type helpModel struct {
 	Description string
 	ShowCommand bool
 
-	Args     string
-	Examples []string
-	FlagsEx  []string
-	Flags    []string
+	Args  string
+	Flags []string
 
-	Curr string
-	Next []string
+	Curr     string
+	CurrDesc string
+	Next     []string
 }
 
-func help(tool string, desc string, c CommandGetter, args []string) {
+func helpView(tool string, desc string, c CommandGetter, args []string) {
 	model := &helpModel{
-		ShowCommand: c != nil && c.Call() != nil,
+		ShowCommand: c != nil,
 		Name:        tool,
 		Description: desc,
 
-		Curr: strings.Join(args, " "),
+		Curr: strings.Join(args, " ") + " " + c.Name(),
+		CurrDesc: func() string {
+			if c == nil {
+				return ""
+			}
+			return c.Description()
+		}(),
 		Next: func() (out []string) {
 			if c == nil {
 				return
@@ -72,8 +66,12 @@ func help(tool string, desc string, c CommandGetter, args []string) {
 			sort.Slice(next, func(i, j int) bool {
 				return next[i].Name() < next[j].Name()
 			})
+			max += 3
 			for _, v := range next {
-				out = append(out, v.Name()+strings.Repeat(" ", max-len(v.Name()))+"    "+v.Description())
+				out = append(out,
+					v.Name()+
+						strings.Repeat(" ", max-len(v.Name()))+
+						v.Description())
 			}
 
 			return
@@ -81,50 +79,39 @@ func help(tool string, desc string, c CommandGetter, args []string) {
 	}
 
 	if c != nil {
-		model.Examples = func() (out []string) {
-			for _, v := range c.Examples() {
-				out = append(out, tool+" "+v)
-			}
-			return
-		}()
 		model.Args = "[arg]"
 		model.Flags = func() (out []string) {
 			max := 0
-			c.Flags().Info(func(r bool, n string, v interface{}, u string) {
-				if len(n) > max {
-					max = len(n)
+			c.Flags().Info(func(_ bool, name string, _ interface{}, _ string) {
+				length := len(name)
+				if length > 2 {
+					length += 2
+				} else {
+					length++
+				}
+				if length > max {
+					max = length
 				}
 			})
-			c.Flags().Info(func(r bool, n string, v interface{}, u string) {
-				ex, i := "", 1
-				if !r {
-					ex = fmt.Sprintf("(default: %+v)", v)
+			max += 2
+			c.Flags().Info(func(req bool, name string, value interface{}, usage string) {
+				defaultValue, i := "", 1
+				if !req {
+					defaultValue = fmt.Sprintf("(default: %+v)", value)
 				}
-				if len(n) > 1 {
+				if len(name) > 1 {
 					i = 2
 				}
 				out = append(out, fmt.Sprintf(
 					"%s%s%s    %s %s",
-					strings.Repeat("-", i), n, strings.Repeat(" ", max-len(n)), u, ex))
+					strings.Repeat("-", i),
+					name,
+					strings.Repeat(" ", max-len(name)-i),
+					usage,
+					defaultValue,
+				))
 			})
-			return
-		}()
-		model.FlagsEx = func() (out []string) {
-			c.Flags().Info(func(r bool, n string, v interface{}, u string) {
-				i, ex := 1, ""
-				if len(n) > 1 {
-					i = 2
-				}
-				switch v.(type) {
-				case bool:
-				default:
-					ex = fmt.Sprintf("=%+v", v)
-				}
-				out = append(out, fmt.Sprintf(
-					"%s%s%s",
-					strings.Repeat("-", i), n, ex))
-			})
-			return
+			return out
 		}()
 	}
 

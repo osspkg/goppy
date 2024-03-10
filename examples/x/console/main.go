@@ -15,9 +15,8 @@ import (
 func main() {
 	root := console.New("tool", "help tool")
 
-	cmd := console.NewCommand(func(setter console.CommandSetter) {
-		setter.Setup("simple", "first-level command")
-		setter.Example("simple aa/bb/cc -a=hello -b=123 --cc=123.456 -e")
+	simpleCmd := console.NewCommand(func(setter console.CommandSetter) {
+		setter.Setup("simple", "third level")
 
 		setter.Flag(func(f console.FlagsSetter) {
 			f.StringVar("a", "demo", "this is a string argument")
@@ -28,7 +27,7 @@ func main() {
 
 		setter.ArgumentFunc(func(s []string) ([]string, error) {
 			if !strings.Contains(s[0], "/") {
-				return nil, fmt.Errorf("argument must contain `/`")
+				return nil, fmt.Errorf("argument must contain /")
 			}
 			return strings.Split(s[0], "/"), nil
 		})
@@ -38,6 +37,25 @@ func main() {
 		})
 	})
 
-	root.AddCommand(cmd)
+	twoCmd := console.NewCommand(func(setter console.CommandSetter) {
+		setter.Setup("two", "second level")
+		setter.Flag(func(f console.FlagsSetter) {
+			f.StringVar("a", "demo", "this is a string argument")
+			f.IntVar("b", 1, "this is a int64 argument")
+			f.FloatVar("cc", 1e-5, "this is a float64 argument")
+			f.Bool("e", "this is a bool argument")
+		})
+
+		setter.AddCommand(simpleCmd)
+		setter.AddCommand(simpleCmd)
+	})
+
+	oneCmd := console.NewCommand(func(setter console.CommandSetter) {
+		setter.Setup("one", "first level")
+
+		setter.AddCommand(twoCmd)
+	})
+
+	root.AddCommand(oneCmd)
 	root.Exec()
 }

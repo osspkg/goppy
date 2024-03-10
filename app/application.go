@@ -221,7 +221,7 @@ func (a *_app) prepareConfig(interactive bool) {
 	}
 	if len(a.configFilePath) > 0 {
 		// read config file
-		resolver := config.NewConfigResolve(a.resolvers...)
+		resolver := config.New(a.resolvers...)
 		if err = resolver.OpenFile(a.configFilePath); err != nil {
 			console.FatalIfErr(err, "open config file: %s", a.configFilePath)
 		}

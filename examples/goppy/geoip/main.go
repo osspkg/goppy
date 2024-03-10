@@ -18,7 +18,7 @@ func main() {
 
 	app := goppy.New()
 	app.Plugins(
-		web.WithHTTP(),
+		web.WithServer(),
 		geoip.WithMaxMindGeoIP(),
 	)
 	app.Plugins(
@@ -31,9 +31,9 @@ func main() {
 				)
 				router.Get("/", func(ctx web.Context) {
 					m := model{
-						ClientIP: geoip.GetClientIP(ctx).String(),
-						Country:  geoip.GetCountryName(ctx),
-						ProxyIPs: geoip.GetProxyIPs(ctx),
+						ClientIP: geoip.GetClientIP(ctx.Context()).String(),
+						Country:  geoip.GetCountryName(ctx.Context()),
+						ProxyIPs: geoip.GetProxyIPs(ctx.Context()),
 					}
 					ctx.JSON(200, &m)
 				})

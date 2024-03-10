@@ -14,10 +14,10 @@ import (
 	"go.osspkg.com/goppy/xc"
 )
 
-func TestUnit_Combine(t *testing.T) {
-	c, cancel := xc.Combine(context.Background(), context.Background())
+func TestUnit_Join(t *testing.T) {
+	c, cancel := xc.Join(context.Background(), context.Background())
 	if c == nil {
-		t.Fatalf("contexts.Combine returned nil")
+		t.Fatalf("contexts.Join returned nil")
 	}
 
 	select {
@@ -36,6 +36,6 @@ func TestUnit_Combine(t *testing.T) {
 	}
 
 	if got, want := fmt.Sprint(c), "context.Background.WithCancel"; got != want {
-		t.Fatalf("contexts.Combine() = %q want %q", got, want)
+		t.Fatalf("contexts.Join() = %q want %q", got, want)
 	}
 }

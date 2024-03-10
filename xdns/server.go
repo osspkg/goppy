@@ -16,7 +16,7 @@ import (
 )
 
 type Server struct {
-	conf    ConfigItem
+	conf    Config
 	serv    []*dns.Server
 	handler HandlerDNS
 	log     xlog.Logger
@@ -24,7 +24,7 @@ type Server struct {
 	mux     iosync.Lock
 }
 
-func NewServer(conf ConfigItem, l xlog.Logger) *Server {
+func NewServer(conf Config, l xlog.Logger) *Server {
 	return &Server{
 		conf:    conf,
 		serv:    make([]*dns.Server, 0, 2),

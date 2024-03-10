@@ -41,13 +41,13 @@ func SetupPingPong(c *websocket.Conn) {
 	c.SetPingHandler(func(_ string) error {
 		return errors.Wrap(
 			c.SetReadDeadline(time.Now().Add(PongWait)),
-			//v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
+			// v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
 		)
 	})
 	c.SetPongHandler(func(_ string) error {
 		return errors.Wrap(
 			c.SetReadDeadline(time.Now().Add(PongWait)),
-			//v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
+			// v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
 		)
 	})
 }

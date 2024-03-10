@@ -13,7 +13,7 @@ import (
 func main() {
 	app := goppy.New()
 	app.Plugins(
-		xdns.WithDNSServer(),
+		xdns.WithServer(),
 	)
 	app.Run()
 }

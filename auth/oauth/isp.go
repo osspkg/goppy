@@ -75,7 +75,7 @@ func oauth2ExchangeContext(
 		return errors.Wrapf(err, "exchange to oauth service")
 	}
 	client := srv.Client(ctx, tok)
-	resp, err := client.Get(uri) //nolint: bodyclose
+	resp, err := client.Get(uri) // nolint: bodyclose
 	if err != nil {
 		return errors.Wrapf(err, "client request to oauth service")
 	}

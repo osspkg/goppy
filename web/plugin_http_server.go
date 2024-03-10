@@ -23,8 +23,8 @@ func (v *ConfigHttpPool) Default() {
 	}
 }
 
-// WithHTTP launch of HTTP service with default Router
-func WithHTTP() plugins.Plugin {
+// WithServer launch of HTTP service with default Router
+func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigHttpPool{},
 		Inject: func(conf *ConfigHttpPool, l xlog.Logger) RouterPool {

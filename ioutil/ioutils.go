@@ -33,7 +33,7 @@ func ReadFull(w io.Writer, r io.Reader, maxSize int) error {
 		return ErrInvalidSize
 	}
 
-	//nolint: ineffassign
+	// nolint: ineffassign
 	var (
 		total = 0
 		n     = 0

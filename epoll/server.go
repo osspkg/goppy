@@ -109,12 +109,12 @@ func (s *Server) connAccept(ctx xc.Context) {
 				return
 			default:
 				s.log.WithFields(xlog.Fields{"err": err.Error()}).Errorf("Epoll conn accept")
-				//TODO: check error?
-				//var ne net.Error
-				//if errors.As(err, ne) {
+				// TODO: check error?
+				// var ne net.Error
+				// if errors.As(err, ne) {
 				//	time.Sleep(1 * time.Second)
 				//	continue
-				//}
+				// }
 				return
 			}
 		}

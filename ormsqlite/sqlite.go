@@ -11,7 +11,7 @@ import (
 	"net/url"
 	"sync"
 
-	_ "github.com/mattn/go-sqlite3" //nolint: golint
+	_ "github.com/mattn/go-sqlite3" // nolint: golint
 	"go.osspkg.com/goppy/errors"
 	"go.osspkg.com/goppy/sqlcommon"
 )
@@ -22,12 +22,12 @@ var (
 )
 
 type (
-	//Config pool of configs
+	// Config pool of configs
 	Config struct {
 		Pool []Item `yaml:"sqlite"`
 	}
 
-	//Item config model
+	// Item config model
 	Item struct {
 		Name        string `yaml:"name"`
 		File        string `yaml:"file"`
@@ -62,27 +62,27 @@ func (i Item) GetDSN() string {
 	if err != nil {
 		params = url.Values{}
 	}
-	//---
+	// ---
 	if len(i.Cache) == 0 {
 		i.Cache = "private"
 	}
 	params.Add("cache", i.Cache)
-	//---
+	// ---
 	if len(i.Mode) == 0 {
 		i.Mode = "rwc"
 	}
 	params.Add("mode", i.Mode)
-	//---
+	// ---
 	if len(i.Journal) == 0 {
 		i.Journal = "TRUNCATE"
 	}
 	params.Add("_journal", i.Journal)
-	//---
+	// ---
 	if len(i.LockingMode) == 0 {
 		i.LockingMode = "EXCLUSIVE"
 	}
 	params.Add("_locking_mode", i.LockingMode)
-	//--
+	// --
 	return fmt.Sprintf("file:%s?%s", i.File, params.Encode())
 }
 

@@ -40,10 +40,8 @@ func (v *exec) Reset() *exec {
 	return v
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 type (
-	//Executor interface for generate execute query
+	// Executor interface for generate execute query
 	Executor interface {
 		SQL(query string, args ...interface{})
 		Params(args ...interface{})
@@ -72,7 +70,7 @@ func callExecContext(ctx context.Context, db dbGetter, call func(q Executor), di
 	if err != nil {
 		return err
 	}
-	defer stmt.Close() //nolint: errcheck
+	defer stmt.Close() // nolint: errcheck
 	var rowsAffected, lastInsertId int64
 	for _, params := range q.P {
 		result, err0 := stmt.ExecContext(ctx, params...)

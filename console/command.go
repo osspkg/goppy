@@ -11,13 +11,12 @@ import (
 )
 
 type Command struct {
-	root     bool
-	name     string
-	desc     string
-	examples []string
-	flags    *Flags
-	args     *Argument
-	execute  interface{}
+	root    bool
+	name    string
+	desc    string
+	flags   *Flags
+	args    *Argument
+	execute interface{}
 
 	next []CommandGetter
 }
@@ -29,7 +28,6 @@ type CommandGetter interface {
 	Is(string) bool
 	Name() string
 	Description() string
-	Examples() []string
 	ArgCall(d []string) ([]string, error)
 	Flags() FlagsGetter
 	Call() interface{}
@@ -40,7 +38,6 @@ type CommandGetter interface {
 
 type CommandSetter interface {
 	Setup(string, string)
-	Example(string)
 	Flag(cb func(FlagsSetter))
 	ArgumentFunc(call ValidFunc)
 	ExecFunc(interface{})
@@ -49,10 +46,9 @@ type CommandSetter interface {
 
 func NewCommand(cb func(CommandSetter)) CommandGetter {
 	cmd := &Command{
-		next:     make([]CommandGetter, 0),
-		flags:    NewFlags(),
-		args:     NewArgument(),
-		examples: make([]string, 0),
+		next:  make([]CommandGetter, 0, 2),
+		flags: NewFlags(),
+		args:  NewArgument(),
 	}
 	cb(cmd)
 	return cmd
@@ -78,14 +74,6 @@ func (c *Command) Name() string {
 
 func (c *Command) Description() string {
 	return c.desc
-}
-
-func (c *Command) Examples() []string {
-	return c.examples
-}
-
-func (c *Command) Example(s string) {
-	c.examples = append(c.examples, s)
 }
 
 func (c *Command) Flag(cb func(FlagsSetter)) {
@@ -129,7 +117,8 @@ func (c *Command) Validate() error {
 		return fmt.Errorf("command name is empty. use Setup(name, description)")
 	}
 	if reflect.ValueOf(c.execute).Kind() != reflect.Func {
-		return fmt.Errorf("command [%s] ExecFunc: is not a func", c.name)
+		return nil
+		// return fmt.Errorf("command [%s] not called. Run with --help to get information", c.name)
 	}
 	count := c.flags.Count() + 1
 	if reflect.ValueOf(c.execute).Type().NumIn() != count {

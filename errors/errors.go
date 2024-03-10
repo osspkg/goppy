@@ -44,11 +44,9 @@ func (v *err) WithTrace() {
 	v.trace = syscall.Trace(10)
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 func Trace(cause error, message string, args ...interface{}) error {
 	v := Wrapf(cause, message, args...)
-	//nolint: errorlint
+	// nolint: errorlint
 	if vv, ok := v.(*err); ok {
 		vv.WithTrace()
 		return vv
@@ -97,7 +95,7 @@ func Wrap(msg ...error) error {
 }
 
 func Unwrap(err error) error {
-	//nolint: errorlint
+	// nolint: errorlint
 	if v, ok := err.(interface {
 		Unwrap() error
 	}); ok {
@@ -108,7 +106,7 @@ func Unwrap(err error) error {
 
 func Cause(err error) error {
 	for err != nil {
-		//nolint: errorlint
+		// nolint: errorlint
 		v, ok := err.(interface {
 			Cause() error
 		})
