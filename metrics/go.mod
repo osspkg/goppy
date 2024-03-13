@@ -27,7 +27,7 @@ require (
 	go.osspkg.com/goppy/xlog v0.3.3
 	go.osspkg.com/goppy/xnet v0.3.1
 	go.osspkg.com/goppy/xtest v0.3.0
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.33.0
 )
 
 require (
