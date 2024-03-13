@@ -41,5 +41,5 @@ require (
 	go.osspkg.com/goppy/xnet v0.3.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/protobuf v1.32.0 // indirect
+	google.golang.org/protobuf v1.33.0 // indirect
 )
