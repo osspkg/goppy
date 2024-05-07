@@ -18,7 +18,7 @@ replace (
 
 require (
 	github.com/mailru/easyjson v0.7.7
-	go.osspkg.com/goppy/encryption v0.3.3
+	go.osspkg.com/goppy/encryption v0.3.4
 	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/ioutil v0.3.1
 	go.osspkg.com/goppy/plugins v0.3.1

@@ -18,7 +18,7 @@ replace (
 )
 
 require (
-	go.osspkg.com/goppy/app v0.3.6
+	go.osspkg.com/goppy/app v0.3.7
 	go.osspkg.com/goppy/config v0.0.3
 	go.osspkg.com/goppy/console v0.3.2
 	go.osspkg.com/goppy/env v0.3.1
