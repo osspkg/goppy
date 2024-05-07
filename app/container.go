@@ -114,13 +114,13 @@ func (v *container) prepare() error {
 		case reflect.Func:
 			if item.ReflectType.NumIn() == 0 {
 				v.kahn.Add(root, item.Address)
-				break
 			}
 			for i := 0; i < item.ReflectType.NumIn(); i++ {
 				inRefType := item.ReflectType.In(i)
 				inAddress, _ := getReflectAddress(inRefType, nil)
 				v.kahn.Add(inAddress, item.Address)
 			}
+
 			for i := 0; i < item.ReflectType.NumOut(); i++ {
 				outRefType := item.ReflectType.Out(i)
 				outAddress, _ := getReflectAddress(outRefType, nil)
@@ -130,7 +130,6 @@ func (v *container) prepare() error {
 		case reflect.Struct:
 			if item.ReflectType.NumField() == 0 {
 				v.kahn.Add(root, item.Address)
-				break
 			}
 			for i := 0; i < item.ReflectType.NumField(); i++ {
 				inRefType := item.ReflectType.Field(i).Type

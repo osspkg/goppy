@@ -7,53 +7,67 @@ package app
 
 import (
 	"errors"
+	"fmt"
 	"reflect"
-	"strings"
+	"regexp"
 	"testing"
+
+	"go.osspkg.com/goppy/xtest"
 )
 
-func TestUnit_getReflectAddress(t *testing.T) {
+// nolint: lll
+func TestUnit_getReflectAddress2(t *testing.T) {
 	type (
 		aa string
 		bb struct{}
+		cc interface {
+			AA() string
+		}
 		ff func(_ string) bool
 	)
 	var (
-		a    = 0
-		b    = "0"
-		c    = false
-		d    = aa("aaa")
-		e ff = func(_ string) bool { return false }
-		f    = func(_ string) bool { return false }
-		g    = errors.New("")
-		h    = []string{}
-		j    = bb{}
-		k    = struct{}{}
+		fn1 ff = func(_ string) bool { return false }
+		fn2    = func(_ string) bool { return false }
 	)
 
 	tests := []struct {
 		name string
-		args reflect.Type
 		obj  interface{}
 		want string
 		ok   bool
 	}{
-		{name: "Case1", args: reflect.TypeOf(a), obj: a, want: "int", ok: false},
-		{name: "Case2", args: reflect.TypeOf(b), obj: b, want: "string", ok: false},
-		{name: "Case3", args: reflect.TypeOf(c), obj: c, want: "bool", ok: false},
-		{name: "Case4", args: reflect.TypeOf(d), obj: d, want: "go.osspkg.com/goppy/app.aa", ok: true},
-		{name: "Case5", args: reflect.TypeOf(e), obj: e, want: "go.osspkg.com/goppy/app.ff", ok: true},
-		{name: "Case6", args: reflect.TypeOf(f), obj: f, want: "func(string) bool", ok: true},
-		{name: "Case7", args: reflect.TypeOf(f), obj: nil, want: "func(string) bool", ok: false},
-		{name: "Case8", args: reflect.TypeOf(g), obj: g, want: "error", ok: false},
-		{name: "Case9", args: reflect.TypeOf(h), obj: h, want: "[]string", ok: false},
-		{name: "Case10", args: reflect.TypeOf(j), obj: j, want: "go.osspkg.com/goppy/app.bb", ok: true},
-		{name: "Case11", args: reflect.TypeOf(k), obj: k, want: "struct {}", ok: false},
+		{name: "Case01", obj: 0, want: "int", ok: false},
+		{name: "Case02", obj: "0", want: "string", ok: false},
+		{name: "Case03", obj: true, want: "bool", ok: false},
+		{name: "Case04", obj: aa("aaa"), want: "go\\.osspkg\\.com\\/goppy\\/app\\.aa", ok: true},
+		{name: "Case05", obj: func() *aa { a := aa("aaa"); return &a }(), want: "\\*go\\.osspkg\\.com\\/goppy\\/app\\.aa", ok: true},
+		{name: "Case06", obj: func() *aa { a := aa("aaa"); return &a }, want: "0x([0-9a-z]+)\\.func\\(\\) \\*app\\.aa", ok: true},
+		{name: "Case07", obj: fn1, want: "go\\.osspkg\\.com\\/goppy\\/app\\.ff", ok: true},
+		{name: "Case08", obj: fn2, want: "0x([0-9a-z]+)\\.func\\(string\\) bool", ok: true},
+		{name: "Case09", obj: 3.14, want: "float64", ok: false},
+		{name: "Case10", obj: errors.New(""), want: "error", ok: false},
+		{name: "Case11", obj: []string{}, want: "\\[\\]string", ok: false},
+		{name: "Case12", obj: []*string{}, want: "\\[\\]\\*string", ok: false},
+		{name: "Case13", obj: bb{}, want: "go\\.osspkg\\.com\\/goppy\\/app\\.bb", ok: true},
+		{name: "Case14", obj: &bb{}, want: "\\*go\\.osspkg\\.com\\/goppy\\/app\\.bb", ok: true},
+		{name: "Case15", obj: struct{}{}, want: "struct\\{\\}", ok: false},
+		{name: "Case16", obj: &struct{}{}, want: "\\*struct\\{\\}", ok: false},
+		{name: "Case17", obj: cc(nil), want: "nil", ok: false},
+		{name: "Case18", obj: []cc{}, want: "\\[\\]go\\.osspkg\\.com\\/goppy\\/app\\.cc", ok: true},
+		{name: "Case19", obj: []*cc{}, want: "\\[\\]\\*go\\.osspkg\\.com\\/goppy\\/app\\.cc", ok: true},
+		{name: "Case20", obj: map[cc]cc{}, want: "map\\[go\\.osspkg\\.com\\/goppy\\/app\\.cc\\]go\\.osspkg\\.com\\/goppy\\/app\\.cc", ok: true},
+		{name: "Case21", obj: map[*cc]*cc{}, want: "map\\[\\*go\\.osspkg\\.com\\/goppy\\/app\\.cc\\]\\*go\\.osspkg\\.com\\/goppy\\/app\\.cc", ok: true},
+		{name: "Case22", obj: make(chan string), want: "chan string", ok: false},
+		{name: "Case23", obj: make(chan *string, 100), want: "chan \\*string", ok: false},
+		{name: "Case24", obj: make(chan struct{}, 100), want: "chan struct\\{\\}", ok: false},
+		{name: "Case25", obj: [2]int{1}, want: "\\[2\\]int", ok: false},
+		{name: "Case26", obj: [2]*cc{}, want: "\\[2\\]\\*go\\.osspkg\\.com\\/goppy\\/app\\.cc", ok: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, ok := getReflectAddress(tt.args, tt.obj)
-			if !strings.Contains(got, tt.want) {
+			got, ok := getReflectAddress(reflect.TypeOf(tt.obj), tt.obj)
+			fmt.Println(got, ok)
+			if !regexp.MustCompile("(U?)^" + tt.want + "$").MatchString(got) {
 				t.Errorf("getReflectAddress() = %v, want %v", got, tt.want)
 			}
 			if ok != tt.ok {
@@ -61,4 +75,15 @@ func TestUnit_getReflectAddress(t *testing.T) {
 			}
 		})
 	}
+
+	var (
+		fn3 = func(_ cc) {}
+	)
+	fn3ref := reflect.TypeOf(fn3)
+
+	fn3ref0 := fn3ref.In(0)
+	got, ok := getReflectAddress(fn3ref0, nil)
+	fmt.Println(got, ok)
+	xtest.Equal(t, "go.osspkg.com/goppy/app.cc", got)
+	xtest.True(t, ok)
 }

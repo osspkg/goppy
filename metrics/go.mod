@@ -18,7 +18,7 @@ replace (
 
 require (
 	github.com/prometheus/client_golang v1.19.0
-	github.com/prometheus/client_model v0.6.0
+	github.com/prometheus/client_model v0.6.1
 	go.osspkg.com/goppy/env v0.3.1
 	go.osspkg.com/goppy/plugins v0.3.1
 	go.osspkg.com/goppy/syscall v0.3.0
@@ -27,7 +27,7 @@ require (
 	go.osspkg.com/goppy/xlog v0.3.3
 	go.osspkg.com/goppy/xnet v0.3.1
 	go.osspkg.com/goppy/xtest v0.3.0
-	google.golang.org/protobuf v1.32.0
+	google.golang.org/protobuf v1.34.1
 )
 
 require (
@@ -41,5 +41,5 @@ require (
 	go.osspkg.com/goppy/iosync v0.3.0 // indirect
 	go.osspkg.com/goppy/ioutil v0.3.1 // indirect
 	go.osspkg.com/static v1.4.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/sys v0.20.0 // indirect
 )
