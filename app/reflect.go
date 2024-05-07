@@ -8,18 +8,23 @@ package app
 import (
 	"fmt"
 	"reflect"
+	"strings"
 )
 
 const errName = "error"
 
 var errType = reflect.TypeOf(new(error)).Elem()
 
+// nolint: gocyclo
 func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
-	if len(t.PkgPath()) > 0 {
-		return fmt.Sprintf("%s.%s", t.PkgPath(), t.Name()), true
+	if t == nil {
+		return "nil", false
 	}
 	switch t.Kind() {
 	case reflect.Func:
+		if len(t.PkgPath()) > 0 {
+			return reflectAddressElem(t), true
+		}
 		if v == nil {
 			return t.String(), false
 		}
@@ -29,18 +34,39 @@ func getReflectAddress(t reflect.Type, v interface{}) (string, bool) {
 		if t.Implements(errType) {
 			return errName, false
 		}
-		if len(t.Elem().PkgPath()) > 0 {
-			return fmt.Sprintf("%s.%s", t.Elem().PkgPath(), t.Elem().Name()), true
+		value := reflectAddressElem(t)
+		if value == "*" {
+			return "*struct{}", false
 		}
+		return value, true
+	case reflect.Map:
+		key := reflectAddressElem(t.Key())
+		value := reflectAddressElem(t.Elem())
+		return fmt.Sprintf("map[%s]%s", key, value), isNotSimple(key) && isNotSimple(value)
+	case reflect.Struct:
+		value := reflectAddressElem(t)
+		if len(value) == 0 {
+			return "struct{}", false
+		}
+		return value, true
 	case reflect.Bool,
 		reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 		reflect.Float32, reflect.Float64,
-		reflect.Array, reflect.Chan, reflect.Map, reflect.Slice, reflect.String,
-		reflect.Struct:
-		if len(t.PkgPath()) > 0 {
-			return fmt.Sprintf("%s.%s", t.PkgPath(), t.Elem().Name()), true
-		}
+		reflect.Complex64, reflect.Complex128,
+		reflect.String,
+		reflect.Interface:
+		value := reflectAddressElem(t)
+		return value, isNotSimple(value)
+	case reflect.Chan:
+		value, _ := getReflectAddress(t.Elem(), v)
+		return fmt.Sprintf("chan %s", value), isNotSimple(value)
+	case reflect.Slice:
+		value := reflectAddressElem(t.Elem())
+		return fmt.Sprintf("[]%s", value), isNotSimple(value)
+	case reflect.Array:
+		value := reflectAddressElem(t.Elem())
+		return fmt.Sprintf("[%d]%s", t.Len(), value), isNotSimple(value)
 	}
 	return t.String(), false
 }
@@ -67,4 +93,19 @@ func typingReflectPtr(vv []interface{}, call func(interface{}) error) ([]interfa
 		}
 	}
 	return result, nil
+}
+
+func reflectAddressElem(t reflect.Type) string {
+	if t.Kind() == reflect.Ptr {
+		return "*" + reflectAddressElem(t.Elem())
+	}
+	value := t.Name()
+	if len(t.PkgPath()) > 0 {
+		value = t.PkgPath() + "." + value
+	}
+	return value
+}
+
+func isNotSimple(v string) bool {
+	return strings.Contains(v, ".")
 }
