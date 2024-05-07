@@ -17,7 +17,7 @@ replace (
 )
 
 require (
-	github.com/go-sql-driver/mysql v1.7.1
+	github.com/go-sql-driver/mysql v1.8.1
 	go.osspkg.com/goppy/errors v0.3.1
 	go.osspkg.com/goppy/orm v0.3.5
 	go.osspkg.com/goppy/plugins v0.3.1
@@ -28,6 +28,7 @@ require (
 )
 
 require (
+	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	go.osspkg.com/goppy/iofile v0.3.3 // indirect

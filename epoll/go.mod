@@ -18,7 +18,7 @@ require (
 	go.osspkg.com/goppy/xc v0.3.1
 	go.osspkg.com/goppy/xlog v0.3.3
 	go.osspkg.com/goppy/xnet v0.3.1
-	golang.org/x/sys v0.17.0
+	golang.org/x/sys v0.20.0
 )
 
 require (
