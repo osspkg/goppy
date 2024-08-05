@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"testing"
 
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
 )
 
 func TestUnit_NewHandler(t *testing.T) {
@@ -18,53 +18,53 @@ func TestUnit_NewHandler(t *testing.T) {
 	h.Route("", func(_ http.ResponseWriter, _ *http.Request) {}, []string{http.MethodPost})
 
 	code, ctrl, vr, midd := h.Match("/aaa/bbb", http.MethodPost)
-	xtest.Equal(t, 200, code)
-	xtest.NotNil(t, ctrl)
-	xtest.Equal(t, 0, len(midd))
-	xtest.Equal(t, uriParamData{"id": "bbb"}, vr)
+	casecheck.Equal(t, 200, code)
+	casecheck.NotNil(t, ctrl)
+	casecheck.Equal(t, 0, len(midd))
+	casecheck.Equal(t, uriParamData{"id": "bbb"}, vr)
 
 	h.Middlewares("/aaa", RecoveryMiddleware(nil))
 	h.Middlewares("", RecoveryMiddleware(nil))
 
 	code, ctrl, vr, midd = h.Match("/aaa/ccc", http.MethodGet)
-	xtest.Equal(t, http.StatusMethodNotAllowed, code)
-	xtest.Nil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData(nil), vr)
+	casecheck.Equal(t, http.StatusMethodNotAllowed, code)
+	casecheck.Nil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData(nil), vr)
 
 	code, ctrl, vr, midd = h.Match("/aaa/bbb", http.MethodPost)
-	xtest.Equal(t, http.StatusOK, code)
-	xtest.NotNil(t, ctrl)
-	xtest.Equal(t, 2, len(midd))
-	xtest.Equal(t, uriParamData{"id": "bbb"}, vr)
+	casecheck.Equal(t, http.StatusOK, code)
+	casecheck.NotNil(t, ctrl)
+	casecheck.Equal(t, 2, len(midd))
+	casecheck.Equal(t, uriParamData{"id": "bbb"}, vr)
 
 	code, ctrl, vr, midd = h.Match("", http.MethodPost)
-	xtest.Equal(t, http.StatusOK, code)
-	xtest.NotNil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData{}, vr)
+	casecheck.Equal(t, http.StatusOK, code)
+	casecheck.NotNil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData{}, vr)
 
 	h.Middlewares("/www/www/www", RecoveryMiddleware(nil))
 
 	code, ctrl, vr, midd = h.Match("/www/www/www", http.MethodPost)
-	xtest.Equal(t, http.StatusNotFound, code)
-	xtest.Nil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData(nil), vr)
+	casecheck.Equal(t, http.StatusNotFound, code)
+	casecheck.Nil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData(nil), vr)
 
 	code, ctrl, vr, midd = h.Match("/test", http.MethodGet)
-	xtest.Equal(t, http.StatusNotFound, code)
-	xtest.Nil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData(nil), vr)
+	casecheck.Equal(t, http.StatusNotFound, code)
+	casecheck.Nil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData(nil), vr)
 
 	h.NoFoundHandler(func(_ http.ResponseWriter, _ *http.Request) {})
 
 	code, ctrl, vr, midd = h.Match("/test", http.MethodGet)
-	xtest.Equal(t, http.StatusOK, code)
-	xtest.NotNil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData(nil), vr)
+	casecheck.Equal(t, http.StatusOK, code)
+	casecheck.NotNil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData(nil), vr)
 }
 
 func TestUnit_NewHandler2(t *testing.T) {
@@ -74,9 +74,9 @@ func TestUnit_NewHandler2(t *testing.T) {
 	h.Middlewares("/api/v{id}", RecoveryMiddleware(nil))
 
 	code, ctrl, vr, midd := h.Match("/api/v1/data/user/aaaa", http.MethodGet)
-	xtest.Equal(t, http.StatusOK, code)
-	xtest.NotNil(t, ctrl)
-	xtest.Equal(t, 1, len(midd))
-	xtest.Equal(t, uriParamData{"id": "1"}, vr)
+	casecheck.Equal(t, http.StatusOK, code)
+	casecheck.NotNil(t, ctrl)
+	casecheck.Equal(t, 1, len(midd))
+	casecheck.Equal(t, uriParamData{"id": "1"}, vr)
 
 }

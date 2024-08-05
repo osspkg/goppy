@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"regexp"
 
-	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/errors"
 )
 
 const (

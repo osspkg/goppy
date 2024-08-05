@@ -9,13 +9,26 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"go.osspkg.com/goppy/iosync"
-	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/ws/event"
-	"go.osspkg.com/goppy/ws/server"
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/goppy/v2/ws/event"
+	"go.osspkg.com/xc"
 )
+
+type Server interface {
+	CountConn() (cc int)
+	SetEventHandler(h EventHandler, eids ...event.Id)
+	DelEventHandler(eids ...event.Id)
+	SetGuard(g Guard)
+	BroadcastEvent(eid event.Id, m interface{}) (err error)
+	SendEvent(eid event.Id, m interface{}, cids ...string) (err error)
+	OnClose(cb func(cid string))
+	OnOpen(cb func(cid string))
+	CloseOne(cid string)
+	CloseAll()
+	HandlingHTTP(w http.ResponseWriter, r *http.Request)
+	Handling(ctx web.Context)
+}
 
 func OptionCompression(enable bool) func(*websocket.Upgrader) {
 	return func(u *websocket.Upgrader) {
@@ -31,51 +44,8 @@ func OptionBuffer(read, write int) func(*websocket.Upgrader) {
 
 func WithServer(options ...func(*websocket.Upgrader)) plugins.Plugin {
 	return plugins.Plugin{
-		Inject: func(l xlog.Logger, ctx xc.Context) (*wssProvider, WebsocketServer) {
-			wsp := newWsServerProvider(l, ctx, options...)
-			return wsp, wsp.serv
+		Inject: func(ctx xc.Context) Server {
+			return NewServer(ctx.Context(), options...)
 		},
 	}
-}
-
-type (
-	WebsocketServer interface {
-		Handling(w http.ResponseWriter, r *http.Request)
-		SendEvent(eid event.Id, m interface{}, cids ...string)
-		Broadcast(eid event.Id, m interface{})
-		SetHandler(call server.EventHandler, eids ...event.Id)
-		CloseAll()
-		CountConn() int
-	}
-
-	wssProvider struct {
-		log  xlog.Logger
-		serv *server.Server
-		sync iosync.Switch
-	}
-)
-
-func newWsServerProvider(l xlog.Logger, ctx xc.Context, options ...func(*websocket.Upgrader)) *wssProvider {
-	return &wssProvider{
-		log:  l,
-		serv: server.New(l, ctx.Context(), options...),
-		sync: iosync.NewSwitch(),
-	}
-}
-
-func (v *wssProvider) Up() error {
-	if !v.sync.On() {
-		return errServAlreadyRunning
-	}
-	v.log.Infof("Websocket started")
-	return nil
-}
-
-func (v *wssProvider) Down() error {
-	if !v.sync.Off() {
-		return errServAlreadyStopped
-	}
-	v.serv.CloseAll()
-	v.log.Infof("Websocket stopped")
-	return nil
 }

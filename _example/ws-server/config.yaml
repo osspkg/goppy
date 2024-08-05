@@ -1,0 +1,10 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: string
+  level: 4
+
+http:
+  main:
+    addr: 0.0.0.0:10000

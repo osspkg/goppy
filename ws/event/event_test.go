@@ -10,27 +10,62 @@ import (
 	"fmt"
 	"testing"
 
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
 )
 
 func TestUnit_Event(t *testing.T) {
-	ev := &Message{}
-	err := json.Unmarshal([]byte(`{"e":1001,"u":"1111","d":{"token":"12345","os":"debian"}}`), ev)
-	xtest.NoError(t, err)
+	type data struct {
+		ID int `json:"id"`
+	}
+
+	ev := poolEvents.Get()
+	ev.WithID(1)
+	err := ev.Encode(&data{ID: 123})
+	casecheck.NoError(t, err)
 
 	b, err := json.Marshal(ev)
-	xtest.NoError(t, err)
-	xtest.Equal(t, string(b), "{\"e\":1001,\"d\":{\"token\":\"12345\",\"os\":\"debian\"}}")
-
-	ev.Error(fmt.Errorf("error1"))
-
-	b, err = json.Marshal(ev)
-	xtest.NoError(t, err)
-	xtest.Equal(t, string(b), "{\"e\":1001,\"d\":null,\"err\":\"error1\"}")
+	casecheck.NoError(t, err)
+	casecheck.NotNil(t, b)
+	casecheck.Equal(t, `{"e":1,"d":{"id":123}}`, string(b))
 
 	ev.Reset()
+	err = json.Unmarshal([]byte("{}"), &ev)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, Id(0), ev.Id)
+	casecheck.Equal(t, json.RawMessage(nil), ev.Data)
+	casecheck.Equal(t, (*string)(nil), ev.Err)
 
-	b, err = json.Marshal(ev)
-	xtest.NoError(t, err)
-	xtest.Equal(t, string(b), "{\"e\":0,\"d\":null}")
+	ev.Reset()
+	err = json.Unmarshal([]byte(`{"e":1,"d":{"id":123}}`), &ev)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, Id(1), ev.ID())
+	casecheck.Equal(t, Id(1), ev.Id)
+	casecheck.Equal(t, `{"id":123}`, string(ev.Data))
+	casecheck.Equal(t, (*string)(nil), ev.Err)
+
+	d := data{}
+	err = ev.Decode(&d)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, 123, d.ID)
+
+	d = data{}
+	ev.WithError(fmt.Errorf("1"))
+	err = ev.Decode(&d)
+	casecheck.Error(t, err)
+	casecheck.Equal(t, "1", err.Error())
+	casecheck.Equal(t, 0, d.ID)
+
+	ev.Reset()
+	err = json.Unmarshal([]byte(`{"e":1,"d":{"id":123}}`), &ev)
+	casecheck.NoError(t, err)
+
+	d = data{}
+	ev.WithError(nil)
+	err = ev.Decode(&d)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, 123, d.ID)
+
+	err = ev.Encode(func() {})
+	casecheck.Error(t, err)
+	casecheck.Equal(t, "json: unsupported type: func()", err.Error())
 }

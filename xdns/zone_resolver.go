@@ -9,7 +9,7 @@ import (
 	"math/rand"
 	"time"
 
-	"go.osspkg.com/goppy/xnet"
+	"go.osspkg.com/network/address"
 )
 
 var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -20,9 +20,9 @@ type ZoneResolve struct {
 
 func NewSimpleZoneResolve(dns ...string) *ZoneResolve {
 	if len(dns) == 0 {
-		dns = append(dns, "1.1.1.1", "1.0.0.1")
+		dns = append(dns, "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4")
 	}
-	ndns := xnet.Normalize("53", dns...)
+	ndns := address.Normalize("53", dns...)
 	return &ZoneResolve{dns: ndns}
 }
 
@@ -35,6 +35,6 @@ func (v *ZoneResolve) Resolve(name string) string {
 
 func DefaultExchanger(dns ...string) HandlerDNS {
 	cli := NewClient(OptionNetUDP())
-	cli.SetZoneResolver(NewSimpleZoneResolve())
+	cli.SetZoneResolver(NewSimpleZoneResolve(dns...))
 	return cli
 }

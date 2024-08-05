@@ -8,37 +8,37 @@ package acl_test
 import (
 	"testing"
 
-	acl2 "go.osspkg.com/goppy/acl"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/acl"
 )
 
 func TestUnit_NewACL(t *testing.T) {
-	store := acl2.NewInMemoryStorage()
-	acl := acl2.New(store, 3)
+	store := acl.NewInMemoryStorage()
+	aclStore := acl.New(store, 3)
 
 	email := "demo@example.com"
 
 	t.Log("user not exist")
 
-	levels, err := acl.GetAll(email)
-	xtest.Error(t, err)
-	xtest.Nil(t, levels)
+	levels, err := aclStore.GetAll(email)
+	casecheck.Error(t, err)
+	casecheck.Nil(t, levels)
 
-	xtest.Error(t, acl.Set(email, 10, 1))
+	casecheck.Error(t, aclStore.Set(email, 10, 1))
 
 	t.Log("user exist")
 
-	xtest.NoError(t, store.ChangeACL(email, ""))
+	casecheck.NoError(t, store.ChangeACL(email, ""))
 
-	xtest.Error(t, acl.Set(email, 10, 1))
+	casecheck.Error(t, aclStore.Set(email, 10, 1))
 
-	levels, err = acl.GetAll(email)
-	xtest.NoError(t, err)
-	xtest.Equal(t, []uint8{0, 0, 0}, levels)
+	levels, err = aclStore.GetAll(email)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, []uint8{0, 0, 0}, levels)
 
-	xtest.NoError(t, acl.Set(email, 2, 10))
+	casecheck.NoError(t, aclStore.Set(email, 2, 10))
 
-	levels, err = acl.GetAll(email)
-	xtest.NoError(t, err)
-	xtest.Equal(t, []uint8{0, 0, 9}, levels)
+	levels, err = aclStore.GetAll(email)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, []uint8{0, 0, 9}, levels)
 }

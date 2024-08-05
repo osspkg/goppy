@@ -9,7 +9,7 @@ import (
 	"net"
 	"net/http"
 
-	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/v2/web"
 )
 
 // CloudflareMiddleware determine geo-ip information when proxying through Cloudflare
@@ -18,12 +18,6 @@ func CloudflareMiddleware() web.Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			cip := net.ParseIP(r.Header.Get("CF-Connecting-IP"))
-			if len(cip) == 0 {
-				host, _, err := net.SplitHostPort(r.RemoteAddr)
-				if err == nil {
-					cip = net.ParseIP(host)
-				}
-			}
 			ctx = SetCountryName(ctx, r.Header.Get("CF-IPCountry"))
 			ctx = SetClientIP(ctx, cip)
 			ctx = SetProxyIPs(ctx, parseXForwardedFor(r.Header.Get("X-Forwarded-For"), cip))

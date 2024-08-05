@@ -10,26 +10,27 @@ import (
 	"net/http"
 
 	"github.com/miekg/dns"
-	"go.osspkg.com/goppy/iosync"
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/syncing"
+	"go.osspkg.com/xc"
 )
 
 type Server struct {
 	conf    Config
 	serv    []*dns.Server
 	handler HandlerDNS
-	log     xlog.Logger
-	wg      iosync.Group
-	mux     iosync.Lock
+	log     logx.Logger
+	wg      syncing.Group
+	mux     syncing.Lock
 }
 
-func NewServer(conf Config, l xlog.Logger) *Server {
+func NewServer(conf Config, l logx.Logger) *Server {
 	return &Server{
 		conf:    conf,
 		serv:    make([]*dns.Server, 0, 2),
 		handler: DefaultExchanger(),
-		wg:      iosync.NewGroup(),
+		wg:      syncing.NewGroup(),
+		mux:     syncing.NewLock(),
 		log:     l,
 	}
 }
@@ -54,19 +55,12 @@ func (v *Server) Up(ctx xc.Context) error {
 		WriteTimeout: v.conf.Timeout,
 	})
 
-	for _, s := range v.serv {
-		s := s
+	for _, srv := range v.serv {
+		srv := srv
 		v.wg.Background(func() {
-			v.log.WithFields(xlog.Fields{
-				"address": s.Addr,
-				"net":     s.Net,
-			}).Infof("Run DNS Server")
-			if err := s.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				v.log.WithFields(xlog.Fields{
-					"err":     err.Error(),
-					"address": s.Addr,
-					"net":     s.Net,
-				}).Errorf("Run DNS Server")
+			v.log.Info("Start DNS Server", "address", srv.Addr, "net", srv.Net)
+			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				v.log.Error("Start DNS Server", "address", srv.Addr, "net", srv.Net, "err", err)
 				ctx.Close()
 			}
 		})
@@ -76,19 +70,12 @@ func (v *Server) Up(ctx xc.Context) error {
 }
 
 func (v *Server) Down() error {
-	for _, s := range v.serv {
-		if err := s.Shutdown(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			v.log.WithFields(xlog.Fields{
-				"err":     err.Error(),
-				"address": s.Addr,
-				"net":     s.Net,
-			}).Errorf("Shutdown DNS Server")
+	for _, srv := range v.serv {
+		if err := srv.Shutdown(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			v.log.Error("Shutdown DNS Server", "address", srv.Addr, "net", srv.Net, "err", err)
 			continue
 		}
-		v.log.WithFields(xlog.Fields{
-			"address": s.Addr,
-			"net":     s.Net,
-		}).Infof("Shutdown DNS Server")
+		v.log.Info("Shutdown DNS Server", "address", srv.Addr, "net", srv.Net)
 	}
 
 	v.wg.Wait()
@@ -117,19 +104,12 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	})
 
 	if err != nil {
-		v.log.WithFields(xlog.Fields{
-			"err":      err.Error(),
-			"question": msg.String(),
-		}).Errorf("DNS handler")
+		v.log.Error("DNS handler", "question", msg, "err", err)
 	} else {
 		response.Answer = append(response.Answer, answer...)
 	}
 
 	if err = w.WriteMsg(response); err != nil {
-		v.log.WithFields(xlog.Fields{
-			"err":      err.Error(),
-			"question": msg.String(),
-			"answer":   response.String(),
-		}).Errorf("DNS handler")
+		v.log.Error("DNS handler", "question", msg, "answer", response, "err", err)
 	}
 }

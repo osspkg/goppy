@@ -10,10 +10,10 @@ import (
 	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"go.osspkg.com/goppy/env"
-	"go.osspkg.com/goppy/web"
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/goppy/v2/env"
+	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/xc"
 )
 
 type Server struct {
@@ -23,7 +23,7 @@ type Server struct {
 	conf   Config
 }
 
-func New(app env.AppInfo, c Config, l xlog.Logger) *Server {
+func New(app env.AppInfo, c Config, l logx.Logger) *Server {
 	router := web.NewBaseRouter()
 	conf := web.Config{Addr: c.Addr}
 	return &Server{

@@ -1,0 +1,7 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: string
+  level: 4
+

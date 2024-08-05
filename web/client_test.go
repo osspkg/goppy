@@ -11,36 +11,34 @@ import (
 	"net/http"
 	"testing"
 
-	"go.osspkg.com/goppy/web"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/web"
 )
 
 type (
 	TestModel struct {
-		Val struct {
-			Page struct {
-				Name string `json:"name"`
-			} `json:"page"`
+		Value struct {
+			Name string `json:"name"`
 		}
 	}
 )
 
 func (v *TestModel) UnmarshalJSON(b []byte) error {
-	return json.Unmarshal(b, &v.Val)
+	return json.Unmarshal(b, &v.Value)
 }
 
 func TestUnit_NewClientHttp_JSON(t *testing.T) {
 	model := TestModel{}
 	cli := web.NewClientHttp()
-	err := cli.Call(context.TODO(), http.MethodGet, "https://www.githubstatus.com/api/v2/status.json", nil, &model)
-	xtest.NoError(t, err)
-	xtest.Equal(t, "GitHub", model.Val.Page.Name)
+	err := cli.Call(context.TODO(), http.MethodGet, "https://osspkg.com/manifest.json", nil, &model)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, "OSSPkg", model.Value.Name)
 }
 
 func TestUnit_NewClientHttp_Bytes(t *testing.T) {
 	var model []byte
 	cli := web.NewClientHttp()
-	err := cli.Call(context.TODO(), http.MethodGet, "https://www.githubstatus.com/api/v2/status.json", nil, &model)
-	xtest.NoError(t, err)
-	xtest.Contains(t, string(model), ",\"name\":\"GitHub\",")
+	err := cli.Call(context.TODO(), http.MethodGet, "https://osspkg.com/manifest.json", nil, &model)
+	casecheck.NoError(t, err)
+	casecheck.Contains(t, string(model), "\"OSSPkg\"")
 }

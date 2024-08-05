@@ -1,0 +1,16 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: string
+  level: 4
+
+http:
+  main:
+    addr: 0.0.0.0:10000
+
+oauth:
+  - code: google
+    client_id: '****************.apps.googleusercontent.com'
+    client_secret: '****************'
+    redirect_url: https://example.com/oauth/callback/google

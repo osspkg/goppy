@@ -16,8 +16,8 @@ import (
 	"net/url"
 	"time"
 
-	"go.osspkg.com/goppy/ioutil"
-	"go.osspkg.com/goppy/web/signature"
+	"go.osspkg.com/goppy/v2/web/signature"
+	"go.osspkg.com/ioutils"
 )
 
 type (
@@ -89,7 +89,7 @@ func (v *ClientHttp) Call(ctx context.Context, method, uri string, in interface{
 		return err
 	}
 
-	b, err = ioutil.ReadAll(resp.Body)
+	b, err = ioutils.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

@@ -9,66 +9,73 @@ package event
 
 import (
 	"encoding/json"
-	"sync"
+	"fmt"
+
+	"go.osspkg.com/ioutils/pool"
 )
 
 var (
-	poolEvents = sync.Pool{New: func() interface{} { return &Message{} }}
+	poolEvents = pool.New[*event](func() *event { return &event{} })
 )
 
 type Id uint16
 
-//easyjson:json
-type Message struct {
-	ID   Id              `json:"e"`
-	Data json.RawMessage `json:"d"`
-	Err  *string         `json:"err,omitempty"`
-}
-
-func GetMessage(call func(ev *Message)) {
-	m, ok := poolEvents.Get().(*Message)
-	if !ok {
-		m = &Message{}
+type (
+	Event interface {
+		ID() Id
+		Decode(out interface{}) error
+		Encode(in interface{}) error
+		Reset()
+		WithError(e error)
+		WithID(id Id)
 	}
+
+	//easyjson:json
+	event struct {
+		Id   Id              `json:"e"`
+		Data json.RawMessage `json:"d,omitempty"`
+		Err  *string         `json:"err,omitempty"`
+	}
+)
+
+func New(call func(ev Event)) {
+	m := poolEvents.Get()
 	call(m)
-	poolEvents.Put(m.Reset())
+	poolEvents.Put(m)
 }
 
-func (v *Message) EventID() Id {
-	return v.ID
+func (v *event) ID() Id {
+	return v.Id
 }
 
-func (v *Message) Decode(in interface{}) error {
+func (v *event) Decode(in interface{}) error {
+	if v.Err != nil {
+		return fmt.Errorf("%s", *v.Err)
+	}
 	return json.Unmarshal(v.Data, in)
 }
 
-func (v *Message) Encode(in interface{}) {
-	b, err := json.Marshal(in)
+func (v *event) Encode(in interface{}) (err error) {
+	v.Data, err = json.Marshal(in)
 	if err != nil {
-		v.Error(err)
+		return err
+	}
+	v.Err = nil
+	return nil
+}
+
+func (v *event) WithID(id Id) {
+	v.Id = id
+}
+
+func (v *event) Reset() {
+	v.Id, v.Err, v.Data = 0, nil, v.Data[:0]
+}
+
+func (v *event) WithError(err error) {
+	if err == nil {
 		return
 	}
-	v.Body(b)
-}
-
-func (v *Message) EncodeEvent(id Id, in interface{}) {
-	v.ID = id
-	v.Encode(in)
-}
-
-func (v *Message) Reset() *Message {
-	v.ID, v.Err, v.Data = 0, nil, v.Data[:0]
-	return v
-}
-
-func (v *Message) Error(e error) {
-	if e == nil {
-		return
-	}
-	err := e.Error()
-	v.Err, v.Data = &err, v.Data[:0]
-}
-
-func (v *Message) Body(b []byte) {
-	v.Err, v.Data = nil, append(v.Data[:0], b...)
+	errMsg := err.Error()
+	v.Err, v.Data = &errMsg, v.Data[:0]
 }

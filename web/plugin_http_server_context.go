@@ -15,8 +15,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"go.osspkg.com/goppy/ioutil"
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/ioutils"
+	"go.osspkg.com/logx"
 	"go.osspkg.com/static"
 )
 
@@ -24,7 +24,7 @@ type (
 	_ctx struct {
 		w http.ResponseWriter
 		r *http.Request
-		l xlog.Logger
+		l logx.Logger
 	}
 
 	// Context request and response interface
@@ -32,6 +32,7 @@ type (
 		URL() *url.URL
 		Redirect(uri string)
 		Param(key string) Param
+		Query(key string) string
 		Header() Header
 		Cookie() Cookie
 
@@ -46,13 +47,12 @@ type (
 		Stream(code int, in []byte, filename string)
 
 		Context() context.Context
-		Log() xlog.WriterContext
 		Request() *http.Request
 		Response() http.ResponseWriter
 	}
 )
 
-func newContext(w http.ResponseWriter, r *http.Request, l xlog.Logger) Context {
+func newContext(w http.ResponseWriter, r *http.Request, l logx.Logger) Context {
 	return &_ctx{
 		w: w,
 		r: r,
@@ -113,11 +113,9 @@ func (v *_ctx) Param(key string) Param {
 	}
 }
 
-/**********************************************************************************************************************/
-
-// Log log entry interface
-func (v *_ctx) Log() xlog.WriterContext {
-	return v.l
+// Query getting a query from URL by key
+func (v *_ctx) Query(key string) string {
+	return v.URL().Query().Get(key)
 }
 
 /**********************************************************************************************************************/
@@ -201,7 +199,7 @@ func (v *_ctx) Cookie() Cookie {
 /**********************************************************************************************************************/
 
 func (v *_ctx) BindBytes(in *[]byte) error {
-	b, err := ioutil.ReadAll(v.r.Body)
+	b, err := ioutils.ReadAll(v.r.Body)
 	if err != nil {
 		return err
 	}
@@ -215,6 +213,10 @@ func (v *_ctx) BindJSON(in interface{}) error {
 
 func (v *_ctx) BindXML(in interface{}) error {
 	return XMLDecode(v.r, in)
+}
+
+func (v *_ctx) BindFormData(in interface{}) error {
+	return FormDataDecode(v.r, in)
 }
 
 /**********************************************************************************************************************/
@@ -248,18 +250,14 @@ func (v *_ctx) ErrorJSON(code int, err error, ctx ErrCtx) {
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
 	if _, err = v.w.Write(b); err != nil {
-		v.l.WithFields(xlog.Fields{
-			"err": err.Error(),
-		}).Errorf("ErrorJSON response")
+		v.l.Error("ErrorJSON response", "err", err)
 	}
 }
 
 func (v *_ctx) Bytes(code int, b []byte) {
 	v.w.WriteHeader(code)
 	if _, err := v.w.Write(b); err != nil {
-		v.l.WithFields(xlog.Fields{
-			"err": err.Error(),
-		}).Errorf("Bytes response")
+		v.l.Error("Bytes response", "err", err)
 	}
 }
 
@@ -267,9 +265,7 @@ func (v *_ctx) Bytes(code int, b []byte) {
 func (v *_ctx) String(code int, b string, args ...interface{}) {
 	v.w.WriteHeader(code)
 	if _, err := fmt.Fprintf(v.w, b, args...); err != nil {
-		v.l.WithFields(xlog.Fields{
-			"err": err.Error(),
-		}).Errorf("String response")
+		v.l.Error("String response", "err", err)
 	}
 }
 
@@ -283,9 +279,7 @@ func (v *_ctx) JSON(code int, in interface{}) {
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
 	if _, err = v.w.Write(b); err != nil {
-		v.l.WithFields(xlog.Fields{
-			"err": err.Error(),
-		}).Errorf("JSON response")
+		v.l.Error("JSON response", "err", err)
 	}
 }
 
@@ -296,9 +290,7 @@ func (v *_ctx) Stream(code int, in []byte, filename string) {
 	v.w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	v.w.WriteHeader(code)
 	if _, err := v.w.Write(in); err != nil {
-		v.l.WithFields(xlog.Fields{
-			"err": err.Error(),
-		}).Errorf("Stream response")
+		v.l.Error("Stream response", "err", err)
 	}
 }
 

@@ -5,7 +5,7 @@
 
 package xdns
 
-import "go.osspkg.com/goppy/plugins"
+import "go.osspkg.com/goppy/v2/plugins"
 
 func WithClient(opts ...Option) plugins.Plugin {
 	return plugins.Plugin{

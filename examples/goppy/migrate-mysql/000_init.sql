@@ -1,4 +1,0 @@
-CREATE TABLE `demo`
-(
-    `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY
-) ENGINE = 'InnoDB';

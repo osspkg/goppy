@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"go.osspkg.com/goppy/env"
+	"go.osspkg.com/goppy/v2/env"
 )
 
 var (

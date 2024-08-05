@@ -9,7 +9,7 @@ import (
 	"context"
 	"time"
 
-	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/errors"
 )
 
 var (

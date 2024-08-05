@@ -6,30 +6,29 @@
 package internal
 
 import (
-	"context"
 	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
-	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/logx"
 )
 
 type (
-	PumpApi interface {
+	Ctx interface {
 		ConnectID() string
-		CallHandler(b []byte)
-		ReadBus() <-chan []byte
+		WriteMessage(b []byte)
+		ReadMessage() <-chan []byte
 		Connect() *websocket.Conn
-		CancelFunc() context.CancelFunc
 		Done() <-chan struct{}
 		Close()
-	}
-	PumpActionsApi interface {
-		ErrLog(cid string, err error, msg string, args ...interface{})
 	}
 )
 
 func IsClosingError(err error) bool {
+	if err == nil {
+		return false
+	}
 	if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived) ||
 		strings.Contains(err.Error(), "use of closed network connection") ||
 		errors.Is(err, websocket.ErrCloseSent) {
@@ -38,49 +37,59 @@ func IsClosingError(err error) bool {
 	return false
 }
 
-func PumpRead(p PumpApi, a PumpActionsApi) {
-	defer p.CancelFunc()
+func PumpRead(ctx Ctx) {
+	defer func() {
+		ctx.Close()
+	}()
 	for {
-		_, message, err := p.Connect().ReadMessage()
+		_, message, err := ctx.Connect().ReadMessage()
 		if err != nil {
 			if !IsClosingError(err) {
-				a.ErrLog(p.ConnectID(), err, "[ws] read message")
+				logx.Error("WS Server", "do", "read message", "err", err, "cid", ctx.ConnectID())
 			}
 			return
 		}
-		go p.CallHandler(message)
+
+		go ctx.WriteMessage(message)
 	}
 }
 
-func PumpWrite(p PumpApi, a PumpActionsApi) {
+func PumpWrite(ctx Ctx) {
 	ticker := time.NewTicker(PingPeriod)
 	defer func() {
 		ticker.Stop()
-		a.ErrLog(p.ConnectID(), p.Connect().Close(), "close connect")
+		ctx.Close()
 	}()
 	for {
 		select {
-		case <-p.Done():
-			err := p.Connect().WriteControl(websocket.CloseMessage,
+		case <-ctx.Done():
+			err := ctx.Connect().WriteControl(websocket.CloseMessage,
 				websocket.FormatCloseMessage(websocket.CloseNormalClosure, "Bye bye!"), time.Now().Add(PongWait))
 			if err != nil && !IsClosingError(err) {
-				a.ErrLog(p.ConnectID(), err, "[ws] send close")
+				logx.Error("WS Server", "do", "close message", "err", err, "cid", ctx.ConnectID())
 			}
 			return
+
 		case <-ticker.C:
-			if err := p.Connect().WriteControl(websocket.PingMessage, nil, time.Now().Add(PongWait)); err != nil {
-				if !IsClosingError(err) {
-					a.ErrLog(p.ConnectID(), err, "[ws] send ping")
-				}
-				return
+			err := ctx.Connect().WriteControl(websocket.PingMessage, nil, time.Now().Add(PongWait))
+			if err == nil {
+				continue
 			}
-		case m := <-p.ReadBus():
-			if err := p.Connect().WriteMessage(websocket.TextMessage, m); err != nil {
-				if !IsClosingError(err) {
-					a.ErrLog(p.ConnectID(), err, "[ws] send message")
-				}
-				return
+			if !IsClosingError(err) {
+				logx.Error("WS Server", "do", "send ping", "err", err, "cid", ctx.ConnectID())
 			}
+			return
+
+		case m := <-ctx.ReadMessage():
+			err := ctx.Connect().WriteMessage(websocket.TextMessage, m)
+			if err == nil {
+				continue
+			}
+			if !IsClosingError(err) {
+				logx.Error("WS Server", "do", "write message", "err", err, "cid", ctx.ConnectID())
+			}
+			return
+
 		}
 	}
 }

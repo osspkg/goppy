@@ -11,17 +11,18 @@ import (
 	"net/http"
 
 	"github.com/oschwald/geoip2-golang"
-	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/web"
+	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v2/web"
 )
 
-// ConfigMaxMind MaxMind database config
 type ConfigMaxMind struct {
-	DB string `yaml:"maxminddb"`
+	GeoIP struct {
+		MaxMindDB string `yaml:"maxminddb"`
+	} `yaml:"geoip"`
 }
 
 func (v *ConfigMaxMind) Default() {
-	v.DB = "./GeoIP2-City.mmdb"
+	v.GeoIP.MaxMindDB = "./GeoIP2-City.mmdb"
 }
 
 // WithMaxMindGeoIP information resolver through local MaxMind database
@@ -53,7 +54,7 @@ func newMaxMindGeoIP(c *ConfigMaxMind) *maxmind {
 }
 
 func (v *maxmind) Up() error {
-	db, err := geoip2.Open(v.conf.DB)
+	db, err := geoip2.Open(v.conf.GeoIP.MaxMindDB)
 	if err != nil {
 		return fmt.Errorf("maxmind: %w", err)
 	}
@@ -82,12 +83,6 @@ func MaxMindMiddleware(resolver GeoIP) web.Middleware {
 		return func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			cip := net.ParseIP(r.Header.Get("X-Real-IP"))
-			if len(cip) == 0 {
-				host, _, err := net.SplitHostPort(r.RemoteAddr)
-				if err == nil {
-					cip = net.ParseIP(host)
-				}
-			}
 			country, _ := resolver.Country(cip) // nolint: errcheck
 			ctx = SetCountryName(ctx, country)
 			ctx = SetClientIP(ctx, cip)

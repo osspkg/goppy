@@ -8,8 +8,8 @@ package acl_test
 import (
 	"testing"
 
-	"go.osspkg.com/goppy/acl"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/acl"
 )
 
 func TestUnit_NewInConfigStorage(t *testing.T) {
@@ -18,23 +18,23 @@ func TestUnit_NewInConfigStorage(t *testing.T) {
 		"u2": "456",
 	}}
 	store := acl.NewInConfigStorage(conf)
-	xtest.NotNil(t, store)
+	casecheck.NotNil(t, store)
 
 	val, err := store.FindACL("u1")
-	xtest.NoError(t, err)
-	xtest.Equal(t, "123", val)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, "123", val)
 
 	val, err = store.FindACL("u2")
-	xtest.NoError(t, err)
-	xtest.Equal(t, "456", val)
+	casecheck.NoError(t, err)
+	casecheck.Equal(t, "456", val)
 
 	val, err = store.FindACL("u3")
-	xtest.Error(t, err)
-	xtest.Equal(t, "", val)
+	casecheck.Error(t, err)
+	casecheck.Equal(t, "", val)
 
 	err = store.ChangeACL("u2", "789")
-	xtest.Error(t, err)
+	casecheck.Error(t, err)
 
 	err = store.ChangeACL("u5", "333")
-	xtest.Error(t, err)
+	casecheck.Error(t, err)
 }

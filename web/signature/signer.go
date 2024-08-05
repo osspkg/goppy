@@ -35,14 +35,14 @@ type (
 	}
 )
 
-// NewSHA256 create sign sha256
-func NewSHA256(id, secret string) Signature {
-	return NewCustomSignature(id, secret, "hmac-sha256", sha256.New)
-}
-
 // NewMD5 create sign md5
 func NewMD5(id, secret string) Signature {
 	return NewCustomSignature(id, secret, "hmac-md5", md5.New)
+}
+
+// NewSHA256 create sign sha256
+func NewSHA256(id, secret string) Signature {
+	return NewCustomSignature(id, secret, "hmac-sha256", sha256.New)
 }
 
 // NewSHA512 create sign sha512
@@ -136,7 +136,7 @@ func (ss *_store) Get(id string) Signature {
 	return nil
 }
 
-// Count count sign in storage
+// Count sign in storage
 func (ss *_store) Count() int {
 	ss.lock.RLock()
 	defer ss.lock.RUnlock()

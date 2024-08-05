@@ -9,14 +9,13 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"strings"
 	"time"
 
-	"go.osspkg.com/goppy/errors"
-	"go.osspkg.com/goppy/iosync"
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
-	"go.osspkg.com/goppy/xnet"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/network/address"
+	"go.osspkg.com/syncing"
+	"go.osspkg.com/xc"
 )
 
 type (
@@ -34,21 +33,21 @@ type (
 		conf    Config
 		serv    *http.Server
 		handler http.Handler
-		log     xlog.Logger
-		wg      iosync.Group
-		sync    iosync.Switch
+		log     logx.Logger
+		wg      syncing.Group
+		sync    syncing.Switch
 	}
 )
 
 // NewServer create default http server
-func NewServer(name string, conf Config, handler http.Handler, l xlog.Logger) *Server {
+func NewServer(name string, conf Config, handler http.Handler, l logx.Logger) *Server {
 	srv := &Server{
-		name:    strings.ToUpper(name),
+		name:    name,
 		conf:    conf,
 		handler: handler,
 		log:     l,
-		sync:    iosync.NewSwitch(),
-		wg:      iosync.NewGroup(),
+		sync:    syncing.NewSwitch(),
+		wg:      syncing.NewGroup(),
 	}
 	srv.validate()
 	return srv
@@ -73,7 +72,7 @@ func (s *Server) validate() {
 	if _, ok := networkType[s.conf.Network]; !ok {
 		s.conf.Network = defaultNetwork
 	}
-	s.conf.Addr = xnet.CheckHostPort(s.conf.Addr)
+	s.conf.Addr = address.CheckHostPort(s.conf.Addr)
 }
 
 // Up start http server
@@ -93,21 +92,16 @@ func (s *Server) Up(ctx xc.Context) error {
 		return err
 	}
 
-	s.log.WithFields(xlog.Fields{
-		"ip": s.conf.Addr,
-	}).Infof("%s server started", s.name)
+	s.log.Info("Http server started", "name", s.name, "ip", s.conf.Addr)
 
 	s.wg.Background(func() {
+		defer ctx.Close()
 		if err = s.serv.Serve(nl); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			s.log.WithFields(xlog.Fields{
-				"err": err.Error(), "ip": s.conf.Addr,
-			}).Errorf("%s server stopped", s.name)
-			ctx.Close()
+			s.log.Error("Http server stopped", "name", s.name, "ip", s.conf.Addr, "err", err)
 			return
 		}
-		s.log.WithFields(xlog.Fields{
-			"ip": s.conf.Addr,
-		}).Infof("%s server stopped", s.name)
+
+		s.log.Info("Http server stopped", "name", s.name, "ip", s.conf.Addr)
 	})
 	return nil
 }
