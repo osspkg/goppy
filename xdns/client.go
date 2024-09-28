@@ -10,15 +10,15 @@ import (
 	"time"
 
 	"github.com/miekg/dns"
-	"go.osspkg.com/goppy/errors"
-	"go.osspkg.com/goppy/iosync"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/syncing"
 )
 
 type (
 	Client struct {
 		cli      *dns.Client
 		resolver ZoneResolver
-		mux      iosync.Lock
+		mux      syncing.Lock
 	}
 
 	Option func(*dns.Client)
@@ -49,7 +49,7 @@ func NewClient(opts ...Option) *Client {
 			ReadTimeout:  time.Second * 5,
 			WriteTimeout: time.Second * 5,
 		},
-		mux: iosync.NewLock(),
+		mux: syncing.NewLock(),
 	}
 
 	for _, opt := range opts {

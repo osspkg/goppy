@@ -8,34 +8,35 @@ package goppy
 import (
 	"fmt"
 	"os"
-	"reflect"
 
-	"go.osspkg.com/goppy/app"
-	"go.osspkg.com/goppy/config"
-	"go.osspkg.com/goppy/console"
-	"go.osspkg.com/goppy/env"
-	"go.osspkg.com/goppy/errors"
-	"go.osspkg.com/goppy/plugins"
-	"go.osspkg.com/goppy/xlog"
-	"gopkg.in/yaml.v3"
+	"go.osspkg.com/config"
+	configEnv "go.osspkg.com/config/env"
+	"go.osspkg.com/console"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/goppy/v2/env"
+	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/grape"
+	grapeConfig "go.osspkg.com/grape/config"
+	"go.osspkg.com/ioutils/codec"
+	"go.osspkg.com/logx"
 )
 
 type (
 	_app struct {
-		application app.App
-		commands    map[string]interface{}
-		plugins     []interface{}
-		configs     []interface{}
-		resolvers   []config.Resolver
-		args        *console.Args
-		info        *env.AppInfo
+		info  *env.AppInfo
+		grape grape.Grape
+
+		commands map[string]interface{}
+
+		plugins []interface{}
+		configs []interface{}
+
+		resolvers []config.Resolver
+		args      *console.Args
 	}
 
 	Goppy interface {
-		AppName(t string)
-		AppVersion(t string)
-		AppDescription(t string)
-		Logger(l xlog.Logger)
+		Logger(l logx.Logger)
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
 		ConfigResolvers(rc ...config.Resolver)
@@ -44,9 +45,9 @@ type (
 )
 
 // New constructor for init Goppy
-func New() Goppy {
+func New(name, version, description string) Goppy {
 	return &_app{
-		application: app.New().ExitFunc(func(code int) {
+		grape: grape.New(name).ExitFunc(func(code int) {
 			os.Exit(code)
 		}),
 		commands:  make(map[string]interface{}),
@@ -56,29 +57,20 @@ func New() Goppy {
 		args:      console.NewArgs().Parse(os.Args[1:]),
 		info: func() *env.AppInfo {
 			info := env.NewAppInfo()
+			info.AppName = env.AppName(name)
+			info.AppVersion = env.AppVersion(version)
+			info.AppDescription = env.AppDescription(description)
 			return &info
 		}(),
 	}
 }
 
-func (v *_app) AppName(t string) {
-	v.info.AppName = env.AppName(t)
-}
-
-func (v *_app) AppVersion(t string) {
-	v.info.AppVersion = env.AppVersion(t)
-}
-
-func (v *_app) AppDescription(t string) {
-	v.info.AppDescription = env.AppDescription(t)
-}
-
-func (v *_app) Logger(l xlog.Logger) {
-	v.application.Logger(l)
+func (v *_app) Logger(l logx.Logger) {
+	v.grape.Logger(l)
 }
 
 func (v *_app) ConfigResolvers(rc ...config.Resolver) {
-	v.application.ConfigResolvers(rc...)
+	v.grape.ConfigResolvers(rc...)
 }
 
 // Plugins setting the list of plugins to initialize
@@ -103,10 +95,10 @@ func (v *_app) Command(name string, call interface{}) {
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
 	if len(v.resolvers) == 0 {
-		v.ConfigResolvers(config.EnvResolver())
+		v.ConfigResolvers(configEnv.New())
 	}
 
-	apps := v.application.Modules(v.plugins...)
+	apps := v.grape.Modules(v.plugins...)
 	apps.Modules(v.info.AppName, v.info.AppVersion, v.info.AppDescription, *v.info)
 
 	appConfig := v.parseConfigFlag()
@@ -172,19 +164,17 @@ func (v *_app) validateConfig(filename string) error {
 	if err := rc.Build(); err != nil {
 		return err
 	}
-	defType := reflect.TypeOf(new(plugins.Validator)).Elem()
+
 	for _, cfg := range v.configs {
-		if reflect.TypeOf(cfg).AssignableTo(defType) {
-			if err := rc.Decode(cfg); err != nil {
-				return fmt.Errorf("decode config %T error: %w", cfg, err)
-			}
-			vv, ok := cfg.(plugins.Validator)
-			if !ok {
-				continue
-			}
-			if err := vv.Validate(); err != nil {
-				return fmt.Errorf("validate config %T error: %w", cfg, err)
-			}
+		if err := rc.Decode(cfg); err != nil {
+			return fmt.Errorf("decode config %T error: %w", cfg, err)
+		}
+		vv, ok := cfg.(plugins.Validator)
+		if !ok {
+			continue
+		}
+		if err := vv.Validate(); err != nil {
+			return fmt.Errorf("validate config %T error: %w", cfg, err)
 		}
 	}
 	return nil
@@ -201,31 +191,21 @@ func (v *_app) recoveryConfig(filename string) error {
 	if !errors.Is(err, os.ErrNotExist) {
 		return err
 	}
-	b, err := yaml.Marshal(&app.Config{
+
+	for _, cfg := range v.configs {
+		if vv, ok := cfg.(plugins.Defaulter); ok {
+			vv.Default()
+		}
+	}
+
+	cfg := &grapeConfig.Config{
 		Env: "dev",
-		Log: app.LogConfig{
+		Log: grapeConfig.LogConfig{
 			Level:    4,
 			FilePath: "/dev/stdout",
 			Format:   "string",
 		},
-	})
-	if err != nil {
-		return err
 	}
-	defType := reflect.TypeOf(new(plugins.Defaulter)).Elem()
-	for _, cfg := range v.configs {
-		if reflect.TypeOf(cfg).AssignableTo(defType) {
-			reflect.ValueOf(cfg).MethodByName("Default").Call([]reflect.Value{})
-		}
-		if bb, err0 := yaml.Marshal(cfg); err0 == nil {
-			b = append(b, '\n')
-			b = append(b, bb...)
-		} else {
-			return err0
-		}
-	}
-	if err = os.WriteFile(filename, b, 0755); err != nil {
-		return err
-	}
-	return nil
+
+	return codec.FileEncoder(filename).Encode(append(v.configs, cfg)...)
 }

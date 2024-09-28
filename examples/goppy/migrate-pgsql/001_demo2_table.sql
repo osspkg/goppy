@@ -1,4 +1,0 @@
-CREATE TABLE "demo2"
-(
-    "id" INTEGER PRIMARY KEY
-);

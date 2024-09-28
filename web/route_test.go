@@ -11,8 +11,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.osspkg.com/goppy/web"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/web"
 )
 
 func TestUnit_Route1(t *testing.T) {
@@ -54,7 +54,7 @@ func TestUnit_Route1(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, httptest.NewRequest("GET", "/", nil))
-	xtest.Equal(t, "1235Ctrl", *result)
+	casecheck.Equal(t, "1235Ctrl", *result)
 }
 
 type statusInterface interface {
@@ -79,22 +79,22 @@ func TestUnit_Route2(t *testing.T) {
 	w := httptest.NewRecorder()
 	req := httptest.NewRequest("GET", "/aaa/bbb/ccc/eee/ggg/fff/kkk", nil)
 	r.ServeHTTP(w, req)
-	xtest.Equal(t, 404, getStatusAndClose(w))
+	casecheck.Equal(t, 404, getStatusAndClose(w))
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/aaa/", nil)
 	r.ServeHTTP(w, req)
-	xtest.Equal(t, 200, getStatusAndClose(w))
+	casecheck.Equal(t, 200, getStatusAndClose(w))
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/aaa", nil)
 	r.ServeHTTP(w, req)
-	xtest.Equal(t, 200, getStatusAndClose(w))
+	casecheck.Equal(t, 200, getStatusAndClose(w))
 
 	w = httptest.NewRecorder()
 	req = httptest.NewRequest("GET", "/aaa?a=1", nil)
 	r.ServeHTTP(w, req)
-	xtest.Equal(t, 200, getStatusAndClose(w))
+	casecheck.Equal(t, 200, getStatusAndClose(w))
 }
 
 func mockNilHandler(_ http.ResponseWriter, _ *http.Request) {}

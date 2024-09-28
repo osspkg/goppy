@@ -7,25 +7,37 @@ package metrics
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"go.osspkg.com/goppy/syscall"
+	"go.osspkg.com/logx"
 )
 
-func fatal(msg string, args ...interface{}) {
-	t := syscall.Trace(1000)
-	fmt.Fprintf(os.Stderr, msg+t, args...)
-	os.Exit(1)
-}
-
-func buildPrometheusLabels(keysVals []string) prometheus.Labels {
+func buildPrometheusLabels(keysVals []string) (prometheus.Labels, *fatalMessage) {
 	if len(keysVals)%2 != 0 {
-		fatal("Error parsing names and values for labels, an odd number is specified: %+v", keysVals)
+		return nil, fatal("Error parsing names and values for labels, an odd number is specified: %+v", keysVals)
 	}
 	result := prometheus.Labels{}
 	for i := 0; i < len(keysVals); i += 2 {
 		result[keysVals[i]] = keysVals[i+1]
 	}
-	return result
+	return result, nil
 }
+
+const fatalMsg = "Fail Metric"
+
+type fatalMessage struct {
+	msg string
+}
+
+func fatal(msg string, args ...any) *fatalMessage {
+	return &fatalMessage{msg: fmt.Sprintf(msg, args...)}
+}
+
+func (v *fatalMessage) Error() string     { return v.msg }
+func (v *fatalMessage) Inc()              { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) Dec()              { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) SetToCurrentTime() { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) Add(float64)       { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) Set(float64)       { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) Sub(float64)       { logx.Error(fatalMsg, "err", v.msg) }
+func (v *fatalMessage) Observe(float64)   { logx.Error(fatalMsg, "err", v.msg) }

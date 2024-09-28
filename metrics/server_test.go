@@ -12,13 +12,13 @@ import (
 	"testing"
 	"time"
 
-	"go.osspkg.com/goppy/env"
-	"go.osspkg.com/goppy/metrics"
-	"go.osspkg.com/goppy/web"
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
-	"go.osspkg.com/goppy/xnet"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/env"
+	"go.osspkg.com/goppy/v2/metrics"
+	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/network/address"
+	"go.osspkg.com/xc"
 )
 
 func TestUnit_NewServer(t *testing.T) {
@@ -30,13 +30,12 @@ func TestUnit_NewServer(t *testing.T) {
 	ctx := xc.New()
 	logBuff := bytes.NewBuffer(nil)
 
-	log := xlog.New()
-	log.SetLevel(xlog.LevelError)
+	log := logx.New()
+	log.SetLevel(logx.LevelError)
 	log.SetOutput(logBuff)
-	defer log.Close()
 
-	addr, err := xnet.RandomPort("127.0.0.1")
-	xtest.NoError(t, err)
+	addr, err := address.RandomPort("127.0.0.1")
+	casecheck.NoError(t, err)
 	url := fmt.Sprintf("http://%s/metrics", addr)
 
 	conf := metrics.Config{
@@ -57,8 +56,8 @@ func TestUnit_NewServer(t *testing.T) {
 	}
 
 	srv := metrics.New(app, conf, log)
-	xtest.NoError(t, err)
-	xtest.NoError(t, srv.Up(ctx))
+	casecheck.NoError(t, err)
+	casecheck.NoError(t, srv.Up(ctx))
 
 	time.Sleep(2 * time.Second)
 	fmt.Println(logBuff.String())
@@ -75,32 +74,32 @@ func TestUnit_NewServer(t *testing.T) {
 	var result bytes.Buffer
 	cli := web.NewClientHttp()
 	err = cli.Call(ctx.Context(), http.MethodGet, url, nil, &result)
-	xtest.NoError(t, err)
-	xtest.NoError(t, srv.Down())
+	casecheck.NoError(t, err)
+	casecheck.NoError(t, srv.Down())
 
 	data := result.String()
-	xtest.Contains(t, data, "app_metrics_test_a1 5.912")
-	xtest.Contains(t, data, "app_metrics_test_a2{l1_1=\"v1\"} 0.538")
-	xtest.Contains(t, data, "app_metrics_test_a3 9.726")
-	xtest.Contains(t, data, "app_metrics_test_a4{l2_1=\"v2\",l2_2=\"v3\"} 10.579")
-	xtest.Contains(t, data, "app_metrics_test_a4{l2_1=\"v2\",l2_2=\"v4\"} -1")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"0.05\"} 0")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"0.5\"} 0")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"1\"} 0")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"2\"} 0")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"5\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"10\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a5_bucket{le=\"+Inf\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a5_sum 2.456")
-	xtest.Contains(t, data, "app_metrics_test_a5_count 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"0.05\"} 0")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"0.5\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"1\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"2\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"5\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"10\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"+Inf\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_a6_sum{l3_1=\"v5\"} 0.123")
-	xtest.Contains(t, data, "app_metrics_test_a6_count{l3_1=\"v5\"} 1")
-	xtest.Contains(t, data, "app_metrics_test_build_info{arch=\"amd64\",os=\"linux\",version=\"v0.0.0\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a1 5.912")
+	casecheck.Contains(t, data, "app_metrics_test_a2{l1_1=\"v1\"} 0.538")
+	casecheck.Contains(t, data, "app_metrics_test_a3 9.726")
+	casecheck.Contains(t, data, "app_metrics_test_a4{l2_1=\"v2\",l2_2=\"v3\"} 10.579")
+	casecheck.Contains(t, data, "app_metrics_test_a4{l2_1=\"v2\",l2_2=\"v4\"} -1")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"0.05\"} 0")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"0.5\"} 0")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"1\"} 0")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"2\"} 0")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"5\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"10\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a5_bucket{le=\"+Inf\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a5_sum 2.456")
+	casecheck.Contains(t, data, "app_metrics_test_a5_count 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"0.05\"} 0")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"0.5\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"1\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"2\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"5\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"10\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_bucket{l3_1=\"v5\",le=\"+Inf\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_a6_sum{l3_1=\"v5\"} 0.123")
+	casecheck.Contains(t, data, "app_metrics_test_a6_count{l3_1=\"v5\"} 1")
+	casecheck.Contains(t, data, "app_metrics_test_build_info{arch=\"amd64\",os=\"linux\",version=\"v0.0.0\"} 1")
 }

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/errors"
 )
 
 const (
@@ -25,7 +25,7 @@ var (
 	ErrUnknownEventID = errors.New("unknown event id")
 )
 
-func NewUpgrader() *websocket.Upgrader {
+func NewUpgrade() *websocket.Upgrader {
 	return &websocket.Upgrader{
 		EnableCompression: false,
 		ReadBufferSize:    1024,

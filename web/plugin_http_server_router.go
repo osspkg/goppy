@@ -12,8 +12,8 @@ import (
 	"net/http"
 	"strings"
 
-	"go.osspkg.com/goppy/xc"
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/xc"
 )
 
 type (
@@ -37,7 +37,7 @@ type (
 	}
 )
 
-func newRouteProvider(configs map[string]Config, l xlog.Logger) *routeProvider {
+func newRouteProvider(configs map[string]Config, l logx.Logger) *routeProvider {
 	v := &routeProvider{
 		pool: make(map[string]*routePoolItem),
 	}
@@ -60,6 +60,11 @@ func (v *routeProvider) All(call func(name string, router Router)) {
 // Main method to get Main route handler
 func (v *routeProvider) Main() Router {
 	return v.Get("main")
+}
+
+// Admin method to get Admin route handler
+func (v *routeProvider) Admin() Router {
+	return v.Get("admin")
 }
 
 // Get method to get route handler by key
@@ -98,7 +103,7 @@ type (
 		route  *BaseRouter
 		serv   *Server
 		config Config
-		log    xlog.Logger
+		log    logx.Logger
 	}
 
 	// Router router handler interface
@@ -122,7 +127,7 @@ type (
 	}
 )
 
-func newRouter(name string, c Config, l xlog.Logger) *route {
+func newRouter(name string, c Config, l logx.Logger) *route {
 	return &route{
 		name:   name,
 		route:  NewBaseRouter(),

@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"sync/atomic"
 
-	"go.osspkg.com/goppy/xlog"
+	"go.osspkg.com/logx"
 )
 
 // Middleware type of middleware
@@ -32,7 +32,7 @@ func ThrottlingMiddleware(max int64) Middleware {
 }
 
 // RecoveryMiddleware recovery go panic and write to log
-func RecoveryMiddleware(l xlog.Logger) func(
+func RecoveryMiddleware(l logx.Logger) func(
 	func(http.ResponseWriter, *http.Request),
 ) func(http.ResponseWriter, *http.Request) {
 	return func(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
@@ -40,7 +40,7 @@ func RecoveryMiddleware(l xlog.Logger) func(
 			defer func() {
 				if err := recover(); err != nil {
 					if l != nil {
-						l.WithFields(xlog.Fields{"err": err}).Errorf("Recovered")
+						l.Error("Panic recovered", "err", err)
 					}
 					w.WriteHeader(http.StatusInternalServerError)
 				}

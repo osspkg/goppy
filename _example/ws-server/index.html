@@ -1,0 +1,71 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
+    <title>WS</title>
+</head>
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+    var tick = 0;
+    var last = 0;
+
+    var socket = new WebSocket("ws://localhost:10000/ws");
+
+    socket.onopen = function() {
+        log('Соединение установлено.');
+    };
+
+    socket.onclose = function(event) {
+        if (event.wasClean) {
+            log('Соединение закрыто чисто');
+        } else {
+            log('Обрыв соединения');
+        }
+        console.log(event)
+        log('Код: ' + event.code + ' причина: ' + event.reason);
+    };
+
+    socket.onmessage = function(event) {
+        log(event.data);
+    };
+
+    socket.onerror = function(error) {
+        log("Ошибка " + error.message);
+    };
+
+    function log(text) {
+        $('#test_div').append(text + '<br><hr>');
+        tick = tick + 1;
+        $('#tick_count').html(tick);
+    }
+
+    function ev(id) {
+        socket.send($('#data'+id).val())
+    }
+</script>
+
+<a href="#" onclick="socket.close('1000')">Close socket</a>
+<br>
+<br>
+<input id="data1" style="width: 400px" type="text"
+       value='{"e":1,"d":[1,2,3,4,5]}'><input
+        onclick="ev(1)" type="button" value="Send">
+<br>
+<input id="data2" style="width: 400px" type="text"
+       value='{"e":2}'><input
+        onclick="ev(2)" type="button" value="Send">
+<br>
+<input id="data3" style="width: 400px" type="text"
+       value='{"e":3}'><input
+        onclick="ev(3)" type="button" value="Send">
+<br>
+<br>
+
+
+<div id="tick_count"></div>
+<div id="test_div"></div>
+</body>
+</html>

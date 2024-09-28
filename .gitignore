@@ -3,11 +3,14 @@
 *.dll
 *.so
 *.dylib
-*.db
-*.db-journal
-*.mmdb
 *.test
 *.out
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.dev.yaml
+*.mmdb
 
 .idea/
 .vscode/
@@ -19,3 +22,6 @@ coverage.out
 bin/
 vendor/
 build/
+
+*.mmdb
+.env

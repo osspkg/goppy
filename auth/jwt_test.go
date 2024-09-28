@@ -8,18 +8,18 @@ package auth_test
 import (
 	"testing"
 
-	"go.osspkg.com/goppy/auth"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/auth"
 )
 
 func TestUnit_ConfigJWT(t *testing.T) {
 	conf := &auth.ConfigJWT{}
 
 	err := conf.Validate()
-	xtest.Error(t, err)
+	casecheck.Error(t, err)
 
 	conf.Default()
 
 	err = conf.Validate()
-	xtest.NoError(t, err)
+	casecheck.NoError(t, err)
 }

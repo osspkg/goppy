@@ -8,7 +8,7 @@ package web
 import (
 	"testing"
 
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
 )
 
 func TestHasMatcher(t *testing.T) {
@@ -128,17 +128,17 @@ func TestUnit_NewMatcher(t *testing.T) {
 			if got1 != tt.want1 {
 				t.Errorf("Matcher.Match() got1 = %v, want %v", got1, tt.want1)
 			}
-			xtest.Equal(t, tt.args.vr, params, "Matcher.Match() params = %v, want %v", params, tt.args.vr)
+			casecheck.Equal(t, tt.args.vr, params, "Matcher.Match() params = %v, want %v", params, tt.args.vr)
 		})
 	}
 }
 
 func TestUnit_NewMatcher1(t *testing.T) {
 	mt := newParamMatch()
-	xtest.NoError(t, mt.Add(`{id}`))
+	casecheck.NoError(t, mt.Add(`{id}`))
 	params := uriParamData{}
 	path, ok := mt.Match("bbb", params)
-	xtest.True(t, ok)
-	xtest.Equal(t, `{id}`, path)
-	xtest.Equal(t, uriParamData{"id": "bbb"}, params)
+	casecheck.True(t, ok)
+	casecheck.Equal(t, `{id}`, path)
+	casecheck.Equal(t, uriParamData{"id": "bbb"}, params)
 }

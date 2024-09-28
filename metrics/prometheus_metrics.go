@@ -24,7 +24,7 @@ type CounterInterface interface {
 func Counter(name string) CounterInterface {
 	v, ok := object.counter[name]
 	if !ok {
-		fatal("Counter with name `%s` not found. Add to config.", name)
+		return fatal("Counter with name `%s` not found. Add to config.", name)
 	}
 	return v
 }
@@ -37,9 +37,13 @@ func Counter(name string) CounterInterface {
 func CounterVec(name string, labelNameValue ...string) CounterInterface {
 	v, ok := object.counterVec[name]
 	if !ok {
-		fatal("Counter with name `%s` not found. Add to config.", name)
+		return fatal("Counter with name `%s` not found. Add to config.", name)
 	}
-	return v.With(buildPrometheusLabels(labelNameValue))
+	labels, err := buildPrometheusLabels(labelNameValue)
+	if err != nil {
+		return err
+	}
+	return v.With(labels)
 }
 
 type GaugeInterface interface {
@@ -71,7 +75,7 @@ type GaugeInterface interface {
 func Gauge(name string) GaugeInterface {
 	v, ok := object.gauge[name]
 	if !ok {
-		fatal("Gauge with name `%s` not found. Add to config.", name)
+		return fatal("Gauge with name `%s` not found. Add to config.", name)
 	}
 	return v
 }
@@ -84,9 +88,13 @@ func Gauge(name string) GaugeInterface {
 func GaugeVec(name string, labelNameValue ...string) GaugeInterface {
 	v, ok := object.gaugeVec[name]
 	if !ok {
-		fatal("GaugeVec with name `%s` not found. Add to config.", name)
+		return fatal("GaugeVec with name `%s` not found. Add to config.", name)
 	}
-	return v.With(buildPrometheusLabels(labelNameValue))
+	labels, err := buildPrometheusLabels(labelNameValue)
+	if err != nil {
+		return err
+	}
+	return v.With(labels)
 }
 
 type HistogramInterface interface {
@@ -102,7 +110,7 @@ type HistogramInterface interface {
 func Histogram(name string) HistogramInterface {
 	v, ok := object.histogram[name]
 	if !ok {
-		fatal("Histogram with name `%s` not found. Add to config.", name)
+		return fatal("Histogram with name `%s` not found. Add to config.", name)
 	}
 	return v
 }
@@ -114,7 +122,11 @@ func Histogram(name string) HistogramInterface {
 func HistogramVec(name string, labelNameValue ...string) HistogramInterface {
 	v, ok := object.histogramVec[name]
 	if !ok {
-		fatal("HistogramVec with name `%s` not found. Add to config.", name)
+		return fatal("HistogramVec with name `%s` not found. Add to config.", name)
 	}
-	return v.With(buildPrometheusLabels(labelNameValue))
+	labels, err := buildPrometheusLabels(labelNameValue)
+	if err != nil {
+		return err
+	}
+	return v.With(labels)
 }

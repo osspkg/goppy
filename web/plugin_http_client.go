@@ -5,7 +5,7 @@
 
 package web
 
-import "go.osspkg.com/goppy/plugins"
+import "go.osspkg.com/goppy/v2/plugins"
 
 // WithClient init pool http clients
 func WithClient() plugins.Plugin {

@@ -20,8 +20,8 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/unicodenorm"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/mapping"
-	"go.osspkg.com/goppy/errors"
-	"go.osspkg.com/goppy/iofile"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/ioutils/fs"
 )
 
 type (
@@ -83,7 +83,7 @@ func (v *serviceSearch) Generate() error {
 
 	for _, conf := range v.conf.Indexes {
 		folderPath := v.conf.Folder + "/" + conf.Name
-		if iofile.Exist(folderPath + indexFilename) {
+		if fs.FileExist(folderPath + indexFilename) {
 			continue
 		}
 		docMapping := bleve.NewDocumentMapping()
@@ -142,7 +142,7 @@ func (v *serviceSearch) Open() error {
 
 	for _, conf := range v.conf.Indexes {
 		folderPath := v.conf.Folder + "/" + conf.Name
-		if !iofile.Exist(folderPath + indexFilename) {
+		if !fs.FileExist(folderPath + indexFilename) {
 			return errors.Wrap(
 				fmt.Errorf("index not found `%s`", conf.Name),
 				v.Close(),

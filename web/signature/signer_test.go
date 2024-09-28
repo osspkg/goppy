@@ -8,8 +8,8 @@ package signature_test
 import (
 	"testing"
 
-	"go.osspkg.com/goppy/web/signature"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/goppy/v2/web/signature"
 )
 
 func TestUnit_Signature(t *testing.T) {
@@ -18,9 +18,9 @@ func TestUnit_Signature(t *testing.T) {
 	body := []byte("hello")
 	hash := "b7089b0463bf766946fc467102671dbe91659f17a7a19145cd68138c36b00555"
 
-	xtest.Equal(t, "123", sign.ID())
-	xtest.Equal(t, hash, sign.CreateString(body))
-	xtest.True(t, sign.Validate(body, hash))
+	casecheck.Equal(t, "123", sign.ID())
+	casecheck.Equal(t, hash, sign.CreateString(body))
+	casecheck.True(t, sign.Validate(body, hash))
 }
 
 func TestUnit_Storage(t *testing.T) {
@@ -30,14 +30,14 @@ func TestUnit_Storage(t *testing.T) {
 	store.Add(signature.NewSHA256("2", "0"))
 	store.Add(signature.NewSHA256("3", "0"))
 	store.Add(signature.NewSHA256("5", "0"))
-	xtest.Equal(t, 4, store.Count())
+	casecheck.Equal(t, 4, store.Count())
 
 	store.Add(signature.NewMD5("5", "0"))
-	xtest.Equal(t, 4, store.Count())
+	casecheck.Equal(t, 4, store.Count())
 
-	xtest.Nil(t, store.Get("4"))
+	casecheck.Nil(t, store.Get("4"))
 	s := store.Get("5")
-	xtest.NotNil(t, s)
-	xtest.Equal(t, "5", s.ID())
-	xtest.Equal(t, "hmac-md5", s.Algorithm())
+	casecheck.NotNil(t, s)
+	casecheck.Equal(t, "5", s.ID())
+	casecheck.Equal(t, "hmac-md5", s.Algorithm())
 }

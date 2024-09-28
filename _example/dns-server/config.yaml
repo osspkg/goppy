@@ -1,0 +1,10 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: string
+  level: 4
+
+dns:
+  addr: 0.0.0.0:11053
+  timeout: 5s

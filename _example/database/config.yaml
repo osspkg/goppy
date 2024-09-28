@@ -1,0 +1,34 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: string
+  level: 4
+
+http:
+  main:
+    addr: 0.0.0.0:10000
+
+mysql:
+  - tags: mysql_master,mysql_slave
+    host: 127.0.0.1
+    port: 3306
+    schema: test
+    user: test
+    password: test
+    timezone: UTC
+mysql_migrate:
+  - tags: mysql_master
+    dir: ./migrations
+
+sqlite:
+  - tags: sqlite_master
+    file: ./sqlite.db
+    cache: private
+    mode: rwc
+    journal: WAL
+    locking_mode: EXCLUSIVE
+    other_params: "auto_vacuum=incremental"
+sqlite_migrate:
+  - tags: mysql_master
+    dir: ./migrations

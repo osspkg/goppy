@@ -11,32 +11,38 @@ import (
 	"strings"
 )
 
-const (
-	geoClientIP    = "x-geo-client-ip"
-	geoProxyIPs    = "X-geo-proxy-ips"
-	geoCountryName = "x-geo-country"
-)
-
 type geoIPContext string
 
+const (
+	geoClientIP    geoIPContext = "x-geo-client-ip"
+	geoProxyIPs    geoIPContext = "X-geo-proxy-ips"
+	geoCountryName geoIPContext = "x-geo-country"
+)
+
 func SetClientIP(ctx context.Context, value net.IP) context.Context {
-	return context.WithValue(ctx, geoIPContext(geoClientIP), value)
+	if len(value) == 0 {
+		return ctx
+	}
+	return context.WithValue(ctx, geoClientIP, value)
 }
 
 func GetClientIP(ctx context.Context) net.IP {
-	value, ok := ctx.Value(geoIPContext(geoClientIP)).(net.IP)
+	value, ok := ctx.Value(geoClientIP).(net.IP)
 	if !ok {
-		return nil
+		return net.IPv4zero
 	}
 	return value
 }
 
 func SetProxyIPs(ctx context.Context, value []net.IP) context.Context {
-	return context.WithValue(ctx, geoIPContext(geoProxyIPs), value)
+	if len(value) == 0 {
+		return ctx
+	}
+	return context.WithValue(ctx, geoProxyIPs, value)
 }
 
 func GetProxyIPs(ctx context.Context) []net.IP {
-	value, ok := ctx.Value(geoIPContext(geoProxyIPs)).([]net.IP)
+	value, ok := ctx.Value(geoProxyIPs).([]net.IP)
 	if !ok {
 		return nil
 	}
@@ -44,15 +50,18 @@ func GetProxyIPs(ctx context.Context) []net.IP {
 }
 
 func SetCountryName(ctx context.Context, value string) context.Context {
-	return context.WithValue(ctx, geoIPContext(geoCountryName), value)
+	if len(value) == 0 {
+		return ctx
+	}
+	return context.WithValue(ctx, geoCountryName, value)
 }
 
-func GetCountryName(ctx context.Context) *string {
-	value, ok := ctx.Value(geoIPContext(geoCountryName)).(string)
-	if !ok || value == "XX" || value == "" {
-		return nil
+func GetCountryName(ctx context.Context) string {
+	value, ok := ctx.Value(geoCountryName).(string)
+	if !ok || value == "XX" {
+		return ""
 	}
-	return &value
+	return value
 }
 
 func parseXForwardedFor(ff string, skip net.IP) []net.IP {

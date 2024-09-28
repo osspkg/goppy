@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"go.osspkg.com/goppy/errors"
+	"go.osspkg.com/errors"
 )
 
 const (

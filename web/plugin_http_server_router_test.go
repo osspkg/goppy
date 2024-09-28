@@ -13,14 +13,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"go.osspkg.com/goppy/ioutil"
-	"go.osspkg.com/goppy/xlog"
-	"go.osspkg.com/goppy/xtest"
+	"go.osspkg.com/casecheck"
+	"go.osspkg.com/ioutils"
+	"go.osspkg.com/logx"
 )
 
 func Test_newRouter(t *testing.T) {
-	logger := xlog.New()
-	defer logger.Close()
+	logger := logx.New()
 
 	r := newRouter("test", Config{}, logger)
 
@@ -90,7 +89,7 @@ STATUS: 200
 BODY: api2.Post [aaa] handler +(api1.Collection [/bbb/ccc] middlewares)  +(r.Collection [api/] middlewares) 
 
 `
-	xtest.Equal(t, expected, buff.String())
+	casecheck.Equal(t, expected, buff.String())
 }
 
 // nolint: unparam
@@ -103,7 +102,7 @@ func requestTest(buff io.Writer, handler http.Handler, method string, uri string
 	rr := w.Result()
 	defer rr.Body.Close()
 	fmt.Fprintf(buff, "STATUS: %d\n", rr.StatusCode)
-	b, err := ioutil.ReadAll(rr.Body)
+	b, err := ioutils.ReadAll(rr.Body)
 	if err != nil {
 		fmt.Fprintf(buff, "ERR: %s\n", err.Error())
 		return
