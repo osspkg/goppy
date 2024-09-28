@@ -46,7 +46,7 @@ log:
   level: 4 # 0-Fatal, 1-Error, 2-Warning, 3-Info, 4-Debug
 
 http:
-  main:
+  - tag: main
     addr: 0.0.0.0:10000
 ```
 

@@ -25,9 +25,9 @@ type Server struct {
 
 func New(app env.AppInfo, c Config, l logx.Logger) *Server {
 	router := web.NewBaseRouter()
-	conf := web.Config{Addr: c.Addr}
+	conf := web.Config{Addr: c.Addr, Tag: "metric"}
 	return &Server{
-		server: web.NewServer("Metrics", conf, router, l),
+		server: web.NewServer(conf, router, l),
 		route:  router,
 		conf:   c,
 		app:    app,

@@ -29,7 +29,7 @@ type (
 		// Main method to get Main route handler
 		Main() Router
 		// Get method to get route handler by key
-		Get(name string) Router
+		Tag(name string) Router
 	}
 
 	routeProvider struct {
@@ -37,14 +37,14 @@ type (
 	}
 )
 
-func newRouteProvider(configs map[string]Config, l logx.Logger) *routeProvider {
+func newRouteProvider(configs []Config, l logx.Logger) *routeProvider {
 	v := &routeProvider{
 		pool: make(map[string]*routePoolItem),
 	}
-	for name, config := range configs {
-		v.pool[name] = &routePoolItem{
+	for _, config := range configs {
+		v.pool[config.Tag] = &routePoolItem{
 			active: false,
-			route:  newRouter(name, config, l),
+			route:  newRouter(config.Tag, config, l),
 		}
 	}
 	return v
@@ -59,16 +59,16 @@ func (v *routeProvider) All(call func(name string, router Router)) {
 
 // Main method to get Main route handler
 func (v *routeProvider) Main() Router {
-	return v.Get("main")
+	return v.Tag("main")
 }
 
 // Admin method to get Admin route handler
 func (v *routeProvider) Admin() Router {
-	return v.Get("admin")
+	return v.Tag("admin")
 }
 
-// Get method to get route handler by key
-func (v *routeProvider) Get(name string) Router {
+// Tag method to get route handler by tag
+func (v *routeProvider) Tag(name string) Router {
 	if r, ok := v.pool[name]; ok {
 		return r.route
 	}
@@ -137,7 +137,7 @@ func newRouter(name string, c Config, l logx.Logger) *route {
 }
 
 func (v *route) Up(c xc.Context) error {
-	v.serv = NewServer(v.name, v.config, v.route, v.log)
+	v.serv = NewServer(v.config, v.route, v.log)
 	return v.serv.Up(c)
 }
 func (v *route) Down() error {

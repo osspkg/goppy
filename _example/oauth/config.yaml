@@ -6,7 +6,7 @@ log:
   level: 4
 
 http:
-  main:
+  - tag: main
     addr: 0.0.0.0:10000
 
 oauth:
