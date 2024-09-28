@@ -20,6 +20,7 @@ import (
 
 type (
 	Config struct {
+		Tag             string        `yaml:"tag"`
 		Addr            string        `yaml:"addr"`
 		Network         string        `yaml:"network,omitempty"`
 		ReadTimeout     time.Duration `yaml:"read_timeout,omitempty"`
@@ -29,7 +30,6 @@ type (
 	}
 
 	Server struct {
-		name    string
 		conf    Config
 		serv    *http.Server
 		handler http.Handler
@@ -40,9 +40,8 @@ type (
 )
 
 // NewServer create default http server
-func NewServer(name string, conf Config, handler http.Handler, l logx.Logger) *Server {
+func NewServer(conf Config, handler http.Handler, l logx.Logger) *Server {
 	srv := &Server{
-		name:    name,
 		conf:    conf,
 		handler: handler,
 		log:     l,
@@ -53,67 +52,67 @@ func NewServer(name string, conf Config, handler http.Handler, l logx.Logger) *S
 	return srv
 }
 
-func (s *Server) validate() {
-	if s.conf.ReadTimeout == 0 {
-		s.conf.ReadTimeout = defaultTimeout
+func (v *Server) validate() {
+	if v.conf.ReadTimeout == 0 {
+		v.conf.ReadTimeout = defaultTimeout
 	}
-	if s.conf.WriteTimeout == 0 {
-		s.conf.WriteTimeout = defaultTimeout
+	if v.conf.WriteTimeout == 0 {
+		v.conf.WriteTimeout = defaultTimeout
 	}
-	if s.conf.IdleTimeout == 0 {
-		s.conf.IdleTimeout = defaultTimeout
+	if v.conf.IdleTimeout == 0 {
+		v.conf.IdleTimeout = defaultTimeout
 	}
-	if s.conf.ShutdownTimeout == 0 {
-		s.conf.ShutdownTimeout = defaultShutdownTimeout
+	if v.conf.ShutdownTimeout == 0 {
+		v.conf.ShutdownTimeout = defaultShutdownTimeout
 	}
-	if len(s.conf.Network) == 0 {
-		s.conf.Network = defaultNetwork
+	if len(v.conf.Network) == 0 {
+		v.conf.Network = defaultNetwork
 	}
-	if _, ok := networkType[s.conf.Network]; !ok {
-		s.conf.Network = defaultNetwork
+	if _, ok := networkType[v.conf.Network]; !ok {
+		v.conf.Network = defaultNetwork
 	}
-	s.conf.Addr = address.CheckHostPort(s.conf.Addr)
+	v.conf.Addr = address.CheckHostPort(v.conf.Addr)
 }
 
 // Up start http server
-func (s *Server) Up(ctx xc.Context) error {
-	if !s.sync.On() {
-		return errors.Wrapf(errServAlreadyRunning, "starting server on %s", s.conf.Addr)
+func (v *Server) Up(ctx xc.Context) error {
+	if !v.sync.On() {
+		return errors.Wrapf(errServAlreadyRunning, "starting server on %s", v.conf.Addr)
 	}
-	s.serv = &http.Server{
-		ReadTimeout:  s.conf.ReadTimeout,
-		WriteTimeout: s.conf.WriteTimeout,
-		IdleTimeout:  s.conf.IdleTimeout,
-		Handler:      s.handler,
+	v.serv = &http.Server{
+		ReadTimeout:  v.conf.ReadTimeout,
+		WriteTimeout: v.conf.WriteTimeout,
+		IdleTimeout:  v.conf.IdleTimeout,
+		Handler:      v.handler,
 	}
 
-	nl, err := net.Listen(s.conf.Network, s.conf.Addr)
+	nl, err := net.Listen(v.conf.Network, v.conf.Addr)
 	if err != nil {
 		return err
 	}
 
-	s.log.Info("Http server started", "name", s.name, "ip", s.conf.Addr)
+	v.log.Info("Http server started", "tag", v.conf.Tag, "ip", v.conf.Addr)
 
-	s.wg.Background(func() {
+	v.wg.Background(func() {
 		defer ctx.Close()
-		if err = s.serv.Serve(nl); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			s.log.Error("Http server stopped", "name", s.name, "ip", s.conf.Addr, "err", err)
+		if err = v.serv.Serve(nl); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			v.log.Error("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr, "err", err)
 			return
 		}
 
-		s.log.Info("Http server stopped", "name", s.name, "ip", s.conf.Addr)
+		v.log.Info("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr)
 	})
 	return nil
 }
 
 // Down stop http server
-func (s *Server) Down() error {
-	if !s.sync.Off() {
-		return errors.Wrapf(errServAlreadyStopped, "stopping server on %s", s.conf.Addr)
+func (v *Server) Down() error {
+	if !v.sync.Off() {
+		return errors.Wrapf(errServAlreadyStopped, "stopping server on %s", v.conf.Addr)
 	}
-	ctx, cncl := context.WithTimeout(context.Background(), s.conf.ShutdownTimeout)
+	ctx, cncl := context.WithTimeout(context.Background(), v.conf.ShutdownTimeout)
 	defer cncl()
-	err := s.serv.Shutdown(ctx)
-	s.wg.Wait()
+	err := v.serv.Shutdown(ctx)
+	v.wg.Wait()
 	return err
 }
