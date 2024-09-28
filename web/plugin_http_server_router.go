@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"strings"
 
-	"go.osspkg.com/logx"
 	"go.osspkg.com/xc"
 )
 
@@ -37,14 +36,14 @@ type (
 	}
 )
 
-func newRouteProvider(configs []Config, l logx.Logger) *routeProvider {
+func newRouteProvider(configs []Config) *routeProvider {
 	v := &routeProvider{
 		pool: make(map[string]*routePoolItem),
 	}
 	for _, config := range configs {
 		v.pool[config.Tag] = &routePoolItem{
 			active: false,
-			route:  newRouter(config.Tag, config, l),
+			route:  newRouter(config.Tag, config),
 		}
 	}
 	return v
@@ -103,7 +102,6 @@ type (
 		route  *BaseRouter
 		serv   *Server
 		config Config
-		log    logx.Logger
 	}
 
 	// Router router handler interface
@@ -127,17 +125,16 @@ type (
 	}
 )
 
-func newRouter(name string, c Config, l logx.Logger) *route {
+func newRouter(name string, c Config) *route {
 	return &route{
 		name:   name,
 		route:  NewBaseRouter(),
 		config: c,
-		log:    l,
 	}
 }
 
 func (v *route) Up(c xc.Context) error {
-	v.serv = NewServer(v.config, v.route, v.log)
+	v.serv = NewServer(v.config, v.route)
 	return v.serv.Up(c)
 }
 func (v *route) Down() error {
@@ -153,13 +150,13 @@ func (v *route) Use(args ...Middleware) {
 
 func (v *route) NotFoundHandler(call func(ctx Context)) {
 	v.route.NoFoundHandler(func(w http.ResponseWriter, r *http.Request) {
-		call(newContext(w, r, v.log))
+		call(newContext(w, r))
 	})
 }
 
 func (v *route) Match(path string, call func(ctx Context), methods ...string) {
 	v.route.Route(path, func(w http.ResponseWriter, r *http.Request) {
-		call(newContext(w, r, v.log))
+		call(newContext(w, r))
 	}, methods...)
 }
 

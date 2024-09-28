@@ -7,14 +7,13 @@ package xdns
 
 import (
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigDNS{},
-		Inject: func(c *ConfigDNS, l logx.Logger) *Server {
-			return NewServer(c.DNS, l)
+		Inject: func(c *ConfigDNS) *Server {
+			return NewServer(c.DNS)
 		},
 	}
 }

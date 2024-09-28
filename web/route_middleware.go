@@ -32,16 +32,14 @@ func ThrottlingMiddleware(max int64) Middleware {
 }
 
 // RecoveryMiddleware recovery go panic and write to log
-func RecoveryMiddleware(l logx.Logger) func(
+func RecoveryMiddleware() func(
 	func(http.ResponseWriter, *http.Request),
 ) func(http.ResponseWriter, *http.Request) {
 	return func(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			defer func() {
 				if err := recover(); err != nil {
-					if l != nil {
-						l.Error("Panic recovered", "err", err)
-					}
+					logx.Error("Panic recovered", "err", err)
 					w.WriteHeader(http.StatusInternalServerError)
 				}
 			}()

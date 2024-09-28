@@ -33,18 +33,16 @@ type (
 		conf    Config
 		serv    *http.Server
 		handler http.Handler
-		log     logx.Logger
 		wg      syncing.Group
 		sync    syncing.Switch
 	}
 )
 
 // NewServer create default http server
-func NewServer(conf Config, handler http.Handler, l logx.Logger) *Server {
+func NewServer(conf Config, handler http.Handler) *Server {
 	srv := &Server{
 		conf:    conf,
 		handler: handler,
-		log:     l,
 		sync:    syncing.NewSwitch(),
 		wg:      syncing.NewGroup(),
 	}
@@ -91,16 +89,16 @@ func (v *Server) Up(ctx xc.Context) error {
 		return err
 	}
 
-	v.log.Info("Http server started", "tag", v.conf.Tag, "ip", v.conf.Addr)
+	logx.Info("Http server started", "tag", v.conf.Tag, "ip", v.conf.Addr)
 
 	v.wg.Background(func() {
 		defer ctx.Close()
 		if err = v.serv.Serve(nl); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			v.log.Error("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr, "err", err)
+			logx.Error("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr, "err", err)
 			return
 		}
 
-		v.log.Info("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr)
+		logx.Info("Http server stopped", "tag", v.conf.Tag, "ip", v.conf.Addr)
 	})
 	return nil
 }

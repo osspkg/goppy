@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 // ConfigMysql mysql config model
@@ -68,10 +67,10 @@ func WithMysql() plugins.Plugin {
 
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
-		Inject: func(c *ConfigMysql, o ORM, l logx.Logger) error {
+		Inject: func(c *ConfigMysql, o ORM) error {
 			conn := NewMysqlClient(c)
 			o.Register(conn)
-			return NewMigrate(o, c.Migrate, l).
+			return NewMigrate(o, c.Migrate).
 				Run(context.TODO(), conn.Dialect())
 		},
 	}

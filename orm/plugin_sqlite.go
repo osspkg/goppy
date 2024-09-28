@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 // ConfigSqlite sqlite config model
@@ -56,10 +55,10 @@ func WithSqlite() plugins.Plugin {
 
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
-		Inject: func(c *ConfigSqlite, o ORM, l logx.Logger) error {
+		Inject: func(c *ConfigSqlite, o ORM) error {
 			conn := NewSqliteClient(c)
 			o.Register(conn)
-			return NewMigrate(o, c.Migrate, l).
+			return NewMigrate(o, c.Migrate).
 				Run(context.TODO(), conn.Dialect())
 		},
 	}

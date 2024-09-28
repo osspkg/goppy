@@ -7,7 +7,6 @@ package web
 
 import (
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 // ConfigHttpPool config to initialize HTTP service
@@ -28,8 +27,8 @@ func (v *ConfigHttpPool) Default() {
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigHttpPool{},
-		Inject: func(conf *ConfigHttpPool, l logx.Logger) RouterPool {
-			return newRouteProvider(conf.Config, l)
+		Inject: func(conf *ConfigHttpPool) RouterPool {
+			return newRouteProvider(conf.Config)
 		},
 	}
 }

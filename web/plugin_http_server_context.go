@@ -24,7 +24,6 @@ type (
 	_ctx struct {
 		w http.ResponseWriter
 		r *http.Request
-		l logx.Logger
 	}
 
 	// Context request and response interface
@@ -52,11 +51,10 @@ type (
 	}
 )
 
-func newContext(w http.ResponseWriter, r *http.Request, l logx.Logger) Context {
+func newContext(w http.ResponseWriter, r *http.Request) Context {
 	return &_ctx{
 		w: w,
 		r: r,
-		l: l,
 	}
 }
 
@@ -250,14 +248,14 @@ func (v *_ctx) ErrorJSON(code int, err error, ctx ErrCtx) {
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
 	if _, err = v.w.Write(b); err != nil {
-		v.l.Error("ErrorJSON response", "err", err)
+		logx.Error("ErrorJSON response", "err", err)
 	}
 }
 
 func (v *_ctx) Bytes(code int, b []byte) {
 	v.w.WriteHeader(code)
 	if _, err := v.w.Write(b); err != nil {
-		v.l.Error("Bytes response", "err", err)
+		logx.Error("Bytes response", "err", err)
 	}
 }
 
@@ -265,7 +263,7 @@ func (v *_ctx) Bytes(code int, b []byte) {
 func (v *_ctx) String(code int, b string, args ...interface{}) {
 	v.w.WriteHeader(code)
 	if _, err := fmt.Fprintf(v.w, b, args...); err != nil {
-		v.l.Error("String response", "err", err)
+		logx.Error("String response", "err", err)
 	}
 }
 
@@ -279,7 +277,7 @@ func (v *_ctx) JSON(code int, in interface{}) {
 	v.w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	v.w.WriteHeader(code)
 	if _, err = v.w.Write(b); err != nil {
-		v.l.Error("JSON response", "err", err)
+		logx.Error("JSON response", "err", err)
 	}
 }
 
@@ -290,7 +288,7 @@ func (v *_ctx) Stream(code int, in []byte, filename string) {
 	v.w.Header().Set("Content-Disposition", fmt.Sprintf(`attachment; filename="%s"`, filename))
 	v.w.WriteHeader(code)
 	if _, err := v.w.Write(in); err != nil {
-		v.l.Error("Stream response", "err", err)
+		logx.Error("Stream response", "err", err)
 	}
 }
 

@@ -11,7 +11,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"go.osspkg.com/goppy/v2/env"
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 type ConfigMetrics struct {
@@ -40,8 +39,8 @@ func (v *ConfigMetrics) Default() {
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMetrics{},
-		Inject: func(app env.AppInfo, c *ConfigMetrics, l logx.Logger) Metrics {
-			return New(app, c.Config, l)
+		Inject: func(app env.AppInfo, c *ConfigMetrics) Metrics {
+			return New(app, c.Config)
 		},
 	}
 }

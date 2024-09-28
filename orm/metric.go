@@ -7,38 +7,28 @@ package orm
 
 import (
 	"time"
+
+	"go.osspkg.com/goppy/v2/metrics"
 )
 
 type (
 	metric struct {
-		metrics MetricWriter
+		name string
 	}
-	// MetricExecutor interface
-	MetricExecutor interface {
+	metricExecutor interface {
 		ExecutionTime(name string, call func())
-	}
-	// MetricWriter interface
-	MetricWriter interface {
-		Metric(name string, time time.Duration)
 	}
 )
 
-// StdOutMetric simple stdout metrig writer
-var StdOutMetric = NewMetric(StdOutWriter)
-
-// NewMetric init new metric
-func NewMetric(m MetricWriter) MetricExecutor {
-	return &metric{metrics: m}
+func newMetric(name string) metricExecutor {
+	return &metric{
+		name: name,
+	}
 }
 
 // ExecutionTime calculating the execution time
 func (m *metric) ExecutionTime(name string, call func()) {
-	if m.metrics == nil {
-		call()
-		return
-	}
-
 	t := time.Now()
 	call()
-	m.metrics.Metric(name, time.Since(t))
+	metrics.HistogramVec(m.name, "query", name).Observe(time.Since(t).Seconds())
 }

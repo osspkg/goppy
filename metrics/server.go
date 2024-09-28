@@ -12,7 +12,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.osspkg.com/goppy/v2/env"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/logx"
 	"go.osspkg.com/xc"
 )
 
@@ -23,11 +22,11 @@ type Server struct {
 	conf   Config
 }
 
-func New(app env.AppInfo, c Config, l logx.Logger) *Server {
+func New(app env.AppInfo, c Config) *Server {
 	router := web.NewBaseRouter()
 	conf := web.Config{Addr: c.Addr, Tag: "metric"}
 	return &Server{
-		server: web.NewServer(conf, router, l),
+		server: web.NewServer(conf, router),
 		route:  router,
 		conf:   c,
 		app:    app,

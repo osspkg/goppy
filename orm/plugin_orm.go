@@ -7,14 +7,13 @@ package orm
 
 import (
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 	"go.osspkg.com/xc"
 )
 
-func WithORM() plugins.Plugin {
+func WithORM(opts ...Option) plugins.Plugin {
 	return plugins.Plugin{
-		Inject: func(ctx xc.Context, l logx.Logger) ORM {
-			o := New(ctx.Context(), l)
+		Inject: func(ctx xc.Context) ORM {
+			o := New(ctx.Context(), opts...)
 			go func() {
 				select {
 				case <-ctx.Done():

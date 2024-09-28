@@ -27,7 +27,6 @@ type (
 		opts  *options
 		mux   syncing.Lock
 		ctx   context.Context
-		log   logx.Logger
 	}
 
 	ORM interface {
@@ -37,23 +36,21 @@ type (
 	}
 
 	options struct {
-		Logger  logx.Logger
-		Metrics MetricExecutor
+		Metrics metricExecutor
 	}
 
-	PluginSetup func(o *options)
+	Option func(o *options)
 )
 
-func UseMetric(m MetricExecutor) PluginSetup {
+func UseMetric(name string) Option {
 	return func(o *options) {
-		o.Metrics = m
+		o.Metrics = newMetric(name)
 	}
 }
 
 // New init database connections
-func New(ctx context.Context, log logx.Logger, opts ...PluginSetup) ORM {
+func New(ctx context.Context, opts ...Option) ORM {
 	o := &options{
-		Logger:  log,
 		Metrics: DevNullMetric,
 	}
 
@@ -67,7 +64,6 @@ func New(ctx context.Context, log logx.Logger, opts ...PluginSetup) ORM {
 		opts:  o,
 		mux:   syncing.NewLock(),
 		ctx:   ctx,
-		log:   log,
 	}
 
 	routine.Interval(ctx, time.Second*15, db.checkConnects)
@@ -79,7 +75,7 @@ func (v *_orm) Close() {
 	v.mux.Lock(func() {
 		for tag, stmt := range v.pool {
 			if err := stmt.Close(); err != nil {
-				v.log.Error("Close DB connect", "err", err, "tag", tag)
+				logx.Error("Close DB connect", "err", err, "tag", tag)
 			}
 			delete(v.pool, tag)
 			delete(v.conns, tag)
@@ -102,13 +98,13 @@ func (v *_orm) Tag(name string) (s Stmt) {
 func (v *_orm) Register(c Connector) {
 	for _, tag := range c.Tags() {
 		if err := v.appendConnect(c, tag); err != nil {
-			v.log.Error("Create DB connect", "err", err, "tag", tag)
+			logx.Error("Create DB connect", "err", err, "tag", tag)
 			continue
 		}
 		v.mux.Lock(func() {
 			v.conns[tag] = c
 		})
-		v.log.Info("Create DB connect", "dialect", c.Dialect(), "tag", tag)
+		logx.Info("Create DB connect", "dialect", c.Dialect(), "tag", tag)
 	}
 	return
 }
@@ -139,7 +135,7 @@ func (v *_orm) checkConnects(ctx context.Context) {
 		badTags = make(map[string]Connector, len(v.conns))
 		for tag, st := range v.pool {
 			if err := st.PingContext(ctx); err != nil {
-				v.log.Error("Bad DB connect", "err", err, "tag", tag)
+				logx.Error("Bad DB connect", "err", err, "tag", tag)
 				badTags[tag] = nil
 			}
 		}
@@ -163,7 +159,7 @@ func (v *_orm) checkConnects(ctx context.Context) {
 	}
 	for tag, c := range badTags {
 		if err := v.appendConnect(c, tag); err != nil {
-			v.log.Error("Create DB connect", "err", err, "tag", tag)
+			logx.Error("Create DB connect", "err", err, "tag", tag)
 		}
 	}
 }

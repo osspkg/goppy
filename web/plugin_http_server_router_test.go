@@ -15,13 +15,10 @@ import (
 
 	"go.osspkg.com/casecheck"
 	"go.osspkg.com/ioutils"
-	"go.osspkg.com/logx"
 )
 
 func Test_newRouter(t *testing.T) {
-	logger := logx.New()
-
-	r := newRouter("test", Config{}, logger)
+	r := newRouter("test", Config{})
 
 	r.NotFoundHandler(func(ctx Context) {
 		ctx.String(404, "NotFoundHandler")

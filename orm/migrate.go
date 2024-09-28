@@ -73,15 +73,13 @@ type (
 	Migrate struct {
 		conn ORM
 		conf []ConfigMigrateItem
-		log  logx.Logger
 	}
 )
 
-func NewMigrate(conn ORM, conf []ConfigMigrateItem, log logx.Logger) *Migrate {
+func NewMigrate(conn ORM, conf []ConfigMigrateItem) *Migrate {
 	return &Migrate{
 		conn: conn,
 		conf: conf,
-		log:  log,
 	}
 }
 
@@ -187,7 +185,7 @@ func (v *Migrate) executor(ctx context.Context,
 				if _, ok := exist[name]; ok {
 					continue
 				}
-				v.log.Info("New migration", "file", filePath)
+				logx.Info("New migration", "file", filePath)
 				b, err0 := os.ReadFile(filePath)
 				if err0 != nil {
 					return errors.Wrapf(err0, "read migration file [%s]", name)

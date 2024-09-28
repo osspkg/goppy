@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/logx"
 )
 
 // ConfigPgsql pgsql config model
@@ -64,10 +63,10 @@ func WithPGSql() plugins.Plugin {
 
 	return plugins.Plugin{
 		Config: &ConfigPgsql{},
-		Inject: func(c *ConfigPgsql, o ORM, l logx.Logger) error {
+		Inject: func(c *ConfigPgsql, o ORM) error {
 			conn := NewPGSqlClient(c)
 			o.Register(conn)
-			return NewMigrate(o, c.Migrate, l).
+			return NewMigrate(o, c.Migrate).
 				Run(context.TODO(), conn.Dialect())
 		},
 	}

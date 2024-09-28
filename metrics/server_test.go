@@ -30,7 +30,7 @@ func TestUnit_NewServer(t *testing.T) {
 	ctx := xc.New()
 	logBuff := bytes.NewBuffer(nil)
 
-	log := logx.New()
+	log := logx.Default()
 	log.SetLevel(logx.LevelError)
 	log.SetOutput(logBuff)
 
@@ -55,7 +55,7 @@ func TestUnit_NewServer(t *testing.T) {
 		},
 	}
 
-	srv := metrics.New(app, conf, log)
+	srv := metrics.New(app, conf)
 	casecheck.NoError(t, err)
 	casecheck.NoError(t, srv.Up(ctx))
 
