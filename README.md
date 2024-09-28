@@ -3,7 +3,6 @@
 [![Release](https://img.shields.io/github/release/osspkg/goppy.svg?style=flat-square)](https://github.com/osspkg/goppy/releases/latest)
 [![Go Report Card](https://goreportcard.com/badge/github.com/osspkg/goppy)](https://goreportcard.com/report/github.com/osspkg/goppy)
 [![CI](https://github.com/osspkg/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/osspkg/goppy/actions/workflows/ci.yml)
-[![Codeql](https://github.com/osspkg/goppy/actions/workflows/codeql.yml/badge.svg)](https://github.com/osspkg/goppy/actions/workflows/codeql.yml)
 ![GitHub](https://img.shields.io/github/license/osspkg/goppy)
 
 ## Features
