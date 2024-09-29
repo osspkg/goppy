@@ -63,14 +63,12 @@ func (v *Client) SetZoneResolver(r ZoneResolver) {
 	v.resolver = r
 }
 
-func (v *Client) Exchange(q []dns.Question) ([]dns.RR, error) {
+func (v *Client) Exchange(question dns.Question) ([]dns.RR, error) {
 	var errs error
-	result := make([]dns.RR, 0, len(q))
+	msg := new(dns.Msg).SetQuestion(question.Name, question.Qtype)
+	ns := v.resolver.Resolve(question.Name)
 
-	for _, question := range q {
-		address := v.resolver.Resolve(question.Name)
-		msg := new(dns.Msg).SetQuestion(question.Name, question.Qtype)
-
+	for _, address := range ns {
 		resp, _, err := v.cli.Exchange(msg, address)
 		if err != nil {
 			errs = errors.Wrap(errs, errors.Wrapf(err, "name: %s, dns: %s", question.String(), address))
@@ -83,8 +81,8 @@ func (v *Client) Exchange(q []dns.Question) ([]dns.RR, error) {
 			continue
 		}
 
-		result = append(result, resp.Answer...)
+		return resp.Answer, nil
 	}
 
-	return result, errs
+	return nil, errs
 }

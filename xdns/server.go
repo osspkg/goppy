@@ -20,7 +20,6 @@ type Server struct {
 	serv    []*dns.Server
 	handler HandlerDNS
 	wg      syncing.Group
-	mux     syncing.Lock
 }
 
 func NewServer(conf Config) *Server {
@@ -29,7 +28,6 @@ func NewServer(conf Config) *Server {
 		serv:    make([]*dns.Server, 0, 2),
 		handler: DefaultExchanger(),
 		wg:      syncing.NewGroup(),
-		mux:     syncing.NewLock(),
 	}
 }
 
@@ -81,9 +79,7 @@ func (v *Server) Down() error {
 }
 
 func (v *Server) HandleFunc(r HandlerDNS) {
-	v.mux.Lock(func() {
-		v.handler = r
-	})
+	v.handler = r
 }
 
 func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
@@ -93,21 +89,16 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	response.SetReply(msg)
 	response.SetRcode(msg, dns.RcodeSuccess)
 
-	var (
-		answer []dns.RR
-		err    error
-	)
-	v.mux.RLock(func() {
-		answer, err = v.handler.Exchange(msg.Question)
-	})
-
-	if err != nil {
-		logx.Error("DNS handler", "question", msg, "err", err)
-	} else {
-		response.Answer = append(response.Answer, answer...)
+	for _, q := range msg.Question {
+		answer, err := v.handler.Exchange(q)
+		if err != nil {
+			logx.Error("DNS exchange", "question", msg, "err", err)
+		} else {
+			response.Answer = append(response.Answer, answer...)
+		}
 	}
 
-	if err = w.WriteMsg(response); err != nil {
-		logx.Error("DNS handler", "question", msg, "answer", response, "err", err)
+	if err := w.WriteMsg(response); err != nil {
+		logx.Error("DNS response", "question", msg, "answer", response, "err", err)
 	}
 }

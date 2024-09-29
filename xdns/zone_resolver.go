@@ -6,13 +6,8 @@
 package xdns
 
 import (
-	"math/rand"
-	"time"
-
 	"go.osspkg.com/network/address"
 )
-
-var rnd = rand.New(rand.NewSource(time.Now().UnixNano()))
 
 type ZoneResolve struct {
 	dns []string
@@ -26,11 +21,8 @@ func NewSimpleZoneResolve(dns ...string) *ZoneResolve {
 	return &ZoneResolve{dns: ndns}
 }
 
-func (v *ZoneResolve) Resolve(name string) string {
-	if len(v.dns) == 1 {
-		return v.dns[0]
-	}
-	return v.dns[rnd.Intn(len(v.dns))]
+func (v *ZoneResolve) Resolve(name string) []string {
+	return append(make([]string, 0, len(v.dns)), v.dns...)
 }
 
 func DefaultExchanger(dns ...string) HandlerDNS {
