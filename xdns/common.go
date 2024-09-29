@@ -10,9 +10,9 @@ import (
 )
 
 type HandlerDNS interface {
-	Exchange(q []dns.Question) ([]dns.RR, error)
+	Exchange(q dns.Question) ([]dns.RR, error)
 }
 
 type ZoneResolver interface {
-	Resolve(name string) string
+	Resolve(name string) []string
 }

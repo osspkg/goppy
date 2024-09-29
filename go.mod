@@ -22,7 +22,7 @@ require (
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.2.0
-	go.osspkg.com/ioutils v0.4.6
+	go.osspkg.com/ioutils v0.4.7
 	go.osspkg.com/logx v0.4.1
 	go.osspkg.com/network v0.4.2
 	go.osspkg.com/random v0.3.1
