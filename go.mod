@@ -8,23 +8,23 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.7.7
-	github.com/mattn/go-sqlite3 v1.14.23
+	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/miekg/dns v1.1.62
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.20.4
 	github.com/prometheus/client_model v0.6.1
 	go.osspkg.com/algorithms v1.4.1
 	go.osspkg.com/casecheck v0.3.0
-	go.osspkg.com/config v0.1.2
+	go.osspkg.com/config v0.1.3
 	go.osspkg.com/console v0.3.3
 	go.osspkg.com/do v0.1.0
 	go.osspkg.com/encrypt v0.3.4
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
-	go.osspkg.com/grape v1.2.0
+	go.osspkg.com/grape v1.2.1
 	go.osspkg.com/ioutils v0.4.7
-	go.osspkg.com/logx v0.4.1
-	go.osspkg.com/network v0.4.2
+	go.osspkg.com/logx v0.4.2
+	go.osspkg.com/network v0.4.4
 	go.osspkg.com/random v0.3.1
 	go.osspkg.com/routine v0.3.1
 	go.osspkg.com/static v1.4.0
@@ -33,7 +33,7 @@ require (
 	go.osspkg.com/xc v0.3.1
 	golang.org/x/mod v0.21.0
 	golang.org/x/oauth2 v0.23.0
-	google.golang.org/protobuf v1.34.2
+	google.golang.org/protobuf v1.35.1
 )
 
 require (
@@ -77,7 +77,7 @@ require (
 	go.etcd.io/bbolt v1.3.7 // indirect
 	golang.org/x/net v0.27.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
