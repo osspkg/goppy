@@ -70,7 +70,7 @@ func (v *_app) Logger(l logx.Logger) {
 }
 
 func (v *_app) ConfigResolvers(rc ...config.Resolver) {
-	v.grape.ConfigResolvers(rc...)
+	v.resolvers = append(v.resolvers, rc...)
 }
 
 // Plugins setting the list of plugins to initialize
