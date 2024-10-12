@@ -22,6 +22,12 @@ import (
 )
 
 type (
+	_config struct {
+		Filename string
+		Data     string
+		Ext      string
+	}
+
 	_app struct {
 		info  *env.AppInfo
 		grape grape.Grape
@@ -30,6 +36,8 @@ type (
 
 		plugins []interface{}
 		configs []interface{}
+
+		cfg _config
 
 		resolvers []config.Resolver
 		args      *console.Args
@@ -40,6 +48,7 @@ type (
 		Plugins(args ...plugins.Plugin)
 		Command(name string, call interface{})
 		ConfigResolvers(rc ...config.Resolver)
+		ConfigData(data, ext string)
 		Run()
 	}
 )
@@ -73,6 +82,14 @@ func (v *_app) ConfigResolvers(rc ...config.Resolver) {
 	v.resolvers = append(v.resolvers, rc...)
 }
 
+func (v *_app) ConfigData(data, ext string) {
+	v.cfg = _config{
+		Filename: "",
+		Data:     data,
+		Ext:      ext,
+	}
+}
+
 // Plugins setting the list of plugins to initialize
 func (v *_app) Plugins(args ...plugins.Plugin) {
 	for _, arg := range args {
@@ -101,10 +118,15 @@ func (v *_app) Run() {
 	apps := v.grape.Modules(v.plugins...)
 	apps.Modules(v.info.AppName, v.info.AppVersion, v.info.AppDescription, *v.info)
 
-	appConfig := v.parseConfigFlag()
-	console.FatalIfErr(v.recoveryConfig(appConfig), "config recovery")
-	console.FatalIfErr(v.validateConfig(appConfig), "config validate")
-	apps.ConfigFile(appConfig)
+	if len(v.cfg.Data) > 0 {
+		apps.ConfigData(v.cfg.Data, v.cfg.Ext)
+	} else {
+		v.cfg.Filename = v.parseConfigFlag()
+		console.FatalIfErr(v.recoveryConfig(v.cfg.Filename), "config recovery")
+		apps.ConfigFile(v.cfg.Filename)
+	}
+	console.FatalIfErr(v.validateConfig(v.cfg), "config validate")
+
 	apps.ConfigModels(v.configs...)
 	apps.ConfigResolvers(v.resolvers...)
 
@@ -153,14 +175,20 @@ func (v *_app) parsePIDFileFlag() (string, error) {
 	return *pid, nil
 }
 
-func (v *_app) validateConfig(filename string) error {
-	if len(filename) == 0 {
+func (v *_app) validateConfig(c _config) error {
+	rc := config.New(v.resolvers...)
+
+	switch true {
+	case len(c.Filename) > 0:
+		if err := rc.OpenFile(c.Filename); err != nil {
+			return err
+		}
+	case len(c.Data) > 0:
+		rc.OpenBlob(c.Data, c.Ext)
+	default:
 		return nil
 	}
-	rc := config.New(v.resolvers...)
-	if err := rc.OpenFile(filename); err != nil {
-		return err
-	}
+
 	if err := rc.Build(); err != nil {
 		return err
 	}
