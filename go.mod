@@ -24,7 +24,7 @@ require (
 	go.osspkg.com/grape v1.2.1
 	go.osspkg.com/ioutils v0.4.7
 	go.osspkg.com/logx v0.4.2
-	go.osspkg.com/network v0.4.4
+	go.osspkg.com/network v0.4.5
 	go.osspkg.com/random v0.3.1
 	go.osspkg.com/routine v0.3.1
 	go.osspkg.com/static v1.4.0
