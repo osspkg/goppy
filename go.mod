@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/miekg/dns v1.1.62
 	github.com/oschwald/geoip2-golang v1.11.0
-	github.com/prometheus/client_golang v1.20.4
+	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
 	go.osspkg.com/algorithms v1.4.1
 	go.osspkg.com/casecheck v0.3.0
