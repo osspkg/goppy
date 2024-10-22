@@ -18,8 +18,9 @@ func CmdBuild() console.CommandGetter {
 		setter.Setup("build", "Building app")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
 			flagsSetter.StringVar("arch", "amd64,arm64", "")
+			flagsSetter.StringVar("mode", "app", "")
 		})
-		setter.ExecFunc(func(_ []string, arch string) {
+		setter.ExecFunc(func(_ []string, arch, mode string) {
 			console.Infof("--- BUILD ---")
 
 			pack := make([]string, 0, 10)
@@ -53,7 +54,15 @@ func CmdBuild() console.CommandGetter {
 						console.Fatalf("possible only arch: amd64, arm64")
 					}
 
-					chunk = append(chunk, `go build -ldflags='-s -w' -a -o `+buildDir+"/"+appName+"_"+arch+" "+main)
+					switch mode {
+					case "app":
+						chunk = append(chunk, `go build -ldflags='-s -w' -a -o `+buildDir+"/"+appName+"_"+arch+" "+main)
+					case "plugin":
+						chunk = append(chunk, `go build -buildmode=plugin -ldflags='-s -w' -a -o `+buildDir+"/"+appName+"_"+arch+".so "+main)
+					default:
+						console.Fatalf("possible only mode: app, plugin")
+					}
+
 					pack = append(pack, strings.Join(chunk, " "))
 				}
 			}
