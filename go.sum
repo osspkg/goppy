@@ -101,6 +101,8 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v1.20.4 h1:Tgh3Yr67PaOv/uTqloMsCEdeuFTatm5zIq5+qNN23vI=
 github.com/prometheus/client_golang v1.20.4/go.mod h1:PIEt8X02hGcP8JWbeHyeZ53Y/jReSnHgO035n//V5WE=
+github.com/prometheus/client_golang v1.20.5 h1:cxppBPuYhUnsO6yo/aoRol4L7q7UFfdm+bR9r+8l63Y=
+github.com/prometheus/client_golang v1.20.5/go.mod h1:PIEt8X02hGcP8JWbeHyeZ53Y/jReSnHgO035n//V5WE=
 github.com/prometheus/client_model v0.6.1 h1:ZKSh/rekM+n3CeS952MLRAdFwIKqeY8b62p8ais2e9E=
 github.com/prometheus/client_model v0.6.1/go.mod h1:OrxVMOVHjw3lKMa8+x6HeMGkHMQyHDk9E3jmP2AmGiY=
 github.com/prometheus/common v0.55.0 h1:KEi6DK7lXW/m7Ig5i47x0vRzuBsHuvJdi5ee6Y3G1dc=
@@ -126,6 +128,8 @@ go.osspkg.com/console v0.3.3 h1:UB/pPoPsgWbyNFix8pEMQHbsXdMv/UK/dgsbRknCH2A=
 go.osspkg.com/console v0.3.3/go.mod h1:IknBCliH6mX/ogHa6wbycnGDFYixCGH3WuNc5W5tQe8=
 go.osspkg.com/do v0.1.0 h1:zkYZcRKbylGZSDUJhCyTkGuuJgF9hESX4SDUwMh6uBY=
 go.osspkg.com/do v0.1.0/go.mod h1:hOQEum85f8Kc4m8PWUAECDQ/mTtQ4362ABLD+KW5/vk=
+go.osspkg.com/do v0.1.1 h1:61rWqjMK4X6dZ9FokKRmm4n4uVvY8joLoVDH1i/f3Mc=
+go.osspkg.com/do v0.1.1/go.mod h1:hOQEum85f8Kc4m8PWUAECDQ/mTtQ4362ABLD+KW5/vk=
 go.osspkg.com/encrypt v0.3.4 h1:YO9mf8E8AGscmH1MtRfNr+QFRLBfjdUtMlqxELJDuZY=
 go.osspkg.com/encrypt v0.3.4/go.mod h1:1HywEHDE4fOBBhJ6QZ2ELrJNlQ6iSfxE3VzFMKPH+hE=
 go.osspkg.com/errors v0.3.1 h1:F9m/EEd/Ot2jba/TV7tvVRIpWXzIpNLc7vRJKcBD86A=
