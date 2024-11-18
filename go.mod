@@ -33,7 +33,7 @@ require (
 	go.osspkg.com/xc v0.3.1
 	golang.org/x/mod v0.21.0
 	golang.org/x/oauth2 v0.23.0
-	google.golang.org/protobuf v1.35.1
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
