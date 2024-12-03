@@ -17,7 +17,7 @@ func (*_mysqlMigrateTable) CreateTableQuery() []string {
 }
 
 func (*_mysqlMigrateTable) CheckTableQuery() string {
-	return "SHOW TABLES LIKE `__migrations__`;"
+	return "SHOW TABLES LIKE '__migrations__';"
 }
 
 func (*_mysqlMigrateTable) CompletedQuery() string {
