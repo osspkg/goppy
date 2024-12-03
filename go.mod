@@ -31,7 +31,7 @@ require (
 	go.osspkg.com/syncing v0.3.0
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.3.1
-	golang.org/x/mod v0.21.0
+	golang.org/x/mod v0.22.0
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/protobuf v1.35.2
 )
