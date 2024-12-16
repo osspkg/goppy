@@ -17,7 +17,7 @@ require (
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/config v0.1.3
 	go.osspkg.com/console v0.3.3
-	go.osspkg.com/do v0.1.2
+	go.osspkg.com/do v0.1.3
 	go.osspkg.com/encrypt v0.3.4
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
