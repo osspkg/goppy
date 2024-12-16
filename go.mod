@@ -7,7 +7,7 @@ require (
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
-	github.com/mailru/easyjson v0.7.7
+	github.com/mailru/easyjson v0.9.0
 	github.com/mattn/go-sqlite3 v1.14.24
 	github.com/miekg/dns v1.1.62
 	github.com/oschwald/geoip2-golang v1.11.0
