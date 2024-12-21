@@ -254,7 +254,9 @@ func (v *_server) HandlingHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ctx, _ := xc.Join(v.ctx, r.Context())
+		ctx, cancel := xc.Join(v.ctx, r.Context())
+		defer cancel()
+
 		c := newConnect(ctx, cid, r.Header, v, conn)
 
 		c.OnClose(func(cid string) {
