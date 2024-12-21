@@ -24,8 +24,8 @@ build:
 tests:
 	goppy test
 
-.PHONY: ci
-ci: install setup license lint build tests
+.PHONY: pre-commit
+pre-commit: install setup license lint build tests
 
 .PHONY: tidy
 tidy:
