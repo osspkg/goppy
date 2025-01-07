@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 func CmdLint() console.CommandGetter {
@@ -22,11 +23,11 @@ func CmdLint() console.CommandGetter {
 			updateGoMod()
 
 			cmds := make([]string, 0, 50)
-			cmds = append(cmds, "gofmt -w -s .", "golangci-lint --version")
+			cmds = append(cmds, "go generate ./...", "gofmt -w -s .", "golangci-lint --version")
 			mods, err := fs.SearchFiles(fs.CurrentDir(), "go.mod")
 			console.FatalIfErr(err, "detects go.mod in workspace")
 			for _, mod := range mods {
-				cmds = append(cmds, "cd "+filepath.Dir(mod)+" && golangci-lint -v run ./...")
+				cmds = append(cmds, "cd "+filepath.Dir(mod)+" && go generate ./... && golangci-lint -v run ./...")
 			}
 
 			global.ExecPack(cmds...)

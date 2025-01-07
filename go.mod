@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/v2
 
-go 1.22.5
+go 1.22.10
 
 require (
 	github.com/blevesearch/bleve/v2 v2.4.4
@@ -24,15 +24,15 @@ require (
 	go.osspkg.com/grape v1.2.3
 	go.osspkg.com/ioutils v0.4.8
 	go.osspkg.com/logx v0.4.2
-	go.osspkg.com/network v0.5.0
-	go.osspkg.com/random v0.4.0
+	go.osspkg.com/network v0.5.2
+	go.osspkg.com/random v0.4.1
 	go.osspkg.com/routine v0.3.1
 	go.osspkg.com/static v1.4.0
 	go.osspkg.com/syncing v0.3.0
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
 	golang.org/x/mod v0.22.0
-	golang.org/x/oauth2 v0.24.0
+	golang.org/x/oauth2 v0.25.0
 	google.golang.org/protobuf v1.36.0
 )
 
@@ -75,10 +75,10 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	go.etcd.io/bbolt v1.3.11 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	golang.org/x/tools v0.28.0 // indirect
+	golang.org/x/tools v0.29.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

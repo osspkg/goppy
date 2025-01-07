@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2024 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -13,8 +13,9 @@ import (
 	"strings"
 
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 func CmdSetupLib() console.CommandGetter {
@@ -148,14 +149,13 @@ func updateGoMod() {
 		for _, mod := range mods {
 			dir := filepath.Dir(mod)
 			cmds = append(cmds,
-				"cd "+dir+" && go mod tidy -v -compat=1.17 && go mod download && go generate ./...",
+				"cd "+dir+" && go mod tidy -v -compat=1.17 && go mod download",
 			)
 		}
 	} else {
 		cmds = append(cmds,
 			"go mod tidy -v -compat=1.17",
 			"go mod download",
-			"go generate ./...",
 		)
 	}
 
@@ -177,7 +177,7 @@ func updateGitIgnore() {
 			if bytes.Contains(b, []byte(datum)) {
 				continue
 			}
-			fmt.Fprintf(buff, "%s\n", datum)
+			fmt.Fprintf(buff, "\n%s\n", datum)
 		}
 		return buff.Bytes(), nil
 	}), "update .gitignore")
@@ -222,7 +222,7 @@ var ciConfigs = map[string]string{
 
 var golangciLintConfig = `
 run:
-  go: "1.22.5"
+  go: "{%go_ver%}"
   concurrency: 4
   timeout: 5m
   tests: false
@@ -429,13 +429,15 @@ linters:
     - errorlint
     - bodyclose
     - exportloopref
-    - gci
     - gosec
     - lll
   fast: false
 `
 
 var makefileConfig = `
+SHELL=/bin/bash
+
+
 .PHONY: install
 install:
 	go install go.osspkg.com/goppy/v2/cmd/goppy@latest
@@ -457,11 +459,11 @@ build:
 tests:
 	goppy test
 
-.PHONY: pre-commite
-pre-commite: install lint tests build
+.PHONY: pre-commit
+pre-commit: install license lint tests build
 
 .PHONY: ci
-ci: pre-commite
+ci: pre-commit
 
 `
 
