@@ -10,22 +10,22 @@ type _sqliteMigrateTable struct {
 
 func (*_sqliteMigrateTable) CreateTableQuery() []string {
 	return []string{
-		"CREATE TABLE `__migrations__` (" +
-			"`id` int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY," +
-			"`name` text NOT NULL," +
-			"`timestamp` int unsigned NOT NULL" +
-			") ENGINE='InnoDB';",
+		`CREATE TABLE "__migrations__" (
+  			"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT,
+  			"name" text NOT NULL,
+  			"timestamp" integer NOT NULL
+		);`,
 	}
 }
 
 func (*_sqliteMigrateTable) CheckTableQuery() string {
-	return "SHOW TABLES LIKE '__migrations__';"
+	return `SELECT "name" FROM "sqlite_master" WHERE "type"='table' AND "name"='__migrations__';`
 }
 
 func (*_sqliteMigrateTable) CompletedQuery() string {
-	return "SELECT `name` FROM `__migrations__`;"
+	return `SELECT "name" FROM "__migrations__";`
 }
 
 func (*_sqliteMigrateTable) SaveQuery() string {
-	return "INSERT INTO `__migrations__` (`name`, `timestamp`) VALUES (?, ?);"
+	return `INSERT INTO "__migrations__" ("name", "timestamp") VALUES (?, ?);`
 }
