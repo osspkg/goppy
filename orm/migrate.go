@@ -8,42 +8,13 @@ package orm
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
-	"sort"
-	"strings"
+	"sync"
 	"time"
 
 	"go.osspkg.com/errors"
-	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/logx"
-	"go.osspkg.com/syncing"
 )
-
-var (
-	migrateQuery = make(map[string]Migrator, 10)
-	mLock        = syncing.NewLock()
-)
-
-func Register(dialog string, migrate Migrator) {
-	mLock.Lock(func() {
-		migrateQuery[dialog] = migrate
-	})
-}
-
-func MigrateProvider(dialog string) (migrate Migrator, err error) {
-	mLock.Lock(func() {
-		m, ok := migrateQuery[dialog]
-		if ok {
-			migrate = m
-			return
-		}
-		err = fmt.Errorf("migrate query not found")
-	})
-	return
-}
-
-// ---------------------------------------------------------------------------------------------------------------------
 
 type (
 	ConfigMigrate struct {
@@ -51,8 +22,9 @@ type (
 	}
 
 	ConfigMigrateItem struct {
-		Tags string `yaml:"tags"`
-		Dir  string `yaml:"dir"`
+		Tags    string `yaml:"tags"`
+		Dialect string `yaml:"dialect"`
+		Dir     string `yaml:"dir"`
 	}
 )
 
@@ -60,8 +32,19 @@ func (v *ConfigMigrate) Default() {
 	if len(v.List) == 0 {
 		v.List = []ConfigMigrateItem{
 			{
-				Tags: "master",
-				Dir:  "./migrations",
+				Tags:    "master",
+				Dialect: MySQLDialect,
+				Dir:     "./migrations/" + MySQLDialect,
+			},
+			{
+				Tags:    "master",
+				Dialect: PgSQLDialect,
+				Dir:     "./migrations/" + PgSQLDialect,
+			},
+			{
+				Tags:    "master",
+				Dialect: SQLiteDialect,
+				Dir:     "./migrations/" + SQLiteDialect,
 			},
 		}
 	}
@@ -69,40 +52,85 @@ func (v *ConfigMigrate) Default() {
 
 // ---------------------------------------------------------------------------------------------------------------------
 
-type (
-	Migrate struct {
-		conn ORM
-		conf []ConfigMigrateItem
-	}
-)
-
-func NewMigrate(conn ORM, conf []ConfigMigrateItem) *Migrate {
-	return &Migrate{
-		conn: conn,
-		conf: conf,
-	}
+type Migrate struct {
+	Conn ORM
+	FS   MFS
+	mux  sync.Mutex
 }
 
 func (v *Migrate) Run(ctx context.Context, dialect string) error {
-	mig, err := MigrateProvider(dialect)
-	if err != nil {
-		return err
-	}
-	return v.executor(ctx, func(stmt Stmt) (map[string]struct{}, error) {
-		if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
-			for _, createQuery := range mig.CreateTableQuery() {
-				if err = migrateCreateTable(ctx, stmt, createQuery); err != nil {
-					return nil, err
+	return v.executor(ctx, dialect,
+		func(stmt Stmt, mig Migrator) (map[string]struct{}, error) {
+			if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
+				for _, createQuery := range mig.CreateTableQuery() {
+					if err := migrateCreateTable(ctx, stmt, createQuery); err != nil {
+						return nil, err
+					}
+				}
+				if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
+					return nil, fmt.Errorf("cant create migration table")
 				}
 			}
-			if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
-				return nil, fmt.Errorf("cant create migration table")
+			return migrateCompletedList(ctx, stmt, mig.CompletedQuery())
+		},
+		func(name string, stmt Stmt, mig Migrator) error {
+			return migrateSave(ctx, stmt, mig.SaveQuery(), name)
+		},
+	)
+}
+
+func (v *Migrate) executor(ctx context.Context, dialect string,
+	call func(stmt Stmt, mig Migrator) (map[string]struct{}, error),
+	save func(name string, stmt Stmt, mig Migrator) error,
+) error {
+	v.mux.Lock()
+	defer v.mux.Unlock()
+
+	defer v.FS.Done()
+
+	for v.FS.Next() {
+		if dialect != v.FS.Dialect() {
+			continue
+		}
+
+		mig, err := dialectExtract(v.FS.Dialect())
+		if err != nil {
+			return err
+		}
+
+		for _, tag := range v.FS.Tags() {
+			stmt := v.Conn.Tag(tag)
+			exist, err := call(stmt, mig)
+			if err != nil {
+				return err
+			}
+			list, err := v.FS.FileNames()
+			if err != nil {
+				return errors.Wrapf(err, "get migration files")
+			}
+			for _, filePath := range list {
+				name := filepath.Base(filePath)
+				if _, ok := exist[name]; ok {
+					continue
+				}
+				logx.Info("New DB migration", "dialect", dialect, "tag", tag, "file", filePath)
+				b, err := v.FS.FileData(filePath)
+				if err != nil {
+					return errors.Wrapf(err, "read migration file [%s]", name)
+				}
+				if err = stmt.Exec(ctx, "new migration", func(q Executor) {
+					q.SQL(b)
+				}); err != nil {
+					return errors.Wrapf(err, "exec migration file [%s]", name)
+				}
+				if err = save(name, stmt, mig); err != nil {
+					return errors.Wrapf(err, "save migrated file [%s]", name)
+				}
 			}
 		}
-		return migrateCompletedList(ctx, stmt, mig.CompletedQuery())
-	}, func(stmt Stmt, name string) error {
-		return migrateSave(ctx, stmt, mig.SaveQuery(), name)
-	})
+
+	}
+	return nil
 }
 
 func migrateTableCheck(ctx context.Context, stmt Stmt, query string) bool {
@@ -159,48 +187,4 @@ func migrateSave(ctx context.Context, stmt Stmt, query, name string) error {
 			return nil
 		})
 	})
-}
-
-func (v *Migrate) executor(ctx context.Context,
-	call func(stmt Stmt) (map[string]struct{}, error),
-	save func(stmt Stmt, name string) error,
-) error {
-	for _, migrateItem := range v.conf {
-		if !fs.FileExist(migrateItem.Dir) {
-			continue
-		}
-		for _, tag := range strings.Split(migrateItem.Tags, ",") {
-			stmt := v.conn.Tag(tag)
-			exist, err := call(stmt)
-			if err != nil {
-				return err
-			}
-			list, err := filepath.Glob(migrateItem.Dir + "/*.sql")
-			if err != nil {
-				return errors.Wrapf(err, "get migration files")
-			}
-			sort.Strings(list)
-			for _, filePath := range list {
-				name := filepath.Base(filePath)
-				if _, ok := exist[name]; ok {
-					continue
-				}
-				logx.Info("New migration", "file", filePath)
-				b, err0 := os.ReadFile(filePath)
-				if err0 != nil {
-					return errors.Wrapf(err0, "read migration file [%s]", name)
-				}
-				if err = stmt.Exec(ctx, "new migration", func(q Executor) {
-					q.SQL(string(b))
-				}); err != nil {
-					return errors.Wrapf(err, "exec migration file [%s]", name)
-				}
-				if err = save(stmt, name); err != nil {
-					return errors.Wrapf(err, "save migrated file [%s]", name)
-				}
-			}
-		}
-
-	}
-	return nil
 }

@@ -8,11 +8,12 @@ package main
 import (
 	"fmt"
 
+	"go.osspkg.com/logx"
+
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/orm"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/logx"
 )
 
 func main() {
@@ -20,10 +21,18 @@ func main() {
 	app := goppy.New("goppy_database", "v1.0.0", "")
 	app.Plugins(
 		web.WithServer(),
-		orm.WithMysql(),
-		orm.WithSqlite(),
-		orm.WithPGSql(),
+		orm.WithMysqlClient(),
+		orm.WithSqliteClient(),
+		orm.WithPgsqlClient(),
 		orm.WithORM(),
+		orm.WithMigration(orm.Migration{
+			Tags:    []string{"mysql_master"},
+			Dialect: "mysql",
+			Data: map[string]string{
+				"0001_data.sql": "CREATE TABLE IF NOT EXISTS `demo` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY\n);",
+			},
+		}),
+		orm.WithMigration(),
 	)
 	app.Plugins(
 		plugins.Plugin{
@@ -74,5 +83,5 @@ func (v *Controller) User(ctx web.Context) {
 
 	ctx.ErrorJSON(400, fmt.Errorf("user not found"), web.ErrCtx{"id": id})
 
-	logx.Info("user - %d", id)
+	logx.Info("user", "id", id)
 }

@@ -22,47 +22,23 @@ var (
 
 type (
 	_orm struct {
-		pool  map[string]Stmt
-		conns map[string]Connector
-		opts  *options
-		mux   syncing.Lock
+		pool  *syncing.Map[string, Stmt]
+		conns *syncing.Map[string, Connector]
 		ctx   context.Context
 	}
 
 	ORM interface {
 		Tag(name string) Stmt
-		Register(c Connector)
+		Register(c Connector, onSuccess func()) error
 		Close()
 	}
-
-	options struct {
-		Metrics metricExecutor
-	}
-
-	Option func(o *options)
 )
 
-func UseMetric(name string) Option {
-	return func(o *options) {
-		o.Metrics = newMetric(name)
-	}
-}
-
 // New init database connections
-func New(ctx context.Context, opts ...Option) ORM {
-	o := &options{
-		Metrics: DevNullMetric,
-	}
-
-	for _, opt := range opts {
-		opt(o)
-	}
-
+func New(ctx context.Context) ORM {
 	db := &_orm{
-		pool:  make(map[string]Stmt, 10),
-		conns: make(map[string]Connector, 10),
-		opts:  o,
-		mux:   syncing.NewLock(),
+		pool:  syncing.NewMap[string, Stmt](10),
+		conns: syncing.NewMap[string, Connector](10),
 		ctx:   ctx,
 	}
 
@@ -72,41 +48,45 @@ func New(ctx context.Context, opts ...Option) ORM {
 }
 
 func (v *_orm) Close() {
-	v.mux.Lock(func() {
-		for tag, stmt := range v.pool {
-			if err := stmt.Close(); err != nil {
-				logx.Error("Close DB connect", "err", err, "tag", tag)
-			}
-			delete(v.pool, tag)
-			delete(v.conns, tag)
+	for _, tag := range v.pool.Keys() {
+		stmt, ok := v.pool.Extract(tag)
+		if !ok {
+			continue
 		}
-	})
+
+		if err := stmt.Close(); err != nil {
+			logx.Error("Close DB connect", "err", err, "tag", tag)
+		}
+
+		v.conns.Del(tag)
+	}
 }
 
 // Tag getting stmt by name
-func (v *_orm) Tag(name string) (s Stmt) {
-	v.mux.RLock(func() {
-		var ok bool
-		s, ok = v.pool[name]
-		if !ok {
-			s = newStmt("", nil, v.opts, ErrTagNotFound)
-		}
-	})
-	return
+func (v *_orm) Tag(name string) Stmt {
+	if s, ok := v.pool.Get(name); ok {
+		return s
+	}
+	return newStmt(name, "", nil, ErrTagNotFound)
 }
 
-func (v *_orm) Register(c Connector) {
+func (v *_orm) Register(c Connector, onSuccess func()) error {
 	for _, tag := range c.Tags() {
-		if err := v.appendConnect(c, tag); err != nil {
-			logx.Error("Create DB connect", "err", err, "tag", tag)
-			continue
+		if _, ok := v.conns.Get(tag); ok {
+			return fmt.Errorf("db connect alredy exist: %s", tag)
 		}
-		v.mux.Lock(func() {
-			v.conns[tag] = c
-		})
+
+		if err := v.appendConnect(c, tag); err != nil {
+			return fmt.Errorf("create db connect [%s:%s]: %w", c.Dialect(), tag, err)
+		}
+
+		v.conns.Set(tag, c)
 		logx.Info("Create DB connect", "dialect", c.Dialect(), "tag", tag)
 	}
-	return
+
+	go onSuccess()
+
+	return nil
 }
 
 func (v *_orm) appendConnect(c Connector, tag string) error {
@@ -114,50 +94,41 @@ func (v *_orm) appendConnect(c Connector, tag string) error {
 	if err != nil {
 		return fmt.Errorf("connect failed: %w", err)
 	}
+
 	if err = db.PingContext(v.ctx); err != nil {
 		return fmt.Errorf("connect ping failed: %w", err)
 	}
-	v.mux.RLock(func() {
-		if _, ok := v.pool[tag]; ok {
-			err = fmt.Errorf("pool exist")
-		}
-	})
-	stmt := newStmt(c.Dialect(), db, v.opts, nil)
-	v.mux.Lock(func() {
-		v.pool[tag] = stmt
-	})
+
+	v.pool.Set(tag, newStmt(tag, c.Dialect(), db, nil))
 	return nil
 }
 
 func (v *_orm) checkConnects(ctx context.Context) {
-	var badTags map[string]Connector
-	v.mux.RLock(func() {
-		badTags = make(map[string]Connector, len(v.conns))
-		for tag, st := range v.pool {
-			if err := st.PingContext(ctx); err != nil {
-				logx.Error("Bad DB connect", "err", err, "tag", tag)
-				badTags[tag] = nil
-			}
+	badConns := make(map[string]struct{}, 10)
+
+	for _, tag := range v.pool.Keys() {
+		stmt, ok := v.pool.Get(tag)
+		if !ok {
+			badConns[tag] = struct{}{}
+			continue
 		}
-	})
-	if len(badTags) == 0 {
+
+		if err := stmt.PingContext(ctx); err != nil {
+			logx.Error("Bad DB connect", "err", err, "tag", tag)
+			badConns[tag] = struct{}{}
+		}
+	}
+
+	if len(badConns) == 0 {
 		return
 	}
-	v.mux.Lock(func() {
-		for tag := range badTags {
-			delete(v.pool, tag)
-			c, ok := v.conns[tag]
-			if !ok {
-				delete(badTags, tag)
-				continue
-			}
-			badTags[tag] = c
+
+	for tag := range badConns {
+		c, ok := v.conns.Get(tag)
+		if !ok {
+			continue
 		}
-	})
-	if len(badTags) == 0 {
-		return
-	}
-	for tag, c := range badTags {
+
 		if err := v.appendConnect(c, tag); err != nil {
 			logx.Error("Create DB connect", "err", err, "tag", tag)
 		}

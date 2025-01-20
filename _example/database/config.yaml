@@ -3,7 +3,7 @@ env: dev
 log:
   file_path: /dev/stdout
   format: string
-  level: 4
+  level: 3
 
 http:
   - tag: main
@@ -13,13 +13,17 @@ mysql:
   - tags: mysql_master,mysql_slave
     host: 127.0.0.1
     port: 3306
-    schema: test
+    schema: test_database
     user: test
     password: test
-    timezone: UTC
-mysql_migrate:
-  - tags: mysql_master
-    dir: ./migrations
+
+pgsql:
+  - tags: pgsql_master,pgsql_slave
+    host: 127.0.0.1
+    port: 5432
+    schema: postgres
+    user: postgres
+    password: postgres
 
 sqlite:
   - tags: sqlite_master
@@ -29,6 +33,8 @@ sqlite:
     journal: WAL
     locking_mode: EXCLUSIVE
     other_params: "auto_vacuum=incremental"
-sqlite_migrate:
-  - tags: mysql_master
+
+db_migrate:
+  - tags: sqlite_master
+    dialect: sqlite
     dir: ./migrations

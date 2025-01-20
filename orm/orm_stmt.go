@@ -32,16 +32,21 @@ type (
 	}
 
 	_stmt struct {
+		tag     string
 		dialect string
 		conn    *sql.DB
-		opts    *options
 		err     error
 	}
 )
 
 // newStmt init new statement
-func newStmt(d string, c *sql.DB, p *options, e error) Stmt {
-	return &_stmt{dialect: d, conn: c, opts: p, err: e}
+func newStmt(tag, dialect string, conn *sql.DB, err error) Stmt {
+	return &_stmt{
+		tag:     tag,
+		dialect: dialect,
+		conn:    conn,
+		err:     err,
+	}
 }
 
 func (v *_stmt) Close() error {
