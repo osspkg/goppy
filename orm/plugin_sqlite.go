@@ -6,15 +6,12 @@
 package orm
 
 import (
-	"context"
-
 	"go.osspkg.com/goppy/v2/plugins"
 )
 
 // ConfigSqlite sqlite config model
 type ConfigSqlite struct {
-	Pool    []ConfigSqliteClient `yaml:"sqlite"`
-	Migrate []ConfigMigrateItem  `yaml:"sqlite_migrate"`
+	Pool []ConfigSqliteClient `yaml:"sqlite"`
 }
 
 func (v *ConfigSqlite) Default() {
@@ -31,14 +28,6 @@ func (v *ConfigSqlite) Default() {
 			},
 		}
 	}
-	if len(v.Migrate) == 0 {
-		v.Migrate = []ConfigMigrateItem{
-			{
-				Tags: "master",
-				Dir:  "./migrations",
-			},
-		}
-	}
 }
 
 // List getting all configs
@@ -49,17 +38,15 @@ func (v *ConfigSqlite) List() (list []ItemInterface) {
 	return
 }
 
-// WithSqlite launch SQLite connection pool
-func WithSqlite() plugins.Plugin {
-	Register(SQLiteDialect, &_sqliteMigrateTable{})
-
+// WithSqliteClient launch SQLite connection pool
+func WithSqliteClient() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigSqlite{},
 		Inject: func(c *ConfigSqlite, o ORM) error {
 			conn := NewSqliteClient(c)
-			o.Register(conn)
-			return NewMigrate(o, c.Migrate).
-				Run(context.TODO(), conn.Dialect())
+			return o.Register(conn, func() {
+				dialectRegister(SQLiteDialect, &_sqliteMigrateTable{})
+			})
 		},
 	}
 }

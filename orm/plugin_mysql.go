@@ -6,7 +6,6 @@
 package orm
 
 import (
-	"context"
 	"time"
 
 	"go.osspkg.com/goppy/v2/plugins"
@@ -14,8 +13,7 @@ import (
 
 // ConfigMysql mysql config model
 type ConfigMysql struct {
-	Pool    []ConfigMysqlClient `yaml:"mysql"`
-	Migrate []ConfigMigrateItem `yaml:"mysql_migrate"`
+	Pool []ConfigMysqlClient `yaml:"mysql"`
 }
 
 // List getting all configs
@@ -51,27 +49,17 @@ func (v *ConfigMysql) Default() {
 			},
 		}
 	}
-	if len(v.Migrate) == 0 {
-		v.Migrate = []ConfigMigrateItem{
-			{
-				Tags: "master",
-				Dir:  "./migrations",
-			},
-		}
-	}
 }
 
-// WithMysql launch MySQL connection pool
-func WithMysql() plugins.Plugin {
-	Register(MySQLDialect, &_mysqlMigrateTable{})
-
+// WithMysqlClient launch MySQL connection pool
+func WithMysqlClient() plugins.Plugin {
 	return plugins.Plugin{
 		Config: &ConfigMysql{},
 		Inject: func(c *ConfigMysql, o ORM) error {
 			conn := NewMysqlClient(c)
-			o.Register(conn)
-			return NewMigrate(o, c.Migrate).
-				Run(context.TODO(), conn.Dialect())
+			return o.Register(conn, func() {
+				dialectRegister(MySQLDialect, &_mysqlMigrateTable{})
+			})
 		},
 	}
 }

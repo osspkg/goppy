@@ -5,10 +5,10 @@
 
 package orm
 
-var (
-	DevNullMetric metricExecutor = new(devNullMetric)
-)
+type Option func(o *Migrate)
 
-type devNullMetric struct{}
-
-func (devNullMetric) ExecutionTime(_ string, call func()) { call() }
+func UseMigration(m []Migration) Option {
+	return func(o *Migrate) {
+		o.FS = newMemFS(m)
+	}
+}

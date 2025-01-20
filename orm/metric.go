@@ -8,27 +8,11 @@ package orm
 import (
 	"time"
 
-	"go.osspkg.com/goppy/v2/metrics"
+	"go.osspkg.com/logx"
 )
 
-type (
-	metric struct {
-		name string
-	}
-	metricExecutor interface {
-		ExecutionTime(name string, call func())
-	}
-)
-
-func newMetric(name string) metricExecutor {
-	return &metric{
-		name: name,
-	}
-}
-
-// ExecutionTime calculating the execution time
-func (m *metric) ExecutionTime(name string, call func()) {
+func execTime(tag, name string, call func()) {
 	t := time.Now()
 	call()
-	metrics.HistogramVec(m.name, "query", name).Observe(time.Since(t).Seconds())
+	logx.Debug("query_time", "tag", tag, "query", name, "execTime", time.Since(t).String())
 }

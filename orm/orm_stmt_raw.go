@@ -16,7 +16,7 @@ func (v *_stmt) PingContext(ctx context.Context) (err error) {
 	if v.err != nil {
 		return v.err
 	}
-	v.opts.Metrics.ExecutionTime("ping", func() {
+	execTime(v.tag, "ping", func() {
 		err = v.conn.PingContext(ctx)
 	})
 	return
@@ -27,7 +27,7 @@ func (v *_stmt) CallContext(ctx context.Context, name string, callFunc func(cont
 	if v.err != nil {
 		return v.err
 	}
-	v.opts.Metrics.ExecutionTime(name, func() {
+	execTime(v.tag, name, func() {
 		err = callFunc(ctx, v.conn)
 	})
 	return
@@ -43,7 +43,7 @@ func (v *_stmt) TxContext(ctx context.Context, name string, callFunc func(contex
 	if err != nil {
 		return err
 	}
-	v.opts.Metrics.ExecutionTime(name, func() {
+	execTime(v.tag, name, func() {
 		err = callFunc(ctx, dbx)
 	})
 	if err != nil {
