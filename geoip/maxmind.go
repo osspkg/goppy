@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/oschwald/geoip2-golang"
+
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
 )

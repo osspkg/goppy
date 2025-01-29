@@ -18,9 +18,10 @@ import (
 	"time"
 
 	"go.osspkg.com/encrypt/aesgcm"
+	"go.osspkg.com/random"
+
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/random"
 )
 
 //go:generate easyjson

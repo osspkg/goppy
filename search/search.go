@@ -250,7 +250,7 @@ func (v *serviceSearch) Search(ctx context.Context, name, query string, highligh
 				}
 				obj.Elem().FieldByName(key).Set(reflect.ValueOf(value))
 			case FieldDate:
-				tv, err := time.Parse(time.RFC3339, value.(string))
+				tv, err := time.Parse(time.RFC3339, fmt.Sprintf("%v", value))
 				if err != nil {
 					return err
 				}

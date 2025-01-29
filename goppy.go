@@ -13,12 +13,14 @@ import (
 	configEnv "go.osspkg.com/config/env"
 	"go.osspkg.com/console"
 	"go.osspkg.com/errors"
-	"go.osspkg.com/goppy/v2/env"
-	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/grape"
 	grapeConfig "go.osspkg.com/grape/config"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/logx"
+	_ "go.uber.org/automaxprocs"
+
+	"go.osspkg.com/goppy/v2/env"
+	"go.osspkg.com/goppy/v2/plugins"
 )
 
 type (

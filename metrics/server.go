@@ -10,9 +10,10 @@ import (
 	"net/http/pprof"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v2/env"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/xc"
 )
 
 type Server struct {

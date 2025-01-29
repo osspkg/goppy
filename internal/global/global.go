@@ -6,6 +6,7 @@
 package global
 
 import (
+	"bytes"
 	"context"
 	"os"
 	"regexp"
@@ -56,4 +57,13 @@ func GoVersion() string {
 		return s
 	}
 	return "unknown"
+}
+
+func GoModule(folder string) string {
+	sh := shell.New()
+	sh.SetDir(folder)
+	console.FatalIfErr(sh.SetShell("sh", "c"), "init shell")
+	b, err := sh.Call(context.TODO(), "go list -m")
+	console.FatalIfErr(err, "detect go module name")
+	return string(bytes.TrimSpace(b))
 }

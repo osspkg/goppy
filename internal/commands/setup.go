@@ -184,17 +184,18 @@ func updateGitIgnore() {
 }
 
 var tools1 = map[string]string{
-	"goveralls": "go install github.com/mattn/goveralls@latest",
-	"static":    "go install go.osspkg.com/static/cmd/static@latest",
-	"easyjson":  "go install github.com/mailru/easyjson/...@latest",
+	"goveralls":   "go install github.com/mattn/goveralls@latest",
+	"static":      "go install go.osspkg.com/static/cmd/static@latest",
+	"easyjson":    "go install github.com/mailru/easyjson/...@latest",
+	"govulncheck": "go install golang.org/x/vuln/cmd/govulncheck@latest",
 }
 
 var tools2 = map[string]map[string]string{
 	"go1.23": {
-		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.2",
+		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2",
 	},
 	"go1.22": {
-		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.60.2",
+		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2",
 	},
 	"go1.21": {
 		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.0",

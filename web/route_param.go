@@ -105,7 +105,9 @@ type (
 
 func ParamString(r *http.Request, key string) (string, error) {
 	if v := r.Context().Value(uriParamKey(key)); v != nil {
-		return v.(string), nil
+		if vv, ok := v.(string); ok {
+			return vv, nil
+		}
 	}
 	return "", errFailContextKey
 }

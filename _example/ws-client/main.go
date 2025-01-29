@@ -10,11 +10,12 @@ import (
 	"fmt"
 	"time"
 
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/ws"
 	"go.osspkg.com/goppy/v2/ws/event"
-	"go.osspkg.com/xc"
 )
 
 func main() {

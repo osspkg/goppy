@@ -6,6 +6,7 @@
 package commands
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"go.osspkg.com/console"
@@ -27,8 +28,15 @@ func CmdLint() console.CommandGetter {
 			mods, err := fs.SearchFiles(fs.CurrentDir(), "go.mod")
 			console.FatalIfErr(err, "detects go.mod in workspace")
 			for _, mod := range mods {
-				cmds = append(cmds, "cd "+filepath.Dir(mod)+" && go generate ./... && golangci-lint -v run ./...")
+				folder := filepath.Dir(mod)
+				modName := global.GoModule(folder)
+				cmds = append(cmds, fmt.Sprintf(
+					"cd %s && go generate ./... && goimports -l -local=%s -w . && golangci-lint -v run ./...",
+					folder, modName,
+				))
 			}
+
+			cmds = append(cmds, "govulncheck ./...")
 
 			global.ExecPack(cmds...)
 		})

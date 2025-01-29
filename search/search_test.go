@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"go.osspkg.com/casecheck"
+
 	"go.osspkg.com/goppy/v2/search"
 )
 

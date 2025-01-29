@@ -6,9 +6,10 @@
 package ws
 
 import (
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/ws/event"
-	"go.osspkg.com/xc"
 )
 
 type Client interface {

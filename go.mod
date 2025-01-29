@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/v2
 
-go 1.22.10
+go 1.22.11
 
 require (
 	github.com/blevesearch/bleve/v2 v2.4.4
@@ -9,7 +9,7 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.0
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/miekg/dns v1.1.62
+	github.com/miekg/dns v1.1.63
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
@@ -31,9 +31,10 @@ require (
 	go.osspkg.com/syncing v0.3.1
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
+	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/mod v0.22.0
 	golang.org/x/oauth2 v0.25.0
-	google.golang.org/protobuf v1.36.0
+	google.golang.org/protobuf v1.36.4
 )
 
 require (
@@ -71,8 +72,8 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
-	github.com/prometheus/common v0.55.0 // indirect
+	github.com/oschwald/maxminddb-golang v1.13.1 // indirect
+	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	go.etcd.io/bbolt v1.3.11 // indirect
 	golang.org/x/net v0.34.0 // indirect

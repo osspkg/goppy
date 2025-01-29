@@ -13,9 +13,10 @@ import (
 	"time"
 
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 const (

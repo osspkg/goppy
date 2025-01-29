@@ -15,8 +15,9 @@ import (
 	"text/template"
 
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 func CmdGenerate() console.CommandGetter {
@@ -29,7 +30,7 @@ func CmdGenerate() console.CommandGetter {
 			data["go_version"] = strings.TrimLeft(global.GoVersion(), "go")
 			data["app_module"] = console.Input("Input project name", nil, "app")
 			data["app_name"] = func() string {
-				vv := strings.Split(data["app_module"].(string), "/")
+				vv := strings.Split(data["app_module"].(string), "/") //nolint: errcheck
 				return vv[len(vv)-1]
 			}()
 

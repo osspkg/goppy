@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/prometheus/client_golang/prometheus"
+
 	"go.osspkg.com/goppy/v2/env"
 )
 

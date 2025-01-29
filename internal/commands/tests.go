@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"go.osspkg.com/console"
+
 	"go.osspkg.com/goppy/v2/internal/global"
 )
 

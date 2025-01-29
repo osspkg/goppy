@@ -12,10 +12,11 @@ import (
 
 	"github.com/gorilla/websocket"
 	"go.osspkg.com/do"
-	"go.osspkg.com/goppy/v2/ws/event"
-	"go.osspkg.com/goppy/v2/ws/internal"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/syncing"
+
+	"go.osspkg.com/goppy/v2/ws/event"
+	"go.osspkg.com/goppy/v2/ws/internal"
 )
 
 type (

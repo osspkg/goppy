@@ -11,11 +11,12 @@ import (
 	"net/http"
 
 	"go.osspkg.com/errors"
-	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/web"
 	"go.osspkg.com/ioutils"
 	"go.osspkg.com/logx"
 	"golang.org/x/oauth2"
+
+	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v2/web"
 )
 
 var (

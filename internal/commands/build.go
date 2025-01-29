@@ -9,8 +9,9 @@ import (
 	"strings"
 
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 func CmdBuild() console.CommandGetter {

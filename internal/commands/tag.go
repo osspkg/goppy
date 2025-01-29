@@ -13,10 +13,11 @@ import (
 
 	"go.osspkg.com/algorithms/graph/kahn"
 	"go.osspkg.com/console"
-	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/validate"
 	"golang.org/x/mod/modfile"
+
+	"go.osspkg.com/goppy/v2/internal/global"
 )
 
 func Cmd() console.CommandGetter {

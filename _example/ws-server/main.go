@@ -9,12 +9,13 @@ import (
 	"fmt"
 	"time"
 
+	"go.osspkg.com/syncing"
+
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
 	"go.osspkg.com/goppy/v2/ws"
 	"go.osspkg.com/goppy/v2/ws/event"
-	"go.osspkg.com/syncing"
 )
 
 func main() {

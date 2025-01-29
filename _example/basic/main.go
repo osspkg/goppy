@@ -10,11 +10,12 @@ import (
 	"os"
 
 	"go.osspkg.com/console"
+	"go.osspkg.com/logx"
+
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/metrics"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/logx"
 )
 
 func main() {

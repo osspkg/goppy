@@ -9,10 +9,11 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
 	"go.osspkg.com/goppy/v2/ws/event"
-	"go.osspkg.com/xc"
 )
 
 type Server interface {
