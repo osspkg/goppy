@@ -188,6 +188,7 @@ var tools1 = map[string]string{
 	"static":      "go install go.osspkg.com/static/cmd/static@latest",
 	"easyjson":    "go install github.com/mailru/easyjson/...@latest",
 	"govulncheck": "go install golang.org/x/vuln/cmd/govulncheck@latest",
+	"goimports":   "go install golang.org/x/tools/cmd/goimports@latest",
 }
 
 var tools2 = map[string]map[string]string{
