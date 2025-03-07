@@ -30,3 +30,6 @@ pre-commit: install setup license lint build tests
 .PHONY: tidy
 tidy:
 	go mod tidy -v
+
+example_gogen: install
+	cd ./_example/go-gen && go generate ./...

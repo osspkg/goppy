@@ -63,7 +63,7 @@ func createScripts(force bool) {
 	mainFiles, err := fs.SearchFiles(fs.CurrentDir(), "main.go")
 	console.FatalIfErr(err, "detect main.go")
 	for _, main := range mainFiles {
-		appName := fs.ParentFolder(main)
+		appName := fs.DirName(main)
 		repl := strings.NewReplacer(
 			"{%app_name%}", appName,
 		)
@@ -192,8 +192,11 @@ var tools1 = map[string]string{
 }
 
 var tools2 = map[string]map[string]string{
+	"go1.24": {
+		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.5",
+	},
 	"go1.23": {
-		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2",
+		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.5",
 	},
 	"go1.22": {
 		"golangci-lint": "go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.62.2",

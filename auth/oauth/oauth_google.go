@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package auth
+package oauth
 
 //go:generate easyjson
 
@@ -26,14 +26,14 @@ type (
 		EmailVerified bool   `json:"email_verified"`
 	}
 
-	oauthUserGoogle struct {
+	userGoogle struct {
 		name  string
 		icon  string
 		email string
 	}
 )
 
-func (v *oauthUserGoogle) UnmarshalJSON(data []byte) error {
+func (v *userGoogle) UnmarshalJSON(data []byte) error {
 	var tmp modelGoogle
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
@@ -48,30 +48,30 @@ func (v *oauthUserGoogle) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *oauthUserGoogle) GetName() string {
+func (v *userGoogle) GetName() string {
 	return v.name
 }
 
-func (v *oauthUserGoogle) GetIcon() string {
+func (v *userGoogle) GetIcon() string {
 	return v.icon
 }
 
-func (v *oauthUserGoogle) GetEmail() string {
+func (v *userGoogle) GetEmail() string {
 	return v.email
 }
 
 /**********************************************************************************************************************/
 
-type OAuthGoogleProvider struct {
+type GoogleProvider struct {
 	oauth  *oauth2.Config
-	config oauthProviderConfig
+	config providerConfig
 }
 
-func (v *OAuthGoogleProvider) Code() string {
+func (v *GoogleProvider) Code() string {
 	return CodeGoogle
 }
 
-func (v *OAuthGoogleProvider) Config(c Config) {
+func (v *GoogleProvider) Config(c Config) {
 	v.oauth = &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
@@ -82,23 +82,23 @@ func (v *OAuthGoogleProvider) Config(c Config) {
 			"https://www.googleapis.com/auth/userinfo.profile",
 		},
 	}
-	v.config = oauthProviderConfig{
+	v.config = providerConfig{
 		State:       "state",
 		AuthCodeKey: "code",
 		RequestURL:  "https://openidconnect.googleapis.com/v1/userinfo",
 	}
 }
 
-func (v *OAuthGoogleProvider) AuthCodeURL() string {
+func (v *GoogleProvider) AuthCodeURL() string {
 	return v.oauth.AuthCodeURL(v.config.State)
 }
 
-func (v *OAuthGoogleProvider) AuthCodeKey() string {
+func (v *GoogleProvider) AuthCodeKey() string {
 	return v.config.AuthCodeKey
 }
 
-func (v *OAuthGoogleProvider) Exchange(ctx context.Context, code string) (OAuthUser, error) {
-	m := &oauthUserGoogle{}
+func (v *GoogleProvider) Exchange(ctx context.Context, code string) (User, error) {
+	m := &userGoogle{}
 	if err := oauth2ExchangeContext(ctx, code, v.config.RequestURL, v.oauth, m); err != nil {
 		return nil, err
 	}

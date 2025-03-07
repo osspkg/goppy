@@ -166,7 +166,7 @@ func (v *_ctx) Header() Header {
 
 type (
 	Cookie interface {
-		Get(key string) *http.Cookie
+		Get(key string) string
 		Set(value *http.Cookie)
 	}
 
@@ -177,9 +177,12 @@ type (
 )
 
 // Get getting cookies from a key request
-func (v *_cookie) Get(key string) *http.Cookie {
-	c, _ := v.r.Cookie(key) // nolint: errcheck
-	return c
+func (v *_cookie) Get(key string) string {
+	c, err := v.r.Cookie(key)
+	if err != nil {
+		return ""
+	}
+	return c.Value
 }
 
 // Set setting cookies in response

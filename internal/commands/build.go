@@ -31,7 +31,7 @@ func CmdBuild() console.CommandGetter {
 			console.FatalIfErr(err, "detect main.go")
 
 			for _, main := range mainFiles {
-				appName := fs.ParentFolder(main)
+				appName := fs.DirName(main)
 				archList := strings.Split(arch, ",")
 
 				for _, arch = range archList {

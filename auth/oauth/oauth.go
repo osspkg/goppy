@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package auth
+package oauth
 
 import (
 	"context"
@@ -15,103 +15,63 @@ import (
 	"go.osspkg.com/logx"
 	"golang.org/x/oauth2"
 
-	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
 )
 
-var (
-	errProviderFail = errors.New("provider not found")
-)
-
 type (
-	// ConfigOAuth oauth config model
-	ConfigOAuth struct {
-		Providers []Config `yaml:"oauth"`
-	}
-
-	Config struct {
-		Code         string `yaml:"code"`
-		ClientID     string `yaml:"client_id"`
-		ClientSecret string `yaml:"client_secret"`
-		RedirectURL  string `yaml:"redirect_url"`
-	}
-)
-
-func (v *ConfigOAuth) Default() {
-	if len(v.Providers) == 0 {
-		v.Providers = []Config{
-			{
-				Code:         CodeGoogle,
-				ClientID:     "****************.apps.googleusercontent.com",
-				ClientSecret: "****************",
-				RedirectURL:  "https://example.com/oauth/callback/google",
-			},
-		}
-	}
-}
-
-// WithOAuth init oauth providers
-func WithOAuth(opts ...func(OAuthOption)) plugins.Plugin {
-	return plugins.Plugin{
-		Config: &ConfigOAuth{},
-		Inject: func(conf *ConfigOAuth) OAuth {
-			obj := &oauthService{
-				config: conf.Providers,
-				list:   make(map[string]OAuthProvider),
-			}
-
-			for _, opt := range opts {
-				opt(obj)
-			}
-
-			return obj
-		},
-	}
-}
-
-type (
-	oauthService struct {
-		config []Config
-		list   map[string]OAuthProvider
-	}
-
-	oauthProviderConfig struct {
-		State       string
-		AuthCodeKey string
-		RequestURL  string
-	}
-
 	OAuth interface {
+		ApplyProvider(p ...Provider)
 		Request(code string) func(web.Context)
-		Callback(code string, handler func(web.Context, OAuthUser, OAuthCode)) func(web.Context)
+		Callback(code string, handler func(web.Context, User, Code)) func(web.Context)
 	}
 
-	OAuthOption interface {
-		ApplyProvider(p ...OAuthProvider)
+	Option interface {
+		ApplyProvider(p ...Provider)
 	}
 
-	OAuthUser interface {
+	User interface {
 		GetName() string
 		GetEmail() string
 		GetIcon() string
 	}
 
-	OAuthProvider interface {
+	Provider interface {
 		Code() string
 		Config(conf Config)
 		AuthCodeURL() string
 		AuthCodeKey() string
-		Exchange(ctx context.Context, code string) (OAuthUser, error)
+		Exchange(ctx context.Context, code string) (User, error)
 	}
 
-	OAuthCode string
+	Code string
 )
 
-func (v *oauthService) ApplyProvider(p ...OAuthProvider) {
+type (
+	service struct {
+		config []Config
+		list   map[string]Provider
+	}
+
+	providerConfig struct {
+		State       string
+		AuthCodeKey string
+		RequestURL  string
+	}
+)
+
+func New(c []Config) OAuth {
+	return &service{
+		config: c,
+		list:   make(map[string]Provider),
+	}
+}
+
+func (v *service) ApplyProvider(p ...Provider) {
 	for _, item := range p {
 		for _, cp := range v.config {
 			if cp.Code == item.Code() {
 				logx.Info("OAuth add provider", "name", cp.Code)
+
 				item.Config(cp)
 				v.list[item.Code()] = item
 			}
@@ -119,15 +79,15 @@ func (v *oauthService) ApplyProvider(p ...OAuthProvider) {
 	}
 }
 
-func (v *oauthService) getProvider(name string) (OAuthProvider, error) {
-	p, ok := v.list[name]
-	if !ok {
-		return nil, errProviderFail
+func (v *service) getProvider(name string) (Provider, error) {
+	if p, ok := v.list[name]; ok {
+		return p, nil
 	}
-	return p, nil
+
+	return nil, ErrProviderNotFound
 }
 
-func (v *oauthService) Request(code string) func(web.Context) {
+func (v *service) Request(code string) func(web.Context) {
 	return func(ctx web.Context) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
@@ -136,16 +96,18 @@ func (v *oauthService) Request(code string) func(web.Context) {
 			})
 			return
 		}
+
 		p, err := v.getProvider(name)
 		if err != nil {
 			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{})
 			return
 		}
+
 		ctx.Redirect(p.AuthCodeURL())
 	}
 }
 
-func (v *oauthService) Callback(code string, handler func(web.Context, OAuthUser, OAuthCode)) func(web.Context) {
+func (v *service) Callback(code string, handler func(web.Context, User, Code)) func(web.Context) {
 	return func(ctx web.Context) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
@@ -154,17 +116,20 @@ func (v *oauthService) Callback(code string, handler func(web.Context, OAuthUser
 			})
 			return
 		}
+
 		p, err := v.getProvider(name)
 		if err != nil {
 			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{})
 			return
 		}
+
 		u, err0 := p.Exchange(ctx.Context(), ctx.Query(p.AuthCodeKey()))
 		if err0 != nil {
 			ctx.ErrorJSON(http.StatusBadRequest, err0, map[string]interface{}{})
 			return
 		}
-		handler(ctx, u, OAuthCode(name))
+
+		handler(ctx, u, Code(name))
 	}
 }
 
@@ -178,17 +143,22 @@ func oauth2ExchangeContext(ctx context.Context, code, uri string, srv oauth2Conf
 	if err != nil {
 		return errors.Wrapf(err, "exchange to oauth service")
 	}
+
 	client := srv.Client(ctx, tok)
+
 	resp, err := client.Get(uri) // nolint: bodyclose
 	if err != nil {
 		return errors.Wrapf(err, "client request to oauth service")
 	}
+
 	b, err := ioutils.ReadAll(resp.Body)
 	if err != nil {
 		return errors.Wrapf(err, "read response from oauth service")
 	}
+
 	if err = json.Unmarshal(b, model); err != nil {
 		return errors.Wrapf(err, "decode oauth model")
 	}
+
 	return nil
 }

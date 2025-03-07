@@ -3,18 +3,18 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package auth_test
+package jwt_test
 
 import (
 	"testing"
 
 	"go.osspkg.com/casecheck"
 
-	"go.osspkg.com/goppy/v2/auth"
+	"go.osspkg.com/goppy/v2/auth/jwt"
 )
 
 func TestUnit_ConfigJWT(t *testing.T) {
-	conf := &auth.ConfigJWT{}
+	conf := &jwt.ConfigGroup{}
 
 	err := conf.Validate()
 	casecheck.Error(t, err)
