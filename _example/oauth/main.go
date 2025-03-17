@@ -8,6 +8,7 @@ package main
 import (
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/auth"
+	"go.osspkg.com/goppy/v2/auth/oauth"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
 )
@@ -16,17 +17,17 @@ func main() {
 	app := goppy.New("", "", "")
 	app.Plugins(
 		web.WithServer(),
-		auth.WithOAuth(func(option auth.OAuthOption) {
+		auth.WithOAuth(func(option oauth.Option) {
 			option.ApplyProvider(
-				&auth.OAuthGoogleProvider{},
-				&auth.OAuthYandexProvider{},
+				&oauth.GoogleProvider{},
+				&oauth.YandexProvider{},
 			)
 		}),
 	)
 	app.Plugins(
 		plugins.Plugin{
 			Inject: NewController,
-			Resolve: func(routes web.RouterPool, c *Controller, oa auth.OAuth) {
+			Resolve: func(routes web.RouterPool, c *Controller, oa oauth.OAuth) {
 				router := routes.Main()
 				router.Use(web.ThrottlingMiddleware(100))
 
@@ -45,7 +46,7 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) CallBack(ctx web.Context, user auth.OAuthUser, code auth.OAuthCode) {
+func (v *Controller) CallBack(ctx web.Context, user oauth.User, code oauth.Code) {
 	ctx.String(
 		200,
 		"code: %s, email: %s, name: %s, ico: %s",

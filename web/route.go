@@ -15,7 +15,7 @@ var _ http.Handler = (*BaseRouter)(nil)
 
 type BaseRouter struct {
 	handler *ctrlHandler
-	lock    sync.RWMutex
+	mux     sync.RWMutex
 }
 
 func NewBaseRouter() *BaseRouter {
@@ -26,40 +26,40 @@ func NewBaseRouter() *BaseRouter {
 
 // Route add new route
 func (v *BaseRouter) Route(path string, ctrl func(http.ResponseWriter, *http.Request), methods ...string) {
-	v.lock.Lock()
+	v.mux.Lock()
 	v.handler.Route(path, ctrl, methods)
-	v.lock.Unlock()
+	v.mux.Unlock()
 }
 
 // Global add global middlewares
 func (v *BaseRouter) Global(
-	middlewares ...func(func(http.ResponseWriter, *http.Request),
-	) func(http.ResponseWriter, *http.Request)) {
-	v.lock.Lock()
+	middlewares ...func(func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request),
+) {
+	v.mux.Lock()
 	v.handler.Middlewares("", middlewares...)
-	v.lock.Unlock()
+	v.mux.Unlock()
 }
 
 // Middlewares add middlewares to route
 func (v *BaseRouter) Middlewares(
-	path string, middlewares ...func(func(http.ResponseWriter, *http.Request),
-	) func(http.ResponseWriter, *http.Request)) {
-	v.lock.Lock()
+	path string, middlewares ...func(func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request),
+) {
+	v.mux.Lock()
 	v.handler.Middlewares(path, middlewares...)
-	v.lock.Unlock()
+	v.mux.Unlock()
 }
 
 // NoFoundHandler ctrlHandler call if route not found
 func (v *BaseRouter) NoFoundHandler(call func(http.ResponseWriter, *http.Request)) {
-	v.lock.Lock()
+	v.mux.Lock()
 	v.handler.NoFoundHandler(call)
-	v.lock.Unlock()
+	v.mux.Unlock()
 }
 
 // ServeHTTP http interface
 func (v *BaseRouter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	v.lock.RLock()
-	defer v.lock.RUnlock()
+	v.mux.RLock()
+	defer v.mux.RUnlock()
 
 	code, next, params, midd := v.handler.Match(r.URL.Path, r.Method)
 	if code != http.StatusOK {

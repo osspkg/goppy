@@ -3,7 +3,9 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package auth
+package oauth
+
+//go:generate easyjson
 
 import (
 	"context"
@@ -13,8 +15,6 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/yandex"
 )
-
-//go:generate easyjson
 
 const CodeYandex = "yandex"
 
@@ -26,14 +26,14 @@ type (
 		Email string `json:"default_email"`
 	}
 
-	oauthUserYandex struct {
+	userYandex struct {
 		name  string
 		icon  string
 		email string
 	}
 )
 
-func (v *oauthUserYandex) UnmarshalJSON(data []byte) error {
+func (v *userYandex) UnmarshalJSON(data []byte) error {
 	var tmp modelYandex
 	if err := json.Unmarshal(data, &tmp); err != nil {
 		return err
@@ -48,30 +48,30 @@ func (v *oauthUserYandex) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-func (v *oauthUserYandex) GetName() string {
+func (v *userYandex) GetName() string {
 	return v.name
 }
 
-func (v *oauthUserYandex) GetIcon() string {
+func (v *userYandex) GetIcon() string {
 	return v.icon
 }
 
-func (v *oauthUserYandex) GetEmail() string {
+func (v *userYandex) GetEmail() string {
 	return v.email
 }
 
 /**********************************************************************************************************************/
 
-type OAuthYandexProvider struct {
+type YandexProvider struct {
 	oauth  *oauth2.Config
-	config oauthProviderConfig
+	config providerConfig
 }
 
-func (v *OAuthYandexProvider) Code() string {
+func (v *YandexProvider) Code() string {
 	return CodeYandex
 }
 
-func (v *OAuthYandexProvider) Config(c Config) {
+func (v *YandexProvider) Config(c Config) {
 	v.oauth = &oauth2.Config{
 		ClientID:     c.ClientID,
 		ClientSecret: c.ClientSecret,
@@ -83,23 +83,23 @@ func (v *OAuthYandexProvider) Config(c Config) {
 			"login:avatar",
 		},
 	}
-	v.config = oauthProviderConfig{
+	v.config = providerConfig{
 		State:       "state",
 		AuthCodeKey: "code",
 		RequestURL:  "https://login.yandex.ru/info",
 	}
 }
 
-func (v *OAuthYandexProvider) AuthCodeURL() string {
+func (v *YandexProvider) AuthCodeURL() string {
 	return v.oauth.AuthCodeURL(v.config.State)
 }
 
-func (v *OAuthYandexProvider) AuthCodeKey() string {
+func (v *YandexProvider) AuthCodeKey() string {
 	return v.config.AuthCodeKey
 }
 
-func (v *OAuthYandexProvider) Exchange(ctx context.Context, code string) (OAuthUser, error) {
-	m := &oauthUserYandex{}
+func (v *YandexProvider) Exchange(ctx context.Context, code string) (User, error) {
+	m := &userYandex{}
 	if err := oauth2ExchangeContext(ctx, code, v.config.RequestURL, v.oauth, m); err != nil {
 		return nil, err
 	}

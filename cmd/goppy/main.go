@@ -9,6 +9,7 @@ import (
 	"go.osspkg.com/console"
 
 	"go.osspkg.com/goppy/v2/internal/commands"
+	"go.osspkg.com/goppy/v2/internal/gen"
 	"go.osspkg.com/goppy/v2/internal/global"
 )
 
@@ -26,6 +27,7 @@ func main() {
 		commands.CmdSetupLib(),
 		commands.CmdSetupApp(),
 		commands.CmdGoSite(),
+		gen.Command(),
 		// commands.CmdGenerate(),
 	)
 

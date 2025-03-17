@@ -1,10 +1,11 @@
 module go.osspkg.com/goppy/v2
 
-go 1.22.11
+go 1.23.6
 
 require (
 	github.com/blevesearch/bleve/v2 v2.4.4
-	github.com/go-sql-driver/mysql v1.8.1
+	github.com/go-sql-driver/mysql v1.9.0
+	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.0
@@ -13,7 +14,7 @@ require (
 	github.com/oschwald/geoip2-golang v1.11.0
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
-	go.osspkg.com/algorithms v1.4.1
+	go.osspkg.com/algorithms v1.5.0
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/config v0.1.3
 	go.osspkg.com/console v0.3.3
@@ -22,7 +23,7 @@ require (
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.2.3
-	go.osspkg.com/ioutils v0.5.0
+	go.osspkg.com/ioutils v0.5.1
 	go.osspkg.com/logx v0.4.2
 	go.osspkg.com/network v0.5.2
 	go.osspkg.com/random v0.4.1
@@ -32,8 +33,8 @@ require (
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/mod v0.22.0
-	golang.org/x/oauth2 v0.25.0
+	golang.org/x/mod v0.23.0
+	golang.org/x/oauth2 v0.26.0
 	google.golang.org/protobuf v1.36.4
 )
 

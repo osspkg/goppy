@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package auth
+package jwt
 
 import (
 	"context"
@@ -23,8 +23,8 @@ func setJWTPayloadContext(ctx context.Context, value []byte) context.Context {
 	return context.WithValue(ctx, jwtPayload, value)
 }
 
-func JWTPayloadContext(c tContext, payload interface{}) error {
-	value, ok := c.Context().Value(jwtPayload).([]byte)
+func PayloadContext(ctx context.Context, payload interface{}) error {
+	value, ok := ctx.Value(jwtPayload).([]byte)
 	if !ok {
 		return fmt.Errorf("jwt payload not found")
 	}

@@ -40,6 +40,7 @@ func GetScriptsDir() string {
 }
 
 func SetupEnv() {
+	console.FatalIfErr(os.Setenv("GOTOOLCHAIN", "local"), "setup env")
 	console.FatalIfErr(os.Setenv("GOBIN", GetToolsDir()), "setup env")
 	console.FatalIfErr(os.Setenv("PATH", GetToolsDir()+":"+os.Getenv("PATH")), "setup env")
 }
