@@ -29,7 +29,7 @@ func (v *keyPool) hashing(data []byte) ([]byte, error) {
 	return result, nil
 }
 
-func (v *keyPool) encrypt(payload interface{}) ([]byte, error) {
+func (v *keyPool) encrypt(payload any) ([]byte, error) {
 	p, err := json.Marshal(payload)
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func (v *keyPool) encrypt(payload interface{}) ([]byte, error) {
 	return p, nil
 }
 
-func (v *keyPool) decrypt(data []byte, payload interface{}) error {
+func (v *keyPool) decrypt(data []byte, payload any) error {
 	b, err := v.codec.Decrypt(data)
 	if err != nil {
 		return err

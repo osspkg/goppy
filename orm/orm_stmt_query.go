@@ -15,11 +15,11 @@ var poolQuery = pool.New[*query](func() *query { return &query{} })
 
 type query struct {
 	Q string
-	P []interface{}
+	P []any
 	B func(bind Scanner) error
 }
 
-func (v *query) SQL(query string, args ...interface{}) {
+func (v *query) SQL(query string, args ...any) {
 	v.Q, v.P = query, args
 }
 
@@ -34,12 +34,12 @@ func (v *query) Reset() {
 type (
 	// Scanner interface for bind data
 	Scanner interface {
-		Scan(args ...interface{}) error
+		Scan(args ...any) error
 	}
 
 	// Querier interface for generate query
 	Querier interface {
-		SQL(query string, args ...interface{})
+		SQL(query string, args ...any)
 		Bind(call func(bind Scanner) error)
 	}
 )

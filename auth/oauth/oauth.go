@@ -91,7 +91,7 @@ func (v *service) Request(code string) func(web.Context) {
 	return func(ctx web.Context) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
-			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{
+			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{
 				code: name,
 			})
 			return
@@ -99,7 +99,7 @@ func (v *service) Request(code string) func(web.Context) {
 
 		p, err := v.getProvider(name)
 		if err != nil {
-			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{})
+			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{})
 			return
 		}
 
@@ -111,7 +111,7 @@ func (v *service) Callback(code string, handler func(web.Context, User, Code)) f
 	return func(ctx web.Context) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
-			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{
+			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{
 				code: name,
 			})
 			return
@@ -119,13 +119,13 @@ func (v *service) Callback(code string, handler func(web.Context, User, Code)) f
 
 		p, err := v.getProvider(name)
 		if err != nil {
-			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]interface{}{})
+			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{})
 			return
 		}
 
 		u, err0 := p.Exchange(ctx.Context(), ctx.Query(p.AuthCodeKey()))
 		if err0 != nil {
-			ctx.ErrorJSON(http.StatusBadRequest, err0, map[string]interface{}{})
+			ctx.ErrorJSON(http.StatusBadRequest, err0, map[string]any{})
 			return
 		}
 

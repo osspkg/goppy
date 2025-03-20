@@ -8,6 +8,7 @@ package signature
 import (
 	"crypto/hmac"
 	"crypto/md5"
+	"crypto/sha1"
 	"crypto/sha256"
 	"crypto/sha512"
 	"encoding/hex"
@@ -38,6 +39,11 @@ type (
 // NewMD5 create sign md5
 func NewMD5(id, secret string) Signature {
 	return NewCustomSignature(id, secret, "hmac-md5", md5.New)
+}
+
+// NewSHA1 create sign sha1
+func NewSHA1(id, secret string) Signature {
+	return NewCustomSignature(id, secret, "hmac-sha1", sha1.New)
 }
 
 // NewSHA256 create sign sha256

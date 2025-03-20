@@ -23,8 +23,8 @@ type Id uint16
 type (
 	Event interface {
 		ID() Id
-		Decode(out interface{}) error
-		Encode(in interface{}) error
+		Decode(out any) error
+		Encode(in any) error
 		Reset()
 		WithError(e error)
 		WithID(id Id)
@@ -48,14 +48,14 @@ func (v *event) ID() Id {
 	return v.Id
 }
 
-func (v *event) Decode(in interface{}) error {
+func (v *event) Decode(in any) error {
 	if v.Err != nil {
 		return fmt.Errorf("%s", *v.Err)
 	}
 	return json.Unmarshal(v.Data, in)
 }
 
-func (v *event) Encode(in interface{}) (err error) {
+func (v *event) Encode(in any) (err error) {
 	v.Data, err = json.Marshal(in)
 	if err != nil {
 		return err

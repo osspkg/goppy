@@ -21,17 +21,15 @@ import (
 	"go.osspkg.com/goppy/v2/web/signature"
 )
 
-type (
-	ClientHttp struct {
-		cli *http.Client
+type ClientHttp struct {
+	cli *http.Client
 
-		headers   http.Header
-		signStore signature.Storage
+	headers   http.Header
+	signStore signature.Storage
 
-		enc func(in interface{}) (body []byte, contentType string, err error)
-		dec func(code int, contentType string, body []byte, out interface{}) error
-	}
-)
+	enc func(in any) (body []byte, contentType string, err error)
+	dec func(code int, contentType string, body []byte, out any) error
+}
 
 func NewClientHttp(opt ...ClientHttpOption) *ClientHttp {
 	cli := &ClientHttp{
@@ -46,7 +44,7 @@ func NewClientHttp(opt ...ClientHttpOption) *ClientHttp {
 	return cli
 }
 
-func (v *ClientHttp) Call(ctx context.Context, method, uri string, in interface{}, out interface{}) error {
+func (v *ClientHttp) Call(ctx context.Context, method, uri string, in any, out any) error {
 	var (
 		ioBody      io.Reader
 		b           []byte
@@ -103,8 +101,8 @@ func (v *ClientHttp) Call(ctx context.Context, method, uri string, in interface{
 type ClientHttpOption func(c *ClientHttp)
 
 func ClientHttpOptionCodec(
-	enc func(in interface{}) (body []byte, contentType string, err error),
-	dec func(code int, contentType string, body []byte, out interface{}) error,
+	enc func(in any) (body []byte, contentType string, err error),
+	dec func(code int, contentType string, body []byte, out any) error,
 ) ClientHttpOption {
 	return func(c *ClientHttp) {
 		c.enc = enc
@@ -114,7 +112,7 @@ func ClientHttpOptionCodec(
 
 func ClientHttpOptionCodecDefault() ClientHttpOption {
 	return ClientHttpOptionCodec(
-		func(in interface{}) (body []byte, contentType string, err error) {
+		func(in any) (body []byte, contentType string, err error) {
 			if v, ok := in.(io.Reader); ok {
 				body, err = io.ReadAll(v)
 				contentType = "text/plain; charset=utf-8"
@@ -132,7 +130,7 @@ func ClientHttpOptionCodecDefault() ClientHttpOption {
 				return nil, "", fmt.Errorf("unknown request format %T", in)
 			}
 		},
-		func(code int, _ string, body []byte, out interface{}) error {
+		func(code int, _ string, body []byte, out any) error {
 			switch code {
 			case 200:
 				if v, ok := out.(io.Writer); ok {

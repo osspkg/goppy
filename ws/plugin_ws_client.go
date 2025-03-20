@@ -21,8 +21,8 @@ type Client interface {
 	OnOpen(cb func(cid string))
 	CloseOne(cid string)
 	CloseAll()
-	BroadcastEvent(eid event.Id, m interface{}) (err error)
-	SendEvent(eid event.Id, m interface{}, cids ...string) (err error)
+	BroadcastEvent(eid event.Id, m any) (err error)
+	SendEvent(eid event.Id, m any, cids ...string) (err error)
 }
 
 func WithClient() plugins.Plugin {

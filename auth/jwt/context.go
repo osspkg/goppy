@@ -23,7 +23,7 @@ func setJWTPayloadContext(ctx context.Context, value []byte) context.Context {
 	return context.WithValue(ctx, jwtPayload, value)
 }
 
-func PayloadContext(ctx context.Context, payload interface{}) error {
+func PayloadContext(ctx context.Context, payload any) error {
 	value, ok := ctx.Value(jwtPayload).([]byte)
 	if !ok {
 		return fmt.Errorf("jwt payload not found")

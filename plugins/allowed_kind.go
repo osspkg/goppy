@@ -39,7 +39,7 @@ var (
 	}
 )
 
-func (v AllowedKind) MustValidate(in interface{}) {
+func (v AllowedKind) MustValidate(in any) {
 	into := reflect.TypeOf(in)
 	for _, k := range v.kind {
 		if into.Kind() == k {

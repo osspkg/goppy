@@ -18,18 +18,18 @@ const (
 )
 
 type (
+	ConfigGroup struct {
+		Search Config `yaml:"search"`
+	}
 	Config struct {
-		Search ConfigItem `yaml:"search"`
+		Folder  string  `yaml:"folder"`
+		Indexes []Index `yaml:"indexes"`
 	}
-	ConfigItem struct {
-		Folder  string        `yaml:"folder"`
-		Indexes []ConfigIndex `yaml:"indexes"`
+	Index struct {
+		Name   string       `yaml:"name"`
+		Fields []IndexField `yaml:"fields"`
 	}
-	ConfigIndex struct {
-		Name   string             `yaml:"name"`
-		Fields []ConfigIndexField `yaml:"fields"`
-	}
-	ConfigIndexField struct {
+	IndexField struct {
 		Name string `yaml:"name"`
 		Type string `yaml:"type"`
 	}

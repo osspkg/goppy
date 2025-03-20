@@ -16,6 +16,7 @@ import (
 	"strconv"
 
 	"go.osspkg.com/ioutils"
+	"go.osspkg.com/ioutils/data"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/static"
 )
@@ -35,14 +36,15 @@ type (
 		Header() Header
 		Cookie() Cookie
 
+		BindRaw() (*data.Buffer, error)
 		BindBytes(in *[]byte) error
-		BindJSON(in interface{}) error
-		BindXML(in interface{}) error
+		BindJSON(in any) error
+		BindXML(in any) error
 		Error(code int, err error)
 		ErrorJSON(code int, err error, ctx ErrCtx)
 		Bytes(code int, b []byte)
-		String(code int, b string, args ...interface{})
-		JSON(code int, in interface{})
+		String(code int, b string, args ...any)
+		JSON(code int, in any)
 		Stream(code int, in []byte, filename string)
 
 		Context() context.Context
@@ -208,15 +210,26 @@ func (v *_ctx) BindBytes(in *[]byte) error {
 	return nil
 }
 
-func (v *_ctx) BindJSON(in interface{}) error {
+func (v *_ctx) BindRaw() (*data.Buffer, error) {
+	defer func() {
+		v.r.Body.Close() //nolint:errcheck
+	}()
+	buf := data.NewBuffer(128)
+	if _, err := buf.ReadFrom(v.r.Body); err != nil {
+		return nil, err
+	}
+	return buf, nil
+}
+
+func (v *_ctx) BindJSON(in any) error {
 	return JSONDecode(v.r, in)
 }
 
-func (v *_ctx) BindXML(in interface{}) error {
+func (v *_ctx) BindXML(in any) error {
 	return XMLDecode(v.r, in)
 }
 
-func (v *_ctx) BindFormData(in interface{}) error {
+func (v *_ctx) BindFormData(in any) error {
 	return FormDataDecode(v.r, in)
 }
 
@@ -229,7 +242,7 @@ type (
 		Ctx     ErrCtx `json:"ctx,omitempty"`
 	}
 
-	ErrCtx map[string]interface{}
+	ErrCtx map[string]any
 )
 
 func (v *_ctx) Error(code int, err error) {
@@ -263,7 +276,7 @@ func (v *_ctx) Bytes(code int, b []byte) {
 }
 
 // String recording the response in string format
-func (v *_ctx) String(code int, b string, args ...interface{}) {
+func (v *_ctx) String(code int, b string, args ...any) {
 	v.w.WriteHeader(code)
 	if _, err := fmt.Fprintf(v.w, b, args...); err != nil {
 		logx.Error("String response", "err", err)
@@ -271,7 +284,7 @@ func (v *_ctx) String(code int, b string, args ...interface{}) {
 }
 
 // JSON recording the response in json format
-func (v *_ctx) JSON(code int, in interface{}) {
+func (v *_ctx) JSON(code int, in any) {
 	b, err := json.Marshal(in)
 	if err != nil {
 		v.ErrorJSON(http.StatusInternalServerError, err, nil)

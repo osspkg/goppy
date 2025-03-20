@@ -26,7 +26,7 @@ func CmdGenerate() console.CommandGetter {
 		setter.ExecFunc(func(_ []string) {
 			currdir := fs.CurrentDir()
 
-			data := make(map[string]interface{}, 100)
+			data := make(map[string]any, 100)
 			data["go_version"] = strings.TrimLeft(global.GoVersion(), "go")
 			data["app_module"] = console.Input("Input project name", nil, "app")
 			data["app_name"] = func() string {
@@ -109,7 +109,7 @@ var generateTemplates = map[string]string{
 	"pkg/plugin.go":            tmplPkgGo,
 }
 
-func writeFile(filename, t string, data map[string]interface{}) {
+func writeFile(filename, t string, data map[string]any) {
 	tmpl, err := template.New("bt").Parse(t)
 	console.FatalIfErr(err, "Parse template")
 	tmpl.Option("missingkey=error")

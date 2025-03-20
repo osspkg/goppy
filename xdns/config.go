@@ -8,7 +8,7 @@ package xdns
 import "time"
 
 type (
-	ConfigDNS struct {
+	ConfigGroup struct {
 		DNS Config `yaml:"dns"`
 	}
 	Config struct {
@@ -17,7 +17,7 @@ type (
 	}
 )
 
-func (v *ConfigDNS) Default() {
+func (v *ConfigGroup) Default() {
 	v.DNS.Addr = "0.0.0.0:53"
 	v.DNS.Timeout = 5 * time.Second
 }

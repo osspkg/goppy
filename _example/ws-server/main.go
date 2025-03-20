@@ -47,8 +47,8 @@ func main() {
 
 type (
 	sender interface {
-		BroadcastEvent(eid event.Id, m interface{}) (err error)
-		SendEvent(eid event.Id, m interface{}, cids ...string) (err error)
+		BroadcastEvent(eid event.Id, m any) (err error)
+		SendEvent(eid event.Id, m any, cids ...string) (err error)
 		OnClose(cb func(cid string))
 		OnOpen(cb func(cid string))
 	}

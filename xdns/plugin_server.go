@@ -11,8 +11,8 @@ import (
 
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &ConfigDNS{},
-		Inject: func(c *ConfigDNS) *Server {
+		Config: &ConfigGroup{},
+		Inject: func(c *ConfigGroup) *Server {
 			return NewServer(c.DNS)
 		},
 	}

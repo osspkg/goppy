@@ -14,11 +14,11 @@ import (
 	"go.osspkg.com/goppy/v2/plugins"
 )
 
-type ConfigMetrics struct {
+type ConfigGroup struct {
 	Config Config `yaml:"metrics"`
 }
 
-func (v *ConfigMetrics) Default() {
+func (v *ConfigGroup) Default() {
 	v.Config = Config{
 		Addr:       "0.0.0.0:12000",
 		Counter:    []string{"default_counter"},
@@ -39,8 +39,8 @@ func (v *ConfigMetrics) Default() {
 
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &ConfigMetrics{},
-		Inject: func(app env.AppInfo, c *ConfigMetrics) Metrics {
+		Config: &ConfigGroup{},
+		Inject: func(app env.AppInfo, c *ConfigGroup) Metrics {
 			return New(app, c.Config)
 		},
 	}
