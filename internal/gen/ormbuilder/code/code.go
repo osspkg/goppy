@@ -163,7 +163,6 @@ package {{.PkgName}}
 
 import (
 	"context"
-	"github.com/lib/pq"
 	"go.osspkg.com/goppy/v2/orm"{{range .Imports}}{{.}}{{end}}
 )
 
