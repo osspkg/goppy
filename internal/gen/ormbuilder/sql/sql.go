@@ -26,12 +26,12 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 			continue
 		}
 
-		if attr, ok := m.Attr.FirstValue(fields.AttrAction); ok {
-			switch attr {
-			case fields.AttrValueActionRO:
-				continue
-			}
-		}
+		//if attr, ok := m.Attr.FirstValue(fields.AttrAction); ok {
+		//	switch attr {
+		//	case fields.AttrValueActionRO:
+		//		continue
+		//	}
+		//}
 
 		w := data.NewBuffer(1024)
 
@@ -125,7 +125,7 @@ func field(dialect dialects.Dialect, table string, v fields.TField) (query []str
 		}
 
 	case fields.Chars:
-		nonArr = true
+		nonArr = hasLen
 		switch dialect {
 		case dialects.PGSql:
 			query = append(query, do.IfElse(hasLen, "VARCHAR("+valLen+")", "TEXT"))

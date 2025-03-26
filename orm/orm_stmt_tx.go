@@ -62,7 +62,7 @@ func (v *_stmt) Tx(ctx context.Context, name string, call func(v Tx)) error {
 				continue
 			}
 			if cc, ok := c.(func(q Querier)); ok {
-				if err := callQueryContext(ctx, db, cc); err != nil {
+				if err := callQueryContext(ctx, db, cc, v.dialect); err != nil {
 					return err
 				}
 				continue

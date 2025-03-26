@@ -14,13 +14,19 @@ import (
 var poolQuery = pool.New[*query](func() *query { return &query{} })
 
 type query struct {
+	D string
 	Q string
 	P []any
 	B func(bind Scanner) error
 }
 
 func (v *query) SQL(query string, args ...any) {
-	v.Q, v.P = query, args
+	switch v.D {
+	case PgSQLDialect:
+		v.Q, v.P = query, pgCastTypes(args)
+	default:
+		v.Q, v.P = query, args
+	}
 }
 
 func (v *query) Bind(call func(bind Scanner) error) {
@@ -28,7 +34,21 @@ func (v *query) Bind(call func(bind Scanner) error) {
 }
 
 func (v *query) Reset() {
-	v.Q, v.P, v.B = "", v.P[:0], nil
+	v.Q, v.P, v.B, v.D = "", v.P[:0], nil, ""
+}
+
+type scan struct {
+	D string
+	S Scanner
+}
+
+func (v *scan) Scan(args ...any) error {
+	switch v.D {
+	case PgSQLDialect:
+		return v.Scan(pgCastTypes(args)...)
+	default:
+		return v.Scan(args...)
+	}
 }
 
 type (
@@ -46,13 +66,15 @@ type (
 
 func (v *_stmt) Query(ctx context.Context, name string, call func(q Querier)) error {
 	return v.CallContext(ctx, name, func(ctx context.Context, db DB) error {
-		return callQueryContext(ctx, db, call)
+		return callQueryContext(ctx, db, call, v.dialect)
 	})
 }
 
-func callQueryContext(ctx context.Context, db dbGetter, call func(q Querier)) error {
+func callQueryContext(ctx context.Context, db dbGetter, call func(q Querier), dialect string) error {
 	q := poolQuery.Get()
-	defer poolQuery.Put(q)
+	defer func() { poolQuery.Put(q) }()
+
+	q.D = dialect
 
 	call(q)
 
@@ -63,7 +85,7 @@ func callQueryContext(ctx context.Context, db dbGetter, call func(q Querier)) er
 	defer rows.Close() // nolint: errcheck
 	if q.B != nil {
 		for rows.Next() {
-			if err = q.B(rows); err != nil {
+			if err = q.B(&scan{D: dialect, S: rows}); err != nil {
 				return err
 			}
 		}

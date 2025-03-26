@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS "meta" (
 	 CONSTRAINT "meta_id_pk" PRIMARY KEY ("id"),
 	 "user_id" BIGINT NOT NULL ,
 	 CONSTRAINT "meta_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "users" ("id") ON DELETE CASCADE NOT DEFERRABLE,
-	 "roles" TEXT NOT NULL ,
+	 "roles" TEXT[] NOT NULL ,
 	 CONSTRAINT "meta_roles_unq" UNIQUE ("roles"),
 	 "fail" BOOLEAN NOT NULL,
 	 "created_at" TIMESTAMPTZ NOT NULL,

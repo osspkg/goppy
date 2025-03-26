@@ -15,9 +15,10 @@ import (
 
 //gen:orm table=users action=ro
 type User struct {
-	Id    int64   // col=id index=pk
-	Name  string  // col=name len=100
-	Meta0 []*Meta // link=id:meta.user_id
+	Id    int64    // col=id index=pk
+	Name  string   // col=name len=100
+	Value []string // col=value
+	Meta0 []*Meta  // link=id:meta.user_id
 	//Meta1 []Meta  // link=id
 	//Meta2 *[]Meta // link=id
 	//Meta3 Meta    // link=id

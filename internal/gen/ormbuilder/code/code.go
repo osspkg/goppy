@@ -72,6 +72,10 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 		return
 	}
 
+	if len(v.Models) == 0 {
+		return
+	}
+
 	for _, m := range v.Models {
 
 		crud := modelCRUD{
@@ -159,6 +163,7 @@ package {{.PkgName}}
 
 import (
 	"context"
+	"github.com/lib/pq"
 	"go.osspkg.com/goppy/v2/orm"{{range .Imports}}{{.}}{{end}}
 )
 
