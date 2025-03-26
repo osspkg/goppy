@@ -34,10 +34,10 @@ type (
 		info  *env.AppInfo
 		grape grape.Grape
 
-		commands map[string]interface{}
+		commands map[string]any
 
-		plugins []interface{}
-		configs []interface{}
+		plugins []any
+		configs []any
 
 		cfg _config
 
@@ -48,7 +48,7 @@ type (
 	Goppy interface {
 		Logger(l logx.Logger)
 		Plugins(args ...plugins.Plugin)
-		Command(name string, call interface{})
+		Command(name string, call any)
 		ConfigResolvers(rc ...config.Resolver)
 		ConfigData(data, ext string)
 		Run()
@@ -61,9 +61,9 @@ func New(name, version, description string) Goppy {
 		grape: grape.New(name).ExitFunc(func(code int) {
 			os.Exit(code)
 		}),
-		commands:  make(map[string]interface{}),
-		plugins:   make([]interface{}, 0, 100),
-		configs:   make([]interface{}, 0, 100),
+		commands:  make(map[string]any),
+		plugins:   make([]any, 0, 100),
+		configs:   make([]any, 0, 100),
 		resolvers: make([]config.Resolver, 0, 100),
 		args:      console.NewArgs().Parse(os.Args[1:]),
 		info: func() *env.AppInfo {
@@ -95,19 +95,19 @@ func (v *_app) ConfigData(data, ext string) {
 // Plugins setting the list of plugins to initialize
 func (v *_app) Plugins(args ...plugins.Plugin) {
 	for _, arg := range args {
-		reflectResolve(arg.Config, plugins.AllowedKindConfig, func(in interface{}) {
+		reflectResolve(arg.Config, plugins.AllowedKindConfig, func(in any) {
 			v.configs = append(v.configs, in)
 		})
-		reflectResolve(arg.Inject, plugins.AllowedKindInject, func(in interface{}) {
+		reflectResolve(arg.Inject, plugins.AllowedKindInject, func(in any) {
 			v.plugins = append(v.plugins, in)
 		})
-		reflectResolve(arg.Resolve, plugins.AllowedKindResolve, func(in interface{}) {
+		reflectResolve(arg.Resolve, plugins.AllowedKindResolve, func(in any) {
 			v.plugins = append(v.plugins, in)
 		})
 	}
 }
 
-func (v *_app) Command(name string, call interface{}) {
+func (v *_app) Command(name string, call any) {
 	v.commands[name] = call
 }
 
@@ -146,7 +146,7 @@ func (v *_app) Run() {
 	apps.Run()
 }
 
-func reflectResolve(arg interface{}, k plugins.AllowedKind, call func(interface{})) {
+func reflectResolve(arg any, k plugins.AllowedKind, call func(any)) {
 	if arg == nil {
 		return
 	}

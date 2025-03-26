@@ -3,13 +3,18 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package env
+package models
 
-import "os"
+//go:generate easyjson
 
-func Get(key, def string) string {
-	if v, ok := os.LookupEnv(key); !ok {
-		return v
-	}
-	return def
+//easyjson:json
+type Users []User
+
+//easyjson:json
+type User struct {
+	Id   int    `json:"id"`
+	Name string `json:"name"`
 }
+
+//easyjson:json
+type IntArray []int

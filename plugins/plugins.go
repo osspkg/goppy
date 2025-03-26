@@ -8,15 +8,15 @@ package plugins
 type (
 	// Plugin plugin structure
 	Plugin struct {
-		Config  interface{}
-		Inject  interface{}
-		Resolve interface{}
+		Config  any
+		Inject  any
+		Resolve any
 	}
 
 	Plugins []Plugin
 )
 
-func (p Plugins) Inject(list ...interface{}) Plugins {
+func (p Plugins) Inject(list ...any) Plugins {
 	for _, vv := range list {
 		switch v := vv.(type) {
 		case Plugins:
@@ -30,7 +30,7 @@ func (p Plugins) Inject(list ...interface{}) Plugins {
 	return p
 }
 
-func Inject(list ...interface{}) Plugins {
+func Inject(list ...any) Plugins {
 	return Plugins{}.Inject(list...)
 }
 

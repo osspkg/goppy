@@ -1,0 +1,44 @@
+###
+POST http://localhost:10000/rpc
+
+[
+    {
+        "id":"1",
+        "method": "base.user1",
+        "params": [1]
+    },
+    {
+        "id":"2",
+        "method": "base.user",
+        "params": [1, 2]
+    },
+    {
+        "id":"3",
+        "method": "base.users",
+        "params": [1, 2]
+    }
+]
+
+###
+POST http://localhost:10000/rpc
+
+{
+    "id":"1",
+    "method": "base.user",
+    "params": [1]
+}
+
+###
+POST http://localhost:10000/rpc
+
+{
+    "id":"1",
+    "method": "base.proxy",
+    "params": [1,2,3]
+}
+
+
+###
+POST http://localhost:10000/rpc
+
+1223

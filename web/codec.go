@@ -20,7 +20,7 @@ import (
 	"go.osspkg.com/ioutils"
 )
 
-func JSONEncode(w http.ResponseWriter, obj interface{}) {
+func JSONEncode(w http.ResponseWriter, obj any) {
 	b, err := json.Marshal(obj)
 	if err != nil {
 		ErrorEncode(w, err)
@@ -31,7 +31,7 @@ func JSONEncode(w http.ResponseWriter, obj interface{}) {
 	w.Write(b) // nolint: errcheck
 }
 
-func JSONDecode(r *http.Request, obj interface{}) error {
+func JSONDecode(r *http.Request, obj any) error {
 	b, err := ioutils.ReadAll(r.Body)
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func JSONDecode(r *http.Request, obj interface{}) error {
 	return json.Unmarshal(b, obj)
 }
 
-func XMLEncode(w http.ResponseWriter, obj interface{}) {
+func XMLEncode(w http.ResponseWriter, obj any) {
 	b, err := xml.Marshal(obj)
 	if err != nil {
 		ErrorEncode(w, err)
@@ -50,7 +50,7 @@ func XMLEncode(w http.ResponseWriter, obj interface{}) {
 	w.Write(b) // nolint: errcheck
 }
 
-func XMLDecode(r *http.Request, obj interface{}) error {
+func XMLDecode(r *http.Request, obj any) error {
 	b, err := ioutils.ReadAll(r.Body)
 	if err != nil {
 		return err
@@ -77,7 +77,7 @@ func RawEncode(w http.ResponseWriter, obj []byte) {
 	w.Write(obj) // nolint: errcheck
 }
 
-func FormDataDecode(r *http.Request, obj interface{}) error {
+func FormDataDecode(r *http.Request, obj any) error {
 	if err := r.ParseMultipartForm(32 << 20); err != nil {
 		return fmt.Errorf("parse multipart form: %w", err)
 	}
@@ -130,6 +130,15 @@ func (v *formData) build() (err error) {
 			value, err = v.formValue(tagName, func(s string) (any, error) {
 				return &s, nil
 			})
+		case "[]byte":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				return []byte(s), nil
+			})
+		case "*[]byte":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				b := []byte(s)
+				return &b, nil
+			})
 		case "int":
 			value, err = v.formValue(tagName, func(s string) (any, error) {
 				return strconv.Atoi(s)
@@ -137,6 +146,42 @@ func (v *formData) build() (err error) {
 		case "*int":
 			value, err = v.formValue(tagName, func(s string) (any, error) {
 				iv, er := strconv.Atoi(s)
+				if er != nil {
+					return nil, er
+				}
+				return &iv, nil
+			})
+		case "int64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				return strconv.ParseInt(s, 10, 64)
+			})
+		case "*int64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				iv, er := strconv.ParseInt(s, 10, 64)
+				if er != nil {
+					return nil, er
+				}
+				return &iv, nil
+			})
+		case "uint64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				return strconv.ParseUint(s, 10, 64)
+			})
+		case "*uint64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				iv, er := strconv.ParseUint(s, 10, 64)
+				if er != nil {
+					return nil, er
+				}
+				return &iv, nil
+			})
+		case "float64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				return strconv.ParseFloat(s, 64)
+			})
+		case "*float64":
+			value, err = v.formValue(tagName, func(s string) (any, error) {
+				iv, er := strconv.ParseFloat(s, 64)
 				if er != nil {
 					return nil, er
 				}

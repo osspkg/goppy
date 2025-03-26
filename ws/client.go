@@ -194,7 +194,7 @@ func (v *_client) CloseAll() {
 	v.wg.Wait()
 }
 
-func (v *_client) BroadcastEvent(eid event.Id, m interface{}) (err error) {
+func (v *_client) BroadcastEvent(eid event.Id, m any) (err error) {
 	event.New(func(ev event.Event) {
 		ev.WithID(eid)
 		if err = ev.Encode(m); err != nil {
@@ -218,7 +218,7 @@ func (v *_client) BroadcastEvent(eid event.Id, m interface{}) (err error) {
 	return
 }
 
-func (v *_client) SendEvent(eid event.Id, m interface{}, cids ...string) (err error) {
+func (v *_client) SendEvent(eid event.Id, m any, cids ...string) (err error) {
 	event.New(func(ev event.Event) {
 		ev.WithID(eid)
 		if err = ev.Encode(m); err != nil {

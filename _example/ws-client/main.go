@@ -48,7 +48,7 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Ticker(call func(event.Id, interface{}) error) {
+func (v *Controller) Ticker(call func(event.Id, any) error) {
 	t := time.NewTicker(time.Second * 3)
 	defer t.Stop()
 

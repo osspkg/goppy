@@ -47,3 +47,39 @@ func RecoveryMiddleware() func(
 		}
 	}
 }
+
+func HeadersContextWrapMiddleware(args ...string) func(
+	func(http.ResponseWriter, *http.Request),
+) func(http.ResponseWriter, *http.Request) {
+	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
+			for _, arg := range args {
+				val := r.Header.Get(arg)
+				if len(val) == 0 {
+					continue
+				}
+				r = r.WithContext(SetContext(r.Context(), arg, val))
+			}
+
+			call(w, r)
+		}
+	}
+}
+
+func CookiesContextWrapMiddleware(args ...string) func(
+	func(http.ResponseWriter, *http.Request),
+) func(http.ResponseWriter, *http.Request) {
+	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
+			for _, arg := range args {
+				val, err := r.Cookie(arg)
+				if err != nil {
+					continue
+				}
+				r = r.WithContext(SetContext(r.Context(), arg, val.Value))
+			}
+
+			call(w, r)
+		}
+	}
+}

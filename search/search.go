@@ -29,13 +29,13 @@ type (
 		Generate() error
 		Open() error
 		Close() error
-		Add(name, id string, data interface{}) error
+		Add(name, id string, data any) error
 		Delete(name, id string) error
-		Search(ctx context.Context, name, query string, highlight bool, result interface{}) error
+		Search(ctx context.Context, name, query string, highlight bool, result any) error
 	}
 
 	serviceSearch struct {
-		conf    ConfigItem
+		conf    Config
 		indexes map[string]*indexItem
 	}
 
@@ -46,7 +46,7 @@ type (
 	}
 )
 
-func NewSearch(c ConfigItem) Searcher {
+func NewSearch(c Config) Searcher {
 	return &serviceSearch{
 		conf:    c,
 		indexes: make(map[string]*indexItem, len(c.Indexes)),
@@ -187,7 +187,7 @@ func (v *serviceSearch) Close() error {
 	return nil
 }
 
-func (v *serviceSearch) Add(name, id string, data interface{}) error {
+func (v *serviceSearch) Add(name, id string, data any) error {
 	indx, ok := v.indexes[name]
 	if !ok {
 		return fmt.Errorf("index not found: %s", name)
@@ -204,7 +204,7 @@ func (v *serviceSearch) Delete(name, id string) error {
 }
 
 // nolint: gocyclo
-func (v *serviceSearch) Search(ctx context.Context, name, query string, highlight bool, result interface{}) error {
+func (v *serviceSearch) Search(ctx context.Context, name, query string, highlight bool, result any) error {
 	indx, ok := v.indexes[name]
 	if !ok {
 		return fmt.Errorf("index not found: %s", name)

@@ -9,14 +9,14 @@ import (
 	"go.osspkg.com/goppy/v2/plugins"
 )
 
-// ConfigHttpPool config to initialize HTTP service
-type ConfigHttpPool struct {
-	Config []Config `yaml:"http"`
+// ConfigGroup config to initialize HTTP service
+type ConfigGroup struct {
+	HTTP []Config `yaml:"http"`
 }
 
-func (v *ConfigHttpPool) Default() {
-	if v.Config == nil {
-		v.Config = append(v.Config, Config{
+func (v *ConfigGroup) Default() {
+	if v.HTTP == nil {
+		v.HTTP = append(v.HTTP, Config{
 			Tag:  "main",
 			Addr: "0.0.0.0:8080",
 		})
@@ -26,9 +26,9 @@ func (v *ConfigHttpPool) Default() {
 // WithServer launch of HTTP service with default Router
 func WithServer() plugins.Plugin {
 	return plugins.Plugin{
-		Config: &ConfigHttpPool{},
-		Inject: func(conf *ConfigHttpPool) RouterPool {
-			return newRouteProvider(conf.Config)
+		Config: &ConfigGroup{},
+		Inject: func(conf *ConfigGroup) RouterPool {
+			return newRouteProvider(conf.HTTP)
 		},
 	}
 }

@@ -173,7 +173,7 @@ func (v *connect) AppendMessage(b []byte) {
 	return
 }
 
-func (v *connect) Encode(eid event.Id, in interface{}) {
+func (v *connect) Encode(eid event.Id, in any) {
 	event.New(func(ev event.Event) {
 		ev.WithID(eid)
 		if err := ev.Encode(in); err != nil {

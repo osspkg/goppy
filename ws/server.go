@@ -106,7 +106,7 @@ func (v *_server) callGuard(cid string, head http.Header) (err error) {
 	return
 }
 
-func (v *_server) BroadcastEvent(eid event.Id, m interface{}) (err error) {
+func (v *_server) BroadcastEvent(eid event.Id, m any) (err error) {
 	event.New(func(ev event.Event) {
 		ev.WithID(eid)
 		if err = ev.Encode(m); err != nil {
@@ -130,7 +130,7 @@ func (v *_server) BroadcastEvent(eid event.Id, m interface{}) (err error) {
 	return
 }
 
-func (v *_server) SendEvent(eid event.Id, m interface{}, cids ...string) (err error) {
+func (v *_server) SendEvent(eid event.Id, m any, cids ...string) (err error) {
 	event.New(func(ev event.Event) {
 		ev.WithID(eid)
 		if err = ev.Encode(m); err != nil {

@@ -24,8 +24,8 @@ import (
 
 type JWT interface {
 	GuardMiddleware() web.Middleware
-	Sign(payload interface{}, ttl time.Duration) (string, error)
-	SignCookie(ctx web.Context, payload interface{}, ttl time.Duration) error
+	Sign(payload any, ttl time.Duration) (string, error)
+	SignCookie(ctx web.Context, payload any, ttl time.Duration) error
 }
 
 func New(c Config) JWT {
@@ -85,7 +85,7 @@ func (v *service) getKPById(id string) (*keyPool, error) {
 	return nil, fmt.Errorf("jwt key not found")
 }
 
-func (v *service) signPayload(payload interface{}, ttl time.Duration) (string, error) {
+func (v *service) signPayload(payload any, ttl time.Duration) (string, error) {
 	kp, err := v.randomKP()
 	if err != nil {
 		return "", err
@@ -127,7 +127,7 @@ func (v *service) signPayload(payload interface{}, ttl time.Duration) (string, e
 	return result.String(), nil
 }
 
-func (v *service) verifyPayload(token string, payload interface{}) (*Header, error) {
+func (v *service) verifyPayload(token string, payload any) (*Header, error) {
 	data := strings.Split(token, ".")
 	if len(data) != 3 {
 		return nil, fmt.Errorf("invalid jwt format")
@@ -182,11 +182,11 @@ func (v *service) verifyPayload(token string, payload interface{}) (*Header, err
 	return header, nil
 }
 
-func (v *service) Sign(payload interface{}, ttl time.Duration) (string, error) {
+func (v *service) Sign(payload any, ttl time.Duration) (string, error) {
 	return v.signPayload(payload, ttl)
 }
 
-func (v *service) SignCookie(ctx web.Context, payload interface{}, ttl time.Duration) error {
+func (v *service) SignCookie(ctx web.Context, payload any, ttl time.Duration) error {
 	tok, err := v.signPayload(payload, ttl)
 	if err != nil {
 		return err

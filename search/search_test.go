@@ -31,10 +31,10 @@ type TestDataSearch struct {
 }
 
 func TestUnit_NewSearch(t *testing.T) {
-	conf := search.ConfigItem{
+	conf := search.Config{
 		Folder: "/tmp/TestUnit_NewSearch",
-		Indexes: []search.ConfigIndex{
-			{Name: "demo", Fields: []search.ConfigIndexField{
+		Indexes: []search.Index{
+			{Name: "demo", Fields: []search.IndexField{
 				{Name: "Line", Type: "text"},
 				{Name: "Data", Type: "text"},
 				{Name: "CreatedAt", Type: "date"},

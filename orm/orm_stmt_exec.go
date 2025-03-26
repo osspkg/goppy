@@ -15,16 +15,16 @@ var poolExec = pool.New[*exec](func() *exec { return &exec{} })
 
 type exec struct {
 	Q string
-	P [][]interface{}
+	P [][]any
 	B func(rowsAffected, lastInsertId int64) error
 }
 
-func (v *exec) SQL(query string, args ...interface{}) {
+func (v *exec) SQL(query string, args ...any) {
 	v.Q = query
 	v.Params(args...)
 }
 
-func (v *exec) Params(args ...interface{}) {
+func (v *exec) Params(args ...any) {
 	if len(args) > 0 {
 		v.P = append(v.P, args)
 	}
@@ -40,8 +40,8 @@ func (v *exec) Reset() {
 type (
 	// Executor interface for generate execute query
 	Executor interface {
-		SQL(query string, args ...interface{})
-		Params(args ...interface{})
+		SQL(query string, args ...any)
+		Params(args ...any)
 		Bind(call func(rowsAffected, lastInsertId int64) error)
 	}
 )
@@ -59,7 +59,7 @@ func callExecContext(ctx context.Context, db dbGetter, call func(q Executor), di
 	call(q)
 
 	if len(q.P) == 0 {
-		q.P = append(q.P, []interface{}{})
+		q.P = append(q.P, []any{})
 	}
 	stmt, err := db.PrepareContext(ctx, q.Q)
 	if err != nil {
