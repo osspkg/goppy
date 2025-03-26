@@ -55,9 +55,7 @@ func Command() console.CommandGetter {
 					console.Fatalf("unknown generate type: %s", s)
 				}
 
-				cmds := make([]string, 0, 2)
-				cmds = append(cmds, "gofmt -w -s .", "goimports -l -w .")
-				global.ExecPack(cmds...)
+				global.ExecPack("gofmt -w -s .", "goimports -l -w .")
 			}
 
 		})
