@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"go.osspkg.com/console"
+	"go.osspkg.com/goppy/v2/internal/global"
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v2/internal/gen/ormbuilder/common"
@@ -54,6 +55,9 @@ func Command() console.CommandGetter {
 					console.Fatalf("unknown generate type: %s", s)
 				}
 
+				cmds := make([]string, 0, 2)
+				cmds = append(cmds, "gofmt -w -s .", "goimports -l -w .")
+				global.ExecPack(cmds...)
 			}
 
 		})
