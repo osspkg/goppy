@@ -178,6 +178,14 @@ func newRepository{{.FileName|title}}(orm orm.ORM) *Repository{{.FileName|title}
 		wtag: "{{.WTag}}",
 	}
 }
+
+func (v *Repository{{.FileName|title}}) Tag{{.RTag|title}}() orm.Stmt {
+	return v.orm.Tag(v.rtag)
+}
+
+func (v *Repository{{.FileName|title}}) Tag{{.WTag|title}}() orm.Stmt {
+	return v.orm.Tag(v.wtag)
+}
 `
 
 const tmplCRUD = `
