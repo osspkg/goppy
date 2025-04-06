@@ -144,7 +144,10 @@ func CmdGoSite() console.CommandGetter {
 				for _, link := range links {
 					linkName := strings.TrimPrefix(link, domain)
 					linkName = strings.Trim(linkName, "/")
-					linksHtml += "\n<li><a href=\"//" + link + "\">" + linkName + "</a></li>"
+					linksHtml += "\n<div class=\"col f-size-lg\">" +
+						"<a class=\"mr-1 w-full btn btn-warning t-align-center" +
+						"\" href=\"//" + link + "\">" + linkName + "</a>" +
+						"</div>"
 				}
 
 				repl := strings.NewReplacer(
@@ -172,31 +175,36 @@ const (
     <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1.0, initial-scale=1.0">
     <meta name="go-import" content="{%root%} git {%repo%}">
     <meta name="go-source" content="{%root%} {%repo%} {%repo%}/tree/{%head%}{/dir} {%repo%}/tree/{%head%}{/dir}/{file}#L{line}">
+    <link href="https://cdn.osspkg.com/onega-ui/icons/icons.css" rel="stylesheet">
+    <link href="https://cdn.osspkg.com/onega-ui/styles/styles.css" rel="stylesheet">
+    <link href="https://cdn.osspkg.com/onega-ui/styles/themes/rainbow-soft.css" rel="stylesheet">
 </head>
 
-<body>
-    <aside>
-        <a href="/">Back Home</a>
+<body data-ong-theme="rainbow-soft">
+    <aside class="area">
+        <a class="btn btn-danger" href="/">Back Home</a>
     </aside>
-    <hr>
-    <div>
-        <h1>{%module%}</h1>
+
+    <div class="area-fluid bg-light p-2 t-align-center">
+        <h1 class="tc-danger t-wrap">{%module%}</h1>
     </div>
 
-    <div>
-        <b>Install command:</b>
-        <pre>go get {%module%}</pre>
-    </div>
-
-    <div>
-        <b>Import in source code:</b>
-        <pre>import "{%module%}"</pre>
-    </div>
-        
-    <div>
-        <b>Repository:</b>
-        <a href="{%repo%}">{%repo%}</a>
-    </div>
+	<aside class="area">
+		<div class="mt-3">
+			<h3>Install command:</h3>
+			<pre class="bq-info t-wrap">go get {%module%}</pre>
+		</div>
+	
+		<div class="mt-3">
+			<h3>Import in source code:</h3>
+			<pre class="bq-info t-wrap">import "{%module%}"</pre>
+		</div>
+			
+		<div class="mt-3">
+			<h3>Repository:</h3>
+			<a class="btn btn-light" href="{%repo%}">{%repo%}</a>
+		</div>
+	</aside>
 </body>
 
 </html>
@@ -209,17 +217,17 @@ const (
     <title>{%domain%}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, height=device-height, minimum-scale=1.0, initial-scale=1.0">
+    <link href="https://cdn.osspkg.com/onega-ui/icons/icons.css" rel="stylesheet">
+    <link href="https://cdn.osspkg.com/onega-ui/styles/styles.css" rel="stylesheet">
+    <link href="https://cdn.osspkg.com/onega-ui/styles/themes/rainbow-soft.css" rel="stylesheet">
 </head>
 
-<body>
-    <div>
-        <h1>{%domain%}</h1>
+<body data-ong-theme="rainbow-soft">
+    <div class="area-fluid bg-light p-2 t-align-center">
+        <h1 class="tc-danger t-wrap">{%domain%}</h1>
     </div>
-	<hr>
-    <aside>
-        <ul>
-            {%links%}
-        </ul>
+    <aside class="area">
+		<div class="row">{%links%}</div>
     </aside>
 </body>
 
