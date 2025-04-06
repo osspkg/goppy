@@ -9,6 +9,6 @@ type Option func(o *Migrate)
 
 func UseMigration(m []Migration) Option {
 	return func(o *Migrate) {
-		o.FS = newMemFS(m)
+		o.FS = NewInMemoryFS(m)
 	}
 }
