@@ -45,12 +45,13 @@ func New(c common.Config) error {
 
 		ast.Walk(v, f)
 
-		fmt.Println("IMPORT:", v.Imports.Keys())
+		//fmt.Println("IMPORT:", v.Imports.Keys())
 		for _, model := range v.Models {
-			fmt.Println("MODEL:", model.Name, model.Table, model.Attr.All())
-			for _, field := range model.Fields {
-				fmt.Println(" --- ", field.Name(), field.Col(), field.RawType(), field.Type(), field.Attr().All())
-			}
+			fmt.Println("MODEL:", model.Name, "TABLE:", model.Table)
+			//fmt.Println("MODEL:", model.Name, model.Table, model.Attr.All())
+			//for _, field := range model.Fields {
+			//	fmt.Println(" --- ", field.Name(), field.Col(), field.RawType(), field.Type(), field.Attr().All())
+			//}
 		}
 
 		if err = sql.Generate(c, v); err != nil {

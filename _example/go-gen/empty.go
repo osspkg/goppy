@@ -3,12 +3,8 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package orm
+package go_gen
 
-type Option func(o *Migrate)
-
-func UseMigration(m []Migration) Option {
-	return func(o *Migrate) {
-		o.FS = NewInMemoryFS(m)
-	}
+type Empty struct {
+	A string
 }

@@ -28,7 +28,15 @@ func newRepositoryModel(orm orm.ORM) *RepositoryModel {
 	}
 }
 
-const sqlUsersReadUserAll = `SELECT "name"
+func (v *RepositoryModel) TagSlave() orm.Stmt {
+	return v.orm.Tag(v.rtag)
+}
+
+func (v *RepositoryModel) TagMaster() orm.Stmt {
+	return v.orm.Tag(v.wtag)
+}
+
+const sqlUsersReadUserAll = `SELECT "name", "value"
 			 FROM "users";
 `
 
@@ -39,7 +47,7 @@ func (v *RepositoryModel) ReadUserAll(ctx context.Context) ([]User,
 		q.SQL(sqlUsersReadUserAll)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name); e != nil {
+			if e := bind.Scan(&m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -52,18 +60,20 @@ func (v *RepositoryModel) ReadUserAll(ctx context.Context) ([]User,
 	return result, nil
 }
 
-const sqlUsersReadUserById = `SELECT "name"
+const sqlUsersReadUserById = `SELECT "name", "value"
 			 FROM "users"
 			 WHERE "id" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadUserById(ctx context.Context, args ...int64) ([]User, error) {
+func (v *RepositoryModel) ReadUserById(
+	ctx context.Context, args ...int64,
+) ([]User, error) {
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_id", func(q orm.Querier) {
 		q.SQL(sqlUsersReadUserById, args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name); e != nil {
+			if e := bind.Scan(&m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -76,18 +86,46 @@ func (v *RepositoryModel) ReadUserById(ctx context.Context, args ...int64) ([]Us
 	return result, nil
 }
 
-const sqlUsersReadUserByName = `SELECT "name"
+const sqlUsersReadUserByName = `SELECT "name", "value"
 			 FROM "users"
 			 WHERE "name" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadUserByName(ctx context.Context, args ...string) ([]User, error) {
+func (v *RepositoryModel) ReadUserByName(
+	ctx context.Context, args ...string,
+) ([]User, error) {
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_name", func(q orm.Querier) {
 		q.SQL(sqlUsersReadUserByName, args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name); e != nil {
+			if e := bind.Scan(&m.Name, &m.Value); e != nil {
+				return e
+			}
+			result = append(result, m)
+			return nil
+		})
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+const sqlUsersReadUserByValue = `SELECT "name", "value"
+			 FROM "users"
+			 WHERE "value" = ANY($1);
+`
+
+func (v *RepositoryModel) ReadUserByValue(
+	ctx context.Context, args ...string,
+) ([]User, error) {
+	result := make([]User, 0, 2)
+	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_value", func(q orm.Querier) {
+		q.SQL(sqlUsersReadUserByValue, args)
+		q.Bind(func(bind orm.Scanner) error {
+			m := User{}
+			if e := bind.Scan(&m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -175,7 +213,9 @@ const sqlMetaReadMetaById = `SELECT "id", "user_id", "roles", "fail", "created_a
 			 WHERE "id" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadMetaById(ctx context.Context, args ...uuid.UUID) ([]Meta, error) {
+func (v *RepositoryModel) ReadMetaById(
+	ctx context.Context, args ...uuid.UUID,
+) ([]Meta, error) {
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_id", func(q orm.Querier) {
 		q.SQL(sqlMetaReadMetaById, args)
@@ -199,7 +239,9 @@ const sqlMetaReadMetaByUserId = `SELECT "id", "user_id", "roles", "fail", "creat
 			 WHERE "user_id" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadMetaByUserId(ctx context.Context, args ...int64) ([]Meta, error) {
+func (v *RepositoryModel) ReadMetaByUserId(
+	ctx context.Context, args ...int64,
+) ([]Meta, error) {
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_user_id", func(q orm.Querier) {
 		q.SQL(sqlMetaReadMetaByUserId, args)
@@ -223,7 +265,9 @@ const sqlMetaReadMetaByRoles = `SELECT "id", "user_id", "roles", "fail", "create
 			 WHERE "roles" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadMetaByRoles(ctx context.Context, args ...string) ([]Meta, error) {
+func (v *RepositoryModel) ReadMetaByRoles(
+	ctx context.Context, args ...string,
+) ([]Meta, error) {
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_roles", func(q orm.Querier) {
 		q.SQL(sqlMetaReadMetaByRoles, args)
@@ -247,7 +291,9 @@ const sqlMetaReadMetaByFail = `SELECT "id", "user_id", "roles", "fail", "created
 			 WHERE "fail" = ANY($1);
 `
 
-func (v *RepositoryModel) ReadMetaByFail(ctx context.Context, args ...bool) ([]Meta, error) {
+func (v *RepositoryModel) ReadMetaByFail(
+	ctx context.Context, args ...bool,
+) ([]Meta, error) {
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_fail", func(q orm.Querier) {
 		q.SQL(sqlMetaReadMetaByFail, args)

@@ -13,7 +13,7 @@ import (
 )
 
 func TestUnit_newImMemoryFS(t *testing.T) {
-	m := newMemFS([]Migration{
+	m := NewInMemoryFS([]Migration{
 		{
 			Tags: []string{"aaa"},
 			Data: map[string]string{
@@ -58,7 +58,7 @@ func TestUnit_newOSFS(t *testing.T) {
 	casecheck.NoError(t, os.WriteFile("/tmp/test-migr/001_bbb.sql", []byte("sql2"), 0755))
 	casecheck.NoError(t, os.WriteFile("/tmp/test-migr/011_bbb.sql", []byte("sql3"), 0755))
 
-	m := newOSFS([]ConfigMigrateItem{
+	m := NewOperationSystemFS([]ConfigMigrateItem{
 		{
 			Tags: "aaa,bbb",
 			Dir:  "/tmp/test-migr",

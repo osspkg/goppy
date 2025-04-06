@@ -18,7 +18,7 @@ func WithMigration(ms ...Migration) plugins.Plugin {
 			Inject: func(ctx xc.Context, o ORM) error {
 				m := &Migrate{
 					Conn: o,
-					FS:   newMemFS(ms),
+					FS:   NewInMemoryFS(ms),
 				}
 				go dialectOnRegistered(func(dialect string) {
 					if err := m.Run(ctx.Context(), dialect); err != nil {
@@ -36,7 +36,7 @@ func WithMigration(ms ...Migration) plugins.Plugin {
 		Inject: func(ctx xc.Context, c *ConfigMigrate, o ORM) error {
 			m := &Migrate{
 				Conn: o,
-				FS:   newOSFS(c.List),
+				FS:   NewOperationSystemFS(c.List),
 			}
 			go dialectOnRegistered(func(dialect string) {
 				if err := m.Run(ctx.Context(), dialect); err != nil {

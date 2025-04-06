@@ -14,6 +14,7 @@ import (
 var poolExec = pool.New[*exec](func() *exec { return &exec{} })
 
 type exec struct {
+	D string
 	Q string
 	P [][]any
 	B func(rowsAffected, lastInsertId int64) error
@@ -25,16 +26,24 @@ func (v *exec) SQL(query string, args ...any) {
 }
 
 func (v *exec) Params(args ...any) {
-	if len(args) > 0 {
+	if len(args) == 0 {
+		return
+	}
+
+	switch v.D {
+	case PgSQLDialect:
+		v.P = append(v.P, pgCastTypes(args))
+	default:
 		v.P = append(v.P, args)
 	}
 }
+
 func (v *exec) Bind(call func(rowsAffected, lastInsertId int64) error) {
 	v.B = call
 }
 
 func (v *exec) Reset() {
-	v.Q, v.P, v.B = "", v.P[:0], nil
+	v.Q, v.P, v.B, v.D = "", v.P[:0], nil, ""
 }
 
 type (
@@ -54,7 +63,9 @@ func (v *_stmt) Exec(ctx context.Context, name string, call func(q Executor)) er
 
 func callExecContext(ctx context.Context, db dbGetter, call func(q Executor), dialect string) error {
 	q := poolExec.Get()
-	defer poolExec.Put(q)
+	defer func() { poolExec.Put(q) }()
+
+	q.D = dialect
 
 	call(q)
 

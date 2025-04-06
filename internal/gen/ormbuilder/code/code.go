@@ -72,6 +72,10 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 		return
 	}
 
+	if len(v.Models) == 0 {
+		return
+	}
+
 	for _, m := range v.Models {
 
 		crud := modelCRUD{
@@ -173,6 +177,14 @@ func newRepository{{.FileName|title}}(orm orm.ORM) *Repository{{.FileName|title}
 		rtag: "{{.RTag}}",
 		wtag: "{{.WTag}}",
 	}
+}
+
+func (v *Repository{{.FileName|title}}) Tag{{.RTag|title}}() orm.Stmt {
+	return v.orm.Tag(v.rtag)
+}
+
+func (v *Repository{{.FileName|title}}) Tag{{.WTag|title}}() orm.Stmt {
+	return v.orm.Tag(v.wtag)
 }
 `
 

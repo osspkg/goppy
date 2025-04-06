@@ -38,7 +38,7 @@ type (
 	}
 )
 
-func newMemFS(c []Migration) *memFS {
+func NewInMemoryFS(c []Migration) MFS {
 	return &memFS{
 		conf: c,
 		curr: -1,
@@ -92,7 +92,7 @@ type osFS struct {
 	curr int
 }
 
-func newOSFS(c []ConfigMigrateItem) *osFS {
+func NewOperationSystemFS(c []ConfigMigrateItem) MFS {
 	return &osFS{
 		conf: c,
 		curr: -1,
