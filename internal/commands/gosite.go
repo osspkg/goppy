@@ -51,6 +51,8 @@ func CmdGoSite() console.CommandGetter {
 			tempdir := fs.CurrentDir() + "/.tmp"
 			defer os.RemoveAll(tempdir) // nolint: errcheck
 			for _, config := range configs {
+				console.Infof("Repo: %s", config)
+
 				os.RemoveAll(tempdir) // nolint: errcheck
 				console.FatalIfErr(os.MkdirAll(tempdir, 0744), "Create temp dir")
 
