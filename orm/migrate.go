@@ -9,6 +9,8 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -114,14 +116,20 @@ func (v *Migrate) executor(ctx context.Context, dialect string,
 					continue
 				}
 				logx.Info("New DB migration", "dialect", dialect, "tag", tag, "file", filePath)
-				b, err := v.FS.FileData(filePath)
+				sqldata, err := v.FS.FileData(filePath)
 				if err != nil {
 					return errors.Wrapf(err, "read migration file [%s]", name)
 				}
-				if err = stmt.Exec(ctx, "new migration", func(q Executor) {
-					q.SQL(b)
-				}); err != nil {
-					return errors.Wrapf(err, "exec migration file [%s]", name)
+				for _, subsql := range strings.Split(sqldata, ";") {
+					subsql = removeSQLComment(subsql)
+					if len(subsql) == 0 {
+						continue
+					}
+					if err = stmt.Exec(ctx, "new migration", func(q Executor) {
+						q.SQL(subsql)
+					}); err != nil {
+						return errors.Wrapf(err, "exec migration file [%s], sql: `%s`", name, subsql)
+					}
 				}
 				if err = save(name, stmt, mig); err != nil {
 					return errors.Wrapf(err, "save migrated file [%s]", name)
@@ -131,6 +139,13 @@ func (v *Migrate) executor(ctx context.Context, dialect string,
 
 	}
 	return nil
+}
+
+var sqlCommentRex = regexp.MustCompile(`(?mU)--.*\n`)
+
+func removeSQLComment(s string) string {
+	s = sqlCommentRex.ReplaceAllString(s, "\n")
+	return strings.TrimSpace(s)
 }
 
 func migrateTableCheck(ctx context.Context, stmt Stmt, query string) bool {

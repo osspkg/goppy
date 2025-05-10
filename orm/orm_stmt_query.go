@@ -45,9 +45,9 @@ type scan struct {
 func (v *scan) Scan(args ...any) error {
 	switch v.D {
 	case PgSQLDialect:
-		return v.Scan(pgCastTypes(args)...)
+		return v.S.Scan(pgCastTypes(args)...)
 	default:
-		return v.Scan(args...)
+		return v.S.Scan(args...)
 	}
 }
 

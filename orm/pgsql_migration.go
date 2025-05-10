@@ -10,7 +10,7 @@ type _pgsqlMigrateTable struct {
 
 func (*_pgsqlMigrateTable) CreateTableQuery() []string {
 	return []string{
-		`CREATE SEQUENCE __migrations___id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;`,
+		`CREATE SEQUENCE IF NOT EXISTS "__migrations___id_seq" INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;`,
 		`CREATE TABLE "__migrations__" (
 			"id" integer DEFAULT nextval('__migrations___id_seq') NOT NULL,
 			"name" text NOT NULL,
