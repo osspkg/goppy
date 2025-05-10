@@ -112,7 +112,6 @@ func field(dialect dialects.Dialect, table string, v fields.TField) (query []str
 				query = append(query,
 					"DEFAULT",
 					"nextval('"+table+"_"+v.Col()+"_seq')",
-					"NOT NULL",
 				)
 				seq = append(seq,
 					"CREATE SEQUENCE IF NOT EXISTS",
