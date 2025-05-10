@@ -69,7 +69,7 @@ func (v *Server) validate() {
 	if _, ok := networkType[v.conf.Network]; !ok {
 		v.conf.Network = defaultNetwork
 	}
-	v.conf.Addr = address.CheckHostPort(v.conf.Addr)
+	v.conf.Addr = address.ResolveIPPort(v.conf.Addr)
 }
 
 // Up start http server
