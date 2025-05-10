@@ -17,7 +17,7 @@ func NewSimpleZoneResolve(dns ...string) *ZoneResolve {
 	if len(dns) == 0 {
 		dns = append(dns, "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4")
 	}
-	ndns := address.Normalize("53", dns...)
+	ndns := address.FixIPPort("53", dns...)
 	return &ZoneResolve{dns: ndns}
 }
 
