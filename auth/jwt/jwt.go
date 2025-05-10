@@ -233,6 +233,7 @@ func (v *service) GuardMiddlewareWithCallback(
 	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			if before != nil && before(w, r) {
+				call(w, r)
 				return
 			}
 
