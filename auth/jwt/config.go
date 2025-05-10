@@ -29,8 +29,9 @@ type (
 	}
 
 	Option struct {
-		HeaderName bool   `yaml:"header_name"`
+		HeaderName string `yaml:"header_name"`
 		CookieName string `yaml:"cookie_name"`
+		SecureOnly bool   `yaml:"secure_only"`
 	}
 )
 
