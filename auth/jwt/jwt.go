@@ -24,8 +24,13 @@ import (
 
 type JWT interface {
 	GuardMiddleware() web.Middleware
+	GuardMiddlewareWithCallback(
+		before, after func(w http.ResponseWriter, r *http.Request) (broke bool),
+		fail func(w http.ResponseWriter, r *http.Request),
+	) web.Middleware
 	Sign(payload any, ttl time.Duration) (string, error)
 	SignCookie(ctx web.Context, payload any, ttl time.Duration) error
+	FlushCookie(ctx web.Context)
 }
 
 func New(c Config) JWT {
@@ -203,14 +208,39 @@ func (v *service) SignCookie(ctx web.Context, payload any, ttl time.Duration) er
 	return nil
 }
 
+func (v *service) FlushCookie(ctx web.Context) {
+	ctx.Cookie().Set(&http.Cookie{
+		Name:     v.config.Option.CookieName,
+		Value:    "",
+		Path:     "/",
+		Domain:   ctx.URL().Host,
+		Expires:  time.Now().Add(-3600 * time.Hour),
+		Secure:   true,
+		HttpOnly: true,
+	})
+}
+
 func (v *service) GuardMiddleware() web.Middleware {
+	return v.GuardMiddlewareWithCallback(nil, nil, func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "authorization required", http.StatusUnauthorized)
+	})
+}
+
+func (v *service) GuardMiddlewareWithCallback(
+	before, after func(w http.ResponseWriter, r *http.Request) (broke bool),
+	fail func(w http.ResponseWriter, r *http.Request),
+) web.Middleware {
 	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
+			if before != nil && before(w, r) {
+				return
+			}
+
 			ctx := r.Context()
 			val := ""
 
-			if v.config.Option.HeaderName {
-				val = r.Header.Get("Authorization")
+			if len(v.config.Option.HeaderName) > 0 {
+				val = r.Header.Get(v.config.Option.HeaderName)
 				if len(val) > 7 && strings.HasPrefix(val, "Bearer ") {
 					val = val[6:]
 				}
@@ -224,20 +254,24 @@ func (v *service) GuardMiddleware() web.Middleware {
 			}
 
 			if len(val) == 0 {
-				http.Error(w, "authorization required", http.StatusUnauthorized)
+				fail(w, r)
 				return
 			}
 
 			var raw json.RawMessage
 
 			if _, err := v.verifyPayload(val, &raw); err != nil {
-				http.Error(w, "authorization required", http.StatusUnauthorized)
+				fail(w, r)
 				return
 			}
 
-			ctx = setJWTPayloadContext(ctx, raw)
+			r = r.WithContext(setJWTPayloadContext(ctx, raw))
 
-			call(w, r.WithContext(ctx))
+			if after != nil && after(w, r) {
+				return
+			}
+
+			call(w, r)
 		}
 	}
 }
