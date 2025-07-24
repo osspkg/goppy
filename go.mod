@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/v2
 
-go 1.23.8
+go 1.23.10
 
 require (
 	github.com/blevesearch/bleve/v2 v2.5.2
