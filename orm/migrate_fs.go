@@ -58,10 +58,7 @@ func (o *memFS) Next() bool {
 		return false
 	}
 	o.curr++
-	if len(o.conf) <= o.curr {
-		return false
-	}
-	return true
+	return len(o.conf) > o.curr
 }
 
 func (o *memFS) Tags() []string {

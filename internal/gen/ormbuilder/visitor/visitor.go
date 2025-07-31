@@ -103,7 +103,7 @@ func (v *Visitor) astTypeSpec(node *ast.TypeSpec) {
 	model.Name = fields.ModelNameType(node.Name.String())
 
 	for _, doc := range node.Doc.List {
-		if strings.Index(doc.Text, tag) < 0 {
+		if !strings.Contains(doc.Text, tag) {
 			continue
 		}
 		v.parseComment(doc.Text, model.Attr)

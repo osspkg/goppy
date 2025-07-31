@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/v2
 
-go 1.23.10
+go 1.23.11
 
 require (
 	github.com/blevesearch/bleve/v2 v2.5.2
@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.0
-	github.com/mattn/go-sqlite3 v1.14.29
+	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/miekg/dns v1.1.67
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.22.0
@@ -23,7 +23,7 @@ require (
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.2.3
-	go.osspkg.com/ioutils v0.6.1
+	go.osspkg.com/ioutils v0.6.2
 	go.osspkg.com/logx v0.4.2
 	go.osspkg.com/network v0.6.0
 	go.osspkg.com/random v0.4.1
