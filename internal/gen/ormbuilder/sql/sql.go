@@ -93,6 +93,7 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 	return nil
 }
 
+//nolint:gocyclo
 func field(dialect dialects.Dialect, table string, v fields.TField) (query []string, seq []string) {
 	query = append(query, "\t", dialects.EscapeCol(dialect, v.Col()))
 

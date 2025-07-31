@@ -16,10 +16,8 @@ func WithORM() plugins.Plugin {
 		Inject: func(ctx xc.Context) ORM {
 			o := New(ctx.Context())
 			go func() {
-				select {
-				case <-ctx.Done():
-					o.Close()
-				}
+				<-ctx.Done()
+				o.Close()
 			}()
 			return o
 		},
