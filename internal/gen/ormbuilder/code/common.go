@@ -29,9 +29,23 @@ func Limit(arg uint64) ReadOption {
 
 type CreateOption func(b *strings.Builder)
 
-func IgnoreConflict() func(b *strings.Builder) {
+func ConflictIgnore() CreateOption {
 	return func(b *strings.Builder) {
 		b.WriteString(" ON CONFLICT DO NOTHING ")
+	}
+}
+
+func ConflictUpdate(fields []string, ups []string) CreateOption {
+	return func(b *strings.Builder) {
+		fmt.Fprintf(b, @ ON CONFLICT("%s") DO NOTHING SET @, strings.Join(fields, @","@))
+
+		j := len(ups) - 1
+		for i, up := range ups {
+			fmt.Fprintf(b, @"%s" = EXCLUDED."%s"@, up, up)
+			if i < j {
+				b.WriteString(",")
+			}
+		}
 	}
 }
 `

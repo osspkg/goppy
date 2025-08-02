@@ -163,9 +163,12 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 	bb := w.Bytes()
 	bb = bytes.ReplaceAll(bb, []byte("@"), []byte("`"))
 
+	cb := cw.Bytes()
+	cb = bytes.ReplaceAll(cb, []byte("@"), []byte("`"))
+
 	return errors.Wrap(
 		os.WriteFile(v.FilePath+"_orm.go", bb, 0755),
-		os.WriteFile("common_orm.go", cw.Bytes(), 0755),
+		os.WriteFile("common_orm.go", cb, 0755),
 	)
 }
 
