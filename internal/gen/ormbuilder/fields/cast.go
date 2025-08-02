@@ -5,18 +5,14 @@
 
 package fields
 
-type Number struct{ base }
-
+type BigInt struct{ base }
+type Int struct{ base }
+type SmallInt struct{ base }
 type Chars struct{ base }
-
 type UUID struct{ base }
-
 type Time struct{ base }
-
 type Bool struct{ base }
-
 type Real struct{ base }
-
 type JSONB struct{ base }
 
 func Create(rt string, t FieldType, c, n string) TField {
@@ -30,8 +26,12 @@ func Create(rt string, t FieldType, c, n string) TField {
 	}
 
 	switch rt {
-	case "int64", "int32", "int", "uint64", "uint32", "uint":
-		return Number{b}
+	case "int32", "uint32":
+		return Int{b}
+	case "int16", "uint16", "int8", "uint8":
+		return SmallInt{b}
+	case "int64", "int", "uint64", "uint":
+		return BigInt{b}
 	case "byte", "string":
 		return Chars{b}
 	case "uuid.UUID":

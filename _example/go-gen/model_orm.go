@@ -15,24 +15,24 @@ import (
 	"go.osspkg.com/goppy/v2/orm"
 )
 
-type RepositoryModel struct {
+type RepoModel struct {
 	orm        orm.ORM
 	rtag, wtag string
 }
 
-func newRepositoryModel(orm orm.ORM) *RepositoryModel {
-	return &RepositoryModel{
+func NewRepositoryModel(orm orm.ORM) *RepoModel {
+	return &RepoModel{
 		orm:  orm,
 		rtag: "slave",
 		wtag: "master",
 	}
 }
 
-func (v *RepositoryModel) TagSlave() orm.Stmt {
+func (v *RepoModel) TagSlave() orm.Stmt {
 	return v.orm.Tag(v.rtag)
 }
 
-func (v *RepositoryModel) TagMaster() orm.Stmt {
+func (v *RepoModel) TagMaster() orm.Stmt {
 	return v.orm.Tag(v.wtag)
 }
 
@@ -40,7 +40,7 @@ const sqlUsersReadUserAll = `SELECT "name", "value"
 			 FROM "users";
 `
 
-func (v *RepositoryModel) ReadUserAll(ctx context.Context) ([]User,
+func (v *RepoModel) ReadUserAll(ctx context.Context) ([]User,
 	error) {
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_all", func(q orm.Querier) {
@@ -62,15 +62,29 @@ func (v *RepositoryModel) ReadUserAll(ctx context.Context) ([]User,
 
 const sqlUsersReadUserById = `SELECT "name", "value"
 			 FROM "users"
-			 WHERE "id" = ANY($1);
+			 WHERE "id" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadUserById(
-	ctx context.Context, args ...int64,
+func (v *RepoModel) ReadUserById(
+	ctx context.Context, args []int64, opts ...ReadOption,
 ) ([]User, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlUsersReadUserById)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_id", func(q orm.Querier) {
-		q.SQL(sqlUsersReadUserById, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
 			if e := bind.Scan(&m.Name, &m.Value); e != nil {
@@ -88,15 +102,29 @@ func (v *RepositoryModel) ReadUserById(
 
 const sqlUsersReadUserByName = `SELECT "name", "value"
 			 FROM "users"
-			 WHERE "name" = ANY($1);
+			 WHERE "name" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadUserByName(
-	ctx context.Context, args ...string,
+func (v *RepoModel) ReadUserByName(
+	ctx context.Context, args []string, opts ...ReadOption,
 ) ([]User, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlUsersReadUserByName)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_name", func(q orm.Querier) {
-		q.SQL(sqlUsersReadUserByName, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
 			if e := bind.Scan(&m.Name, &m.Value); e != nil {
@@ -114,15 +142,29 @@ func (v *RepositoryModel) ReadUserByName(
 
 const sqlUsersReadUserByValue = `SELECT "name", "value"
 			 FROM "users"
-			 WHERE "value" = ANY($1);
+			 WHERE "value" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadUserByValue(
-	ctx context.Context, args ...string,
+func (v *RepoModel) ReadUserByValue(
+	ctx context.Context, args []string, opts ...ReadOption,
 ) ([]User, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlUsersReadUserByValue)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]User, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "users_read_by_value", func(q orm.Querier) {
-		q.SQL(sqlUsersReadUserByValue, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
 			if e := bind.Scan(&m.Name, &m.Value); e != nil {
@@ -138,24 +180,111 @@ func (v *RepositoryModel) ReadUserByValue(
 	return result, nil
 }
 
-const sqlMetaCreateMeta = `INSERT INTO "meta" ("id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") 
-			VALUES ($1, $2, $3, $4, $5, $6, $7) 
-			RETURNING ("id");
+const sqlUsersCountUserById = `SELECT COUNT(*) 
+			 FROM "users"
+			 WHERE "id" = ANY($1);
 `
 
-func (v *RepositoryModel) CreateMeta(ctx context.Context, m *Meta) error {
-	m.Id = uuid.New()
-	m.CreatedAt = time.Now()
-	m.UpdatedAt = time.Now()
+func (v *RepoModel) CountUserById(
+	ctx context.Context, args []int64,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
 
-	return v.orm.Tag(v.wtag).Query(ctx, "meta_create", func(q orm.Querier) {
-		q.SQL(
-			sqlMetaCreateMeta,
-			m.Id, m.UserId, m.Roles, m.Fail, m.CreatedAt, m.UpdatedAt, m.DeletedAt,
-		)
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "users_count_by_id", func(q orm.Querier) {
+		q.SQL(sqlUsersCountUserById, args)
 		q.Bind(func(bind orm.Scanner) error {
-			return bind.Scan(&m.Id)
+			return bind.Scan(&count)
 		})
+	})
+
+	return count, err
+}
+
+const sqlUsersCountUserByName = `SELECT COUNT(*) 
+			 FROM "users"
+			 WHERE "name" = ANY($1);
+`
+
+func (v *RepoModel) CountUserByName(
+	ctx context.Context, args []string,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "users_count_by_name", func(q orm.Querier) {
+		q.SQL(sqlUsersCountUserByName, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
+}
+
+const sqlUsersCountUserByValue = `SELECT COUNT(*) 
+			 FROM "users"
+			 WHERE "value" = ANY($1);
+`
+
+func (v *RepoModel) CountUserByValue(
+	ctx context.Context, args []string,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "users_count_by_value", func(q orm.Querier) {
+		q.SQL(sqlUsersCountUserByValue, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
+}
+
+const sqlMetaCreateMeta = `INSERT INTO "meta" ("id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") 
+			VALUES ($1, $2, $3, $4, $5, $6, $7) 
+			
+`
+
+func (v *RepoModel) CreateMeta(ctx context.Context, ms []*Meta, opts ...CreateOption) error {
+	if len(ms) == 0 {
+		return nil
+	}
+
+	for _, m := range ms {
+		m.Id = uuid.New()
+		m.CreatedAt = time.Now()
+		m.UpdatedAt = time.Now()
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlMetaCreateMeta)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(`;`)
+
+	return v.orm.Tag(v.wtag).Tx(ctx, "meta_create", func(tx orm.Tx) {
+		for _, m := range ms {
+			tx.Query(func(q orm.Querier) {
+				q.SQL(buf.String(), m.Id, m.UserId, m.Roles, m.Fail, m.CreatedAt, m.UpdatedAt, m.DeletedAt)
+				q.Bind(func(bind orm.Scanner) error {
+					return bind.Scan(&m.Id)
+				})
+			})
+		}
 	})
 }
 
@@ -164,23 +293,42 @@ const sqlMetaUpdateMeta = `UPDATE "meta" SET
 			 WHERE "id" = $8;
 `
 
-func (v *RepositoryModel) UpdateMeta(ctx context.Context, m *Meta) error {
-	m.UpdatedAt = time.Now()
+func (v *RepoModel) UpdateMeta(ctx context.Context, ms []*Meta) error {
+	if len(ms) == 0 {
+		return nil
+	}
+
+	for _, m := range ms {
+		m.UpdatedAt = time.Now()
+	}
+
+	if len(ms) > 1 {
+		return v.orm.Tag(v.wtag).Tx(ctx, "meta_update", func(tx orm.Tx) {
+			tx.Exec(func(e orm.Executor) {
+				e.SQL(sqlMetaUpdateMeta)
+				for _, m := range ms {
+					e.Params(m.Id, m.UserId, m.Roles, m.Fail, m.CreatedAt, m.UpdatedAt, m.DeletedAt, m.Id)
+				}
+			})
+		})
+	}
 
 	return v.orm.Tag(v.wtag).Exec(ctx, "meta_update", func(e orm.Executor) {
-		e.SQL(sqlMetaUpdateMeta)
-		e.Params(m.Id, m.UserId, m.Roles, m.Fail, m.CreatedAt, m.UpdatedAt, m.DeletedAt, m.Id)
+		e.SQL(sqlMetaUpdateMeta, ms[0].Id, ms[0].UserId, ms[0].Roles, ms[0].Fail, ms[0].CreatedAt, ms[0].UpdatedAt, ms[0].DeletedAt, ms[0].Id)
 	})
 }
 
 const sqlMetaDeleteMeta = `DELETE FROM "meta"
-			 WHERE "id" = $1;
+			 WHERE "id" = ANY($1);
 `
 
-func (v *RepositoryModel) DeleteMeta(ctx context.Context, pk uuid.UUID) error {
+func (v *RepoModel) DeleteMeta(ctx context.Context, pk []uuid.UUID) error {
+	if len(pk) == 0 {
+		return nil
+	}
+
 	return v.orm.Tag(v.wtag).Exec(ctx, "meta_delete", func(e orm.Executor) {
-		e.SQL(sqlMetaDeleteMeta)
-		e.Params(pk)
+		e.SQL(sqlMetaDeleteMeta, pk)
 	})
 }
 
@@ -188,7 +336,7 @@ const sqlMetaReadMetaAll = `SELECT "id", "user_id", "roles", "fail", "created_at
 			 FROM "meta";
 `
 
-func (v *RepositoryModel) ReadMetaAll(ctx context.Context) ([]Meta,
+func (v *RepoModel) ReadMetaAll(ctx context.Context) ([]Meta,
 	error) {
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_all", func(q orm.Querier) {
@@ -210,15 +358,29 @@ func (v *RepositoryModel) ReadMetaAll(ctx context.Context) ([]Meta,
 
 const sqlMetaReadMetaById = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
-			 WHERE "id" = ANY($1);
+			 WHERE "id" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadMetaById(
-	ctx context.Context, args ...uuid.UUID,
+func (v *RepoModel) ReadMetaById(
+	ctx context.Context, args []uuid.UUID, opts ...ReadOption,
 ) ([]Meta, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlMetaReadMetaById)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_id", func(q orm.Querier) {
-		q.SQL(sqlMetaReadMetaById, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
 			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
@@ -236,15 +398,29 @@ func (v *RepositoryModel) ReadMetaById(
 
 const sqlMetaReadMetaByUserId = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
-			 WHERE "user_id" = ANY($1);
+			 WHERE "user_id" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadMetaByUserId(
-	ctx context.Context, args ...int64,
+func (v *RepoModel) ReadMetaByUserId(
+	ctx context.Context, args []int64, opts ...ReadOption,
 ) ([]Meta, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlMetaReadMetaByUserId)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_user_id", func(q orm.Querier) {
-		q.SQL(sqlMetaReadMetaByUserId, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
 			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
@@ -262,15 +438,29 @@ func (v *RepositoryModel) ReadMetaByUserId(
 
 const sqlMetaReadMetaByRoles = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
-			 WHERE "roles" = ANY($1);
+			 WHERE "roles" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadMetaByRoles(
-	ctx context.Context, args ...string,
+func (v *RepoModel) ReadMetaByRoles(
+	ctx context.Context, args []string, opts ...ReadOption,
 ) ([]Meta, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlMetaReadMetaByRoles)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_roles", func(q orm.Querier) {
-		q.SQL(sqlMetaReadMetaByRoles, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
 			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
@@ -288,15 +478,29 @@ func (v *RepositoryModel) ReadMetaByRoles(
 
 const sqlMetaReadMetaByFail = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
-			 WHERE "fail" = ANY($1);
+			 WHERE "fail" = ANY($1)
 `
 
-func (v *RepositoryModel) ReadMetaByFail(
-	ctx context.Context, args ...bool,
+func (v *RepoModel) ReadMetaByFail(
+	ctx context.Context, args []bool, opts ...ReadOption,
 ) ([]Meta, error) {
+	if len(args) == 0 {
+		return nil, nil
+	}
+
+	buf := _sqlBuilderPool.Get()
+	defer func() { _sqlBuilderPool.Put(buf) }()
+
+	buf.WriteString(sqlMetaReadMetaByFail)
+	for _, o := range opts {
+		o(buf)
+	}
+
+	buf.WriteString(`;`)
+
 	result := make([]Meta, 0, 2)
 	err := v.orm.Tag(v.rtag).Query(ctx, "meta_read_by_fail", func(q orm.Querier) {
-		q.SQL(sqlMetaReadMetaByFail, args)
+		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
 			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
@@ -310,4 +514,96 @@ func (v *RepositoryModel) ReadMetaByFail(
 		return nil, err
 	}
 	return result, nil
+}
+
+const sqlMetaCountMetaById = `SELECT COUNT(*) 
+			 FROM "meta"
+			 WHERE "id" = ANY($1);
+`
+
+func (v *RepoModel) CountMetaById(
+	ctx context.Context, args []uuid.UUID,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "meta_count_by_id", func(q orm.Querier) {
+		q.SQL(sqlMetaCountMetaById, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
+}
+
+const sqlMetaCountMetaByUserId = `SELECT COUNT(*) 
+			 FROM "meta"
+			 WHERE "user_id" = ANY($1);
+`
+
+func (v *RepoModel) CountMetaByUserId(
+	ctx context.Context, args []int64,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "meta_count_by_user_id", func(q orm.Querier) {
+		q.SQL(sqlMetaCountMetaByUserId, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
+}
+
+const sqlMetaCountMetaByRoles = `SELECT COUNT(*) 
+			 FROM "meta"
+			 WHERE "roles" = ANY($1);
+`
+
+func (v *RepoModel) CountMetaByRoles(
+	ctx context.Context, args []string,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "meta_count_by_roles", func(q orm.Querier) {
+		q.SQL(sqlMetaCountMetaByRoles, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
+}
+
+const sqlMetaCountMetaByFail = `SELECT COUNT(*) 
+			 FROM "meta"
+			 WHERE "fail" = ANY($1);
+`
+
+func (v *RepoModel) CountMetaByFail(
+	ctx context.Context, args []bool,
+) (int64, error) {
+	if len(args) == 0 {
+		return 0, nil
+	}
+
+	var count int64
+	err := v.orm.Tag(v.rtag).Query(ctx, "meta_count_by_fail", func(q orm.Querier) {
+		q.SQL(sqlMetaCountMetaByFail, args)
+		q.Bind(func(bind orm.Scanner) error {
+			return bind.Scan(&count)
+		})
+	})
+
+	return count, err
 }

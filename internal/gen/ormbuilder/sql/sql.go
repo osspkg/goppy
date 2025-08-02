@@ -105,7 +105,7 @@ func field(dialect dialects.Dialect, table string, v fields.TField) (query []str
 
 	switch v.(type) {
 
-	case fields.Number:
+	case fields.BigInt:
 		switch dialect {
 		case dialects.PGSql:
 			query = append(query, "BIGINT")
@@ -120,6 +120,22 @@ func field(dialect dialects.Dialect, table string, v fields.TField) (query []str
 					"INCREMENT 1 MINVALUE 1 MAXVALUE 9223372036854775807 CACHE 1",
 				)
 			}
+		case dialects.MySql:
+		case dialects.SQLite:
+		}
+
+	case fields.Int:
+		switch dialect {
+		case dialects.PGSql:
+			query = append(query, "INTEGER")
+		case dialects.MySql:
+		case dialects.SQLite:
+		}
+
+	case fields.SmallInt:
+		switch dialect {
+		case dialects.PGSql:
+			query = append(query, "SMALLINT")
 		case dialects.MySql:
 		case dialects.SQLite:
 		}
