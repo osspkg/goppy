@@ -182,7 +182,7 @@ type Repo{{.FileName|title}} struct {
 	rtag, wtag string
 }
 
-func NewRepository{{.FileName|title}}(orm orm.ORM) *Repo{{.FileName|title}} {
+func NewRepo{{.FileName|title}}(orm orm.ORM) *Repo{{.FileName|title}} {
 	return &Repo{{.FileName|title}}{
 		orm:  orm,
 		rtag: "{{.RTag}}",
