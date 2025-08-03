@@ -23,10 +23,11 @@ type query struct {
 func (v *query) SQL(query string, args ...any) {
 	switch v.D {
 	case PgSQLDialect:
-		v.Q, v.P = query, pgCastTypes(args)
+		applyPGSqlCastTypes(args)
 	default:
-		v.Q, v.P = query, args
 	}
+
+	v.Q, v.P = query, args
 }
 
 func (v *query) Bind(call func(bind Scanner) error) {
@@ -45,10 +46,11 @@ type scan struct {
 func (v *scan) Scan(args ...any) error {
 	switch v.D {
 	case PgSQLDialect:
-		return v.S.Scan(pgCastTypes(args)...)
+		applyPGSqlCastTypes(args)
 	default:
-		return v.S.Scan(args...)
 	}
+
+	return v.S.Scan(args...)
 }
 
 type (

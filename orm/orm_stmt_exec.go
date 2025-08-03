@@ -32,10 +32,11 @@ func (v *exec) Params(args ...any) {
 
 	switch v.D {
 	case PgSQLDialect:
-		v.P = append(v.P, pgCastTypes(args))
+		applyPGSqlCastTypes(args)
 	default:
-		v.P = append(v.P, args)
 	}
+
+	v.P = append(v.P, args)
 }
 
 func (v *exec) Bind(call func(rowsAffected, lastInsertId int64) error) {

@@ -6,11 +6,26 @@
 package orm
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"fmt"
+	"reflect"
+	"time"
 
 	"github.com/lib/pq"
+)
+
+type (
+	TypeScanValuer interface {
+		driver.Valuer
+		sql.Scanner
+	}
+
+	TypeJSONb interface {
+		json.Marshaler
+		json.Unmarshaler
+	}
 )
 
 type jsonb struct {
@@ -48,49 +63,35 @@ func (jb *jsonb) Value() (driver.Value, error) {
 	return driver.Value(b), nil
 }
 
-func pgCastTypes(args []any) []any {
-	out := make([]any, 0, len(args))
-	for _, arg := range args {
-		out = append(out, pgCastType(arg))
+func applyPGSqlCastTypes(args []any) {
+	count := len(args)
+
+	for i := 0; i < count; i++ {
+		if reflect.ValueOf(args[i]).Kind() == reflect.Slice {
+			args[i] = pq.Array(args[i])
+			continue
+		}
+
+		switch args[i].(type) {
+		case TypeScanValuer:
+			// ---
+		case []byte, string, *[]byte, *string:
+			// ---
+		case int, int8, int16, int32, int64, *int, *int8, *int16, *int32, *int64:
+			// ---
+		case uint, uint8, uint16, uint32, uint64, *uint, *uint8, *uint16, *uint32, *uint64:
+			// ---
+		case float32, float64, *float32, *float64:
+			// ---
+		case bool, *bool:
+			// ---
+		case complex64, complex128, *complex64, *complex128:
+			// ---
+		case time.Time, *time.Time:
+			// ---
+		case TypeJSONb:
+			args[i] = &jsonb{Any: args[i]}
+		default:
+		}
 	}
-	return out
-}
-
-func pgCastType(arg any) any {
-	switch a := arg.(type) {
-	case json.Marshaler, json.Unmarshaler:
-		return &jsonb{Any: a}
-
-	case []bool:
-		return (*pq.BoolArray)(&a)
-	case []float64:
-		return (*pq.Float64Array)(&a)
-	case []float32:
-		return (*pq.Float32Array)(&a)
-	case []int64:
-		return (*pq.Int64Array)(&a)
-	case []int32:
-		return (*pq.Int32Array)(&a)
-	case []string:
-		return (*pq.StringArray)(&a)
-	case [][]byte:
-		return (*pq.ByteaArray)(&a)
-
-	case *[]bool:
-		return (*pq.BoolArray)(a)
-	case *[]float64:
-		return (*pq.Float64Array)(a)
-	case *[]float32:
-		return (*pq.Float32Array)(a)
-	case *[]int64:
-		return (*pq.Int64Array)(a)
-	case *[]int32:
-		return (*pq.Int32Array)(a)
-	case *[]string:
-		return (*pq.StringArray)(a)
-	case *[][]byte:
-		return (*pq.ByteaArray)(a)
-	}
-
-	return arg
 }
