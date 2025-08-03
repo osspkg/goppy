@@ -67,6 +67,7 @@ func applyPGSqlCastTypes(args []any) {
 	count := len(args)
 
 	for i := 0; i < count; i++ {
+		fmt.Printf("%#v %T %+v\n", args[i], args[i], reflect.ValueOf(args[i]).Kind())
 		if reflect.ValueOf(args[i]).Kind() == reflect.Slice {
 			args[i] = pq.Array(args[i])
 			continue
