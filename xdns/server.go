@@ -86,8 +86,6 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	response := &dns.Msg{}
 	response.Authoritative = true
 	response.RecursionAvailable = true
-	response.SetReply(msg)
-	response.SetRcode(msg, dns.RcodeSuccess)
 
 	for _, q := range msg.Question {
 		answer, err := v.handler.Exchange(q)
@@ -96,6 +94,12 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 		} else {
 			response.Answer = append(response.Answer, answer...)
 		}
+	}
+
+	if len(response.Answer) == 0 {
+		response.SetRcode(msg, dns.RcodeNotZone)
+	} else {
+		response.SetRcode(msg, dns.RcodeSuccess)
 	}
 
 	if err := w.WriteMsg(response); err != nil {
