@@ -208,7 +208,6 @@ const tmplCRUD = `
 {{if not .RO}}
 const sql{{.Table|title}}Create{{.Name}} = @{{ queries .Dialect "INSERT INTO " (.Table|esc .Dialect) " (" .Cols ") " }}
 			{{ queries .Dialect "VALUES (" .ColsLen ") " }}
-			{{if .PK.Col}}{{end}}
 @
 
 func (v *Repo{{.FileName|title}}) Create{{.Name}}(ctx context.Context, ms []*{{.Name}}, opts ...CreateOption) error {
@@ -228,7 +227,7 @@ func (v *Repo{{.FileName|title}}) Create{{.Name}}(ctx context.Context, ms []*{{.
 		o(buf)
 	}
 
-	{{if .PK.Col}}buf.WriteString(@ {{ queries .Dialect "RETURNING (" .PK.Col ")" }}@){{end}}
+	{{if .PK.Col}}buf.WriteString(@{{ queries .Dialect " RETURNING (" .PK.Col ") " }}@){{end}}
 	buf.WriteString(@;@)
 
 	return v.orm.Tag(v.wtag).Tx(ctx, "{{.Table|lower}}_create", func(tx orm.Tx) {
