@@ -7,6 +7,7 @@ package xdns
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/miekg/dns"
@@ -101,6 +102,8 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	} else {
 		response.SetRcode(msg, dns.RcodeSuccess)
 	}
+
+	fmt.Println(response.String())
 
 	if err := w.WriteMsg(response); err != nil {
 		logx.Error("DNS response", "question", msg, "answer", response, "err", err)
