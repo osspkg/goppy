@@ -98,7 +98,7 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	}
 
 	if len(response.Answer) == 0 {
-		response.SetRcode(msg, dns.RcodeNotZone)
+		response.SetRcode(msg, dns.RcodeNameError)
 	} else {
 		response.SetRcode(msg, dns.RcodeSuccess)
 	}
