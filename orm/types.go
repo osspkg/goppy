@@ -65,33 +65,41 @@ func (jb *jsonb) Value() (driver.Value, error) {
 
 func applyPGSqlCastTypes(args []any) {
 	count := len(args)
-
 	for i := 0; i < count; i++ {
-		if reflect.ValueOf(args[i]).Kind() == reflect.Slice {
+
+		switch args[i].(type) {
+		case []byte, string, *[]byte, *string:
+			continue
+		case int, int8, int16, int32, int64, *int, *int8, *int16, *int32, *int64:
+			continue
+		case uint, uint8, uint16, uint32, uint64, *uint, *uint8, *uint16, *uint32, *uint64:
+			continue
+		case float32, float64, *float32, *float64:
+			continue
+		case bool, *bool:
+			continue
+		case complex64, complex128, *complex64, *complex128:
+			continue
+		case time.Time, *time.Time:
+			continue
+		case TypeScanValuer:
+			continue
+		case TypeJSONb:
+			args[i] = &jsonb{Any: args[i]}
+		default:
+		}
+
+		ref := reflect.ValueOf(args[i])
+
+		if ref.Kind() == reflect.Slice || ref.Kind() == reflect.Array {
 			args[i] = pq.Array(args[i])
 			continue
 		}
 
-		switch args[i].(type) {
-		case TypeScanValuer:
-			// ---
-		case []byte, string, *[]byte, *string:
-			// ---
-		case int, int8, int16, int32, int64, *int, *int8, *int16, *int32, *int64:
-			// ---
-		case uint, uint8, uint16, uint32, uint64, *uint, *uint8, *uint16, *uint32, *uint64:
-			// ---
-		case float32, float64, *float32, *float64:
-			// ---
-		case bool, *bool:
-			// ---
-		case complex64, complex128, *complex64, *complex128:
-			// ---
-		case time.Time, *time.Time:
-			// ---
-		case TypeJSONb:
-			args[i] = &jsonb{Any: args[i]}
-		default:
+		if ref.Kind() == reflect.Ptr &&
+			(ref.Elem().Kind() == reflect.Slice || ref.Elem().Kind() == reflect.Array) {
+			args[i] = pq.Array(args[i])
+			continue
 		}
 	}
 }

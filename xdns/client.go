@@ -6,7 +6,6 @@
 package xdns
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/miekg/dns"
@@ -71,13 +70,11 @@ func (v *Client) Exchange(question dns.Question) ([]dns.RR, error) {
 	for _, address := range ns {
 		resp, _, err := v.cli.Exchange(msg, address)
 		if err != nil {
-			errs = errors.Wrap(errs, errors.Wrapf(err, "name: %s, dns: %s", question.String(), address))
+			errs = errors.Wrap(errs, errors.Wrapf(err, "name: %s, dns: %s", question.Name, address))
 			continue
 		}
 
 		if len(resp.Answer) == 0 {
-			errs = errors.Wrap(errs,
-				errors.Wrapf(fmt.Errorf("empty answer"), "name: %s, dns: %s", question.String(), address))
 			continue
 		}
 

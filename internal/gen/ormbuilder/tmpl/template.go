@@ -20,13 +20,15 @@ func Build(w io.Writer, value string, model any) error {
 	tmpl, err := template.
 		New("0").
 		Funcs(template.FuncMap{
-			"esc":     esc,
-			"lower":   strings.ToLower,
-			"title":   title,
-			"queries": queries,
-			"fields":  fields,
-			"pls":     pls,
-			"incr":    incr,
+			"esc":         esc,
+			"lower":       strings.ToLower,
+			"title":       title,
+			"queries":     queries,
+			"fields":      fields,
+			"pls":         pls,
+			"incr":        incr,
+			"joinEscaped": joinEscaped,
+			"joinString":  joinString,
 		}).
 		Parse(value)
 
@@ -35,6 +37,38 @@ func Build(w io.Writer, value string, model any) error {
 	}
 
 	return tmpl.Execute(w, model)
+}
+
+func joinEscaped(args ...any) []Escaped {
+	out := make([]Escaped, 0, len(args))
+
+	for _, arg := range args {
+		switch v := arg.(type) {
+		case Escaped:
+			out = append(out, v)
+
+		case []Escaped:
+			out = append(out, v...)
+		}
+	}
+
+	return out
+}
+
+func joinString(args ...any) []string {
+	out := make([]string, 0, len(args))
+
+	for _, arg := range args {
+		switch v := arg.(type) {
+		case string:
+			out = append(out, v)
+
+		case []string:
+			out = append(out, v...)
+		}
+	}
+
+	return out
 }
 
 func esc(dialect string, arg string) string {

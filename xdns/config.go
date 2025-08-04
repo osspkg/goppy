@@ -5,19 +5,17 @@
 
 package xdns
 
-import "time"
-
 type (
 	ConfigGroup struct {
 		DNS Config `yaml:"dns"`
 	}
 	Config struct {
-		Addr    string        `yaml:"addr"`
-		Timeout time.Duration `yaml:"timeout"`
+		Addr   string   `yaml:"addr"`
+		QTypes []string `yaml:"qtypes,omitempty"`
 	}
 )
 
 func (v *ConfigGroup) Default() {
 	v.DNS.Addr = "0.0.0.0:53"
-	v.DNS.Timeout = 5 * time.Second
+	v.DNS.QTypes = []string{"A"}
 }

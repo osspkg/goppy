@@ -208,7 +208,6 @@ const tmplCRUD = `
 {{if not .RO}}
 const sql{{.Table|title}}Create{{.Name}} = @{{ queries .Dialect "INSERT INTO " (.Table|esc .Dialect) " (" .Cols ") " }}
 			{{ queries .Dialect "VALUES (" .ColsLen ") " }}
-			{{if .PK.Col}}{{end}}
 @
 
 func (v *Repo{{.FileName|title}}) Create{{.Name}}(ctx context.Context, ms []*{{.Name}}, opts ...CreateOption) error {
@@ -228,7 +227,7 @@ func (v *Repo{{.FileName|title}}) Create{{.Name}}(ctx context.Context, ms []*{{.
 		o(buf)
 	}
 
-	{{if .PK.Col}}buf.WriteString(@ {{ queries .Dialect "RETURNING (" .PK.Col ")" }}@){{end}}
+	{{if .PK.Col}}buf.WriteString(@{{ queries .Dialect " RETURNING (" .PK.Col ") " }}@){{end}}
 	buf.WriteString(@;@)
 
 	return v.orm.Tag(v.wtag).Tx(ctx, "{{.Table|lower}}_create", func(tx orm.Tx) {
@@ -289,7 +288,7 @@ func (v *Repo{{.FileName|title}}) Delete{{.Name}}(ctx context.Context, pk []{{.P
 }
 {{end}}
 
-const sql{{$G.Table|title}}Read{{$G.Name}}All = @{{ queries $G.Dialect "SELECT " $G.Cols }}
+const sql{{$G.Table|title}}Read{{$G.Name}}All = @{{ queries $G.Dialect "SELECT " (joinEscaped $G.PK.Col $G.Cols) }}
 			{{ queries $G.Dialect " FROM " ($G.Table|esc $G.Dialect) }};
 @
 
@@ -300,7 +299,7 @@ error) {
 		q.SQL(sql{{$G.Table|title}}Read{{$G.Name}}All)
 		q.Bind(func(bind orm.Scanner) error {
 			m := {{$G.Name}}{}
-			if e := bind.Scan({{ fields "&m." $G.Fields }}); e!= nil{
+			if e := bind.Scan({{ fields "&m." (joinString $G.PK.Field $G.Fields) }}); e!= nil{
 				return e
 			}
 			result = append(result, m)
@@ -314,7 +313,7 @@ error) {
 }
 
 {{range $i, $x := .RCols}}
-const sql{{$G.Table|title}}Read{{$G.Name}}By{{$x.Field}} = @{{ queries $G.Dialect "SELECT " $G.Cols }}
+const sql{{$G.Table|title}}Read{{$G.Name}}By{{$x.Field}} = @{{ queries $G.Dialect "SELECT " (joinEscaped $G.PK.Col $G.Cols) }}
 			{{ queries $G.Dialect " FROM " ($G.Table|esc $G.Dialect) }}
 			{{ queries $G.Dialect " WHERE " $x.Col " = ANY(" 1 ")"}}
 @
@@ -341,7 +340,7 @@ ctx context.Context, args []{{$x.Type}}, opts ...ReadOption,
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := {{$G.Name}}{}
-			if e := bind.Scan({{ fields "&m." $G.Fields }}); e!= nil{
+			if e := bind.Scan({{ fields "&m." (joinString $G.PK.Field $G.Fields) }}); e!= nil{
 				return e
 			}
 			result = append(result, m)

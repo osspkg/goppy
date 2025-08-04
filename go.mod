@@ -10,11 +10,11 @@ require (
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.0
 	github.com/mattn/go-sqlite3 v1.14.30
-	github.com/miekg/dns v1.1.67
+	github.com/miekg/dns v1.1.68
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.0
 	github.com/prometheus/client_model v0.6.2
-	go.osspkg.com/algorithms v1.5.1
+	go.osspkg.com/algorithms v1.5.2
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/config v0.1.3
 	go.osspkg.com/console v0.3.3
@@ -75,10 +75,10 @@ require (
 	github.com/prometheus/common v0.65.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	go.etcd.io/bbolt v1.4.0 // indirect
-	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/sync v0.15.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
-	golang.org/x/tools v0.34.0 // indirect
+	golang.org/x/net v0.42.0 // indirect
+	golang.org/x/sync v0.16.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/text v0.27.0 // indirect
+	golang.org/x/tools v0.35.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
