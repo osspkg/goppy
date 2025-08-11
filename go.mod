@@ -35,7 +35,7 @@ require (
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/mod v0.26.0
 	golang.org/x/oauth2 v0.30.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.7
 )
 
 require (
