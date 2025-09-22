@@ -1,6 +1,6 @@
 module go.osspkg.com/goppy/v2
 
-go 1.23.11
+go 1.24.0
 
 require (
 	github.com/blevesearch/bleve/v2 v2.5.2
@@ -8,7 +8,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
-	github.com/mailru/easyjson v0.9.0
+	github.com/mailru/easyjson v0.9.1
 	github.com/mattn/go-sqlite3 v1.14.30
 	github.com/miekg/dns v1.1.68
 	github.com/oschwald/geoip2-golang v1.13.0
@@ -23,13 +23,13 @@ require (
 	go.osspkg.com/errors v0.3.1
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.2.3
-	go.osspkg.com/ioutils v0.6.2
-	go.osspkg.com/logx v0.4.2
+	go.osspkg.com/ioutils v0.7.0
+	go.osspkg.com/logx v0.6.0
 	go.osspkg.com/network v0.6.0
 	go.osspkg.com/random v0.4.1
 	go.osspkg.com/routine v0.3.1
 	go.osspkg.com/static v1.4.0
-	go.osspkg.com/syncing v0.3.1
+	go.osspkg.com/syncing v0.4.0
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
 	go.uber.org/automaxprocs v1.6.0
@@ -41,6 +41,7 @@ require (
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.4.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
