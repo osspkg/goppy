@@ -9,77 +9,83 @@ import (
 	"net/http"
 	"sync/atomic"
 
+	"go.osspkg.com/errors"
 	"go.osspkg.com/logx"
 )
 
 // Middleware type of middleware
-type Middleware func(func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request)
+type Middleware func(func(Ctx)) func(Ctx)
 
 // ThrottlingMiddleware limits active requests
 func ThrottlingMiddleware(max int64) Middleware {
 	var i int64
-	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-		return func(w http.ResponseWriter, r *http.Request) {
+	err := errors.New(http.StatusText(http.StatusTooManyRequests))
+
+	return func(call func(Ctx)) func(Ctx) {
+		return func(ctx Ctx) {
 			if atomic.LoadInt64(&i) >= max {
-				w.WriteHeader(http.StatusTooManyRequests)
+				ctx.Error(http.StatusTooManyRequests, err)
 				return
 			}
+
 			atomic.AddInt64(&i, 1)
-			call(w, r)
+			call(ctx)
 			atomic.AddInt64(&i, -1)
 		}
 	}
 }
 
 // RecoveryMiddleware recovery go panic and write to log
-func RecoveryMiddleware() func(
-	func(http.ResponseWriter, *http.Request),
-) func(http.ResponseWriter, *http.Request) {
-	return func(f func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-		return func(w http.ResponseWriter, r *http.Request) {
+func RecoveryMiddleware() Middleware {
+	return func(call func(Ctx)) func(Ctx) {
+		err := errors.New(http.StatusText(http.StatusInternalServerError))
+
+		return func(ctx Ctx) {
 			defer func() {
-				if err := recover(); err != nil {
-					logx.Error("Panic recovered", "err", err)
-					w.WriteHeader(http.StatusInternalServerError)
+				if e := recover(); e != nil {
+					logx.Error("web.RecoveryMiddleware", "err", e)
+					ctx.Error(http.StatusInternalServerError, err)
 				}
 			}()
-			f(w, r)
+			call(ctx)
 		}
 	}
 }
 
-func HeadersContextWrapMiddleware(args ...string) func(
-	func(http.ResponseWriter, *http.Request),
-) func(http.ResponseWriter, *http.Request) {
-	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-		return func(w http.ResponseWriter, r *http.Request) {
+func HeadersContextWrapMiddleware(args ...string) Middleware {
+	return func(call func(Ctx)) func(Ctx) {
+		return func(ctx Ctx) {
+			headers := ctx.Header()
+
 			for _, arg := range args {
-				val := r.Header.Get(arg)
+				val := headers.Get(arg)
 				if len(val) == 0 {
 					continue
 				}
-				r = r.WithContext(SetContext(r.Context(), arg, val))
+
+				ctx.SetContextValue(webCtx(arg), val)
 			}
 
-			call(w, r)
+			call(ctx)
 		}
 	}
 }
 
-func CookiesContextWrapMiddleware(args ...string) func(
-	func(http.ResponseWriter, *http.Request),
-) func(http.ResponseWriter, *http.Request) {
-	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-		return func(w http.ResponseWriter, r *http.Request) {
+func CookiesContextWrapMiddleware(args ...string) Middleware {
+	return func(call func(Ctx)) func(Ctx) {
+		return func(ctx Ctx) {
+			cookies := ctx.Cookie()
+
 			for _, arg := range args {
-				val, err := r.Cookie(arg)
-				if err != nil {
+				val := cookies.Get(arg)
+				if len(val) == 0 {
 					continue
 				}
-				r = r.WithContext(SetContext(r.Context(), arg, val.Value))
+
+				ctx.SetContextValue(webCtx(arg), val)
 			}
 
-			call(w, r)
+			call(ctx)
 		}
 	}
 }

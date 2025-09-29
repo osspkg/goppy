@@ -17,9 +17,10 @@ import (
 	"go.osspkg.com/network/address"
 	"go.osspkg.com/xc"
 
+	"go.osspkg.com/goppy/v2/web/client"
+
 	"go.osspkg.com/goppy/v2/env"
 	"go.osspkg.com/goppy/v2/metrics"
-	"go.osspkg.com/goppy/v2/web"
 )
 
 func TestUnit_NewServer(t *testing.T) {
@@ -56,7 +57,7 @@ func TestUnit_NewServer(t *testing.T) {
 		},
 	}
 
-	srv := metrics.New(app, conf)
+	srv := metrics.New(ctx, app, conf)
 	casecheck.NoError(t, err)
 	casecheck.NoError(t, srv.Up(ctx))
 
@@ -73,8 +74,8 @@ func TestUnit_NewServer(t *testing.T) {
 	metrics.HistogramVec("a6", "l3_1", "v5").Observe(0.123)
 
 	var result bytes.Buffer
-	cli := web.NewClientHttp()
-	err = cli.Call(ctx.Context(), http.MethodGet, url, nil, &result)
+	cli := client.NewHTTPClient()
+	err = cli.Send(ctx.Context(), http.MethodGet, url, nil, &result)
 	casecheck.NoError(t, err)
 	casecheck.NoError(t, srv.Down())
 

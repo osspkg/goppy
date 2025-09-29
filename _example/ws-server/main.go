@@ -7,6 +7,8 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"os"
 	"time"
 
 	"go.osspkg.com/syncing"
@@ -25,19 +27,30 @@ func main() {
 		ws.WithServer(),
 	)
 	app.Plugins(
-		plugins.Plugin{
-			Inject: func(ws ws.Server) *Controller {
-				return NewController(ws)
+		plugins.Kind{
+			Inject: func(wss ws.Server) *Controller {
+				return NewController(wss)
 			},
-			Resolve: func(routes web.RouterPool, c *Controller, wss ws.Server) {
-				router := routes.Main()
-				router.Use(web.ThrottlingMiddleware(100))
+			Resolve: func(routes web.ServerPool, c *Controller, wss ws.Server) {
+				router, ok := routes.Main()
+				if !ok {
+					return
+				}
 
 				wss.SetEventHandler(c.Event1, 1)
 				wss.SetEventHandler(c.MultiEvent, 2, 3)
 
-				router.Get("/ws", func(ctx web.Context) {
-					wss.HandlingHTTP(ctx.Response(), ctx.Request())
+				router.Get("/ws", func(ctx web.Ctx) {
+					wss.Handling(ctx)
+				})
+
+				router.Get("/", func(ctx web.Ctx) {
+					b, err := os.ReadFile("./index.html")
+					if err != nil {
+						ctx.Error(http.StatusInternalServerError, err)
+						return
+					}
+					ctx.Bytes(http.StatusOK, b)
 				})
 			},
 		},
@@ -46,39 +59,37 @@ func main() {
 }
 
 type (
-	sender interface {
+	pipe interface {
 		BroadcastEvent(eid event.Id, m any) (err error)
 		SendEvent(eid event.Id, m any, cids ...string) (err error)
-		OnClose(cb func(cid string))
-		OnOpen(cb func(cid string))
+		AddOnCloseFunc(cb func(cid string))
+		AddOnOpenFunc(cb func(cid string))
 	}
 	Controller struct {
-		list   map[string]struct{}
-		sender sender
-		mux    syncing.Lock
+		pipe pipe
+		list *syncing.Map[string, struct{}]
 	}
 )
 
-func NewController(s sender) *Controller {
-	c := &Controller{
-		list:   make(map[string]struct{}),
-		sender: s,
-		mux:    syncing.NewLock(),
+func NewController(s pipe) *Controller {
+	ctrl := &Controller{
+		list: syncing.NewMap[string, struct{}](2),
+		pipe: s,
 	}
-	c.sender.OnOpen(func(cid string) {
-		c.mux.Lock(func() {
-			c.list[cid] = struct{}{}
-			fmt.Println(">", cid, "MultiEvent Add")
-		})
+
+	ctrl.pipe.AddOnOpenFunc(func(cid string) {
+		ctrl.list.Set(cid, struct{}{})
+		fmt.Println(">", cid, "MultiEvent Add")
 	})
-	c.sender.OnClose(func(cid string) {
-		c.mux.Lock(func() {
-			delete(c.list, cid)
-			fmt.Println(">", cid, "MultiEvent Close")
-		})
+
+	ctrl.pipe.AddOnCloseFunc(func(cid string) {
+		ctrl.list.Del(cid)
+		fmt.Println(">", cid, "MultiEvent Close")
 	})
-	go c.Timer()
-	return c
+
+	go ctrl.Timer()
+
+	return ctrl
 }
 
 func (v *Controller) Event1(event event.Event, meta ws.Meta) error {
@@ -86,9 +97,16 @@ func (v *Controller) Event1(event event.Event, meta ws.Meta) error {
 	if err := event.Decode(&list); err != nil {
 		return err
 	}
+
 	list = []int{10, 19, 17, 15}
-	event.Encode(&list)
+
+	if err := event.Encode(&list); err != nil {
+		fmt.Println(">", meta.ConnectID(), "Event1", event.ID(), "err", err.Error())
+		return err
+	}
+
 	fmt.Println(">", meta.ConnectID(), "Event1", event.ID())
+
 	return nil
 }
 
@@ -99,19 +117,21 @@ func (v *Controller) Timer() {
 	for {
 		select {
 		case tt := <-t.C:
-			v.sender.BroadcastEvent(99, tt.Format(time.RFC3339))
+			if err := v.pipe.BroadcastEvent(99, tt.Format(time.RFC3339)); err != nil {
+				fmt.Println(">", "Timer", "err", err.Error())
+			}
 		}
 	}
 }
 
 func (v *Controller) MultiEvent(event event.Event, meta ws.Meta) error {
+	fmt.Println(">", meta.ConnectID(), "MultiEvent", event.ID())
+
 	switch event.ID() {
 	case 2:
-		event.Encode("event 2")
+		return event.Encode("event 2")
 
-	case 3:
-		event.WithError(fmt.Errorf("event 3"))
+	default:
+		return fmt.Errorf("event %d not found", event.ID())
 	}
-	fmt.Println(">", meta.ConnectID(), "MultiEvent", event.ID())
-	return nil
 }

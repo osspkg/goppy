@@ -142,6 +142,8 @@ func installTools() {
 
 func updateGoMod() {
 	cmds := make([]string, 0, 50)
+	cmds = append(cmds, "go version")
+
 	if fs.FileExist(fs.CurrentDir() + "/go.work") {
 		cmds = append(cmds, "go work use -r .", "go work sync")
 		mods, err := fs.SearchFiles(fs.CurrentDir(), "go.mod")

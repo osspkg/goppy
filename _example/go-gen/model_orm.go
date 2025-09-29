@@ -36,7 +36,7 @@ func (v *RepoModel) TagMaster() orm.Stmt {
 	return v.orm.Tag(v.wtag)
 }
 
-const sqlUsersReadUserAll = `SELECT "name", "value"
+const sqlUsersReadUserAll = `SELECT "id", "name", "value"
 			 FROM "users";
 `
 
@@ -47,7 +47,7 @@ func (v *RepoModel) ReadUserAll(ctx context.Context) ([]User,
 		q.SQL(sqlUsersReadUserAll)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name, &m.Value); e != nil {
+			if e := bind.Scan(&m.Id, &m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -60,7 +60,7 @@ func (v *RepoModel) ReadUserAll(ctx context.Context) ([]User,
 	return result, nil
 }
 
-const sqlUsersReadUserById = `SELECT "name", "value"
+const sqlUsersReadUserById = `SELECT "id", "name", "value"
 			 FROM "users"
 			 WHERE "id" = ANY($1)
 `
@@ -87,7 +87,7 @@ func (v *RepoModel) ReadUserById(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name, &m.Value); e != nil {
+			if e := bind.Scan(&m.Id, &m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -100,7 +100,7 @@ func (v *RepoModel) ReadUserById(
 	return result, nil
 }
 
-const sqlUsersReadUserByName = `SELECT "name", "value"
+const sqlUsersReadUserByName = `SELECT "id", "name", "value"
 			 FROM "users"
 			 WHERE "name" = ANY($1)
 `
@@ -127,7 +127,7 @@ func (v *RepoModel) ReadUserByName(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name, &m.Value); e != nil {
+			if e := bind.Scan(&m.Id, &m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -140,7 +140,7 @@ func (v *RepoModel) ReadUserByName(
 	return result, nil
 }
 
-const sqlUsersReadUserByValue = `SELECT "name", "value"
+const sqlUsersReadUserByValue = `SELECT "id", "name", "value"
 			 FROM "users"
 			 WHERE "value" = ANY($1)
 `
@@ -167,7 +167,7 @@ func (v *RepoModel) ReadUserByValue(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := User{}
-			if e := bind.Scan(&m.Name, &m.Value); e != nil {
+			if e := bind.Scan(&m.Id, &m.Name, &m.Value); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -251,7 +251,6 @@ func (v *RepoModel) CountUserByValue(
 
 const sqlMetaCreateMeta = `INSERT INTO "meta" ("id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") 
 			VALUES ($1, $2, $3, $4, $5, $6, $7) 
-			
 `
 
 func (v *RepoModel) CreateMeta(ctx context.Context, ms []*Meta, opts ...CreateOption) error {
@@ -273,7 +272,7 @@ func (v *RepoModel) CreateMeta(ctx context.Context, ms []*Meta, opts ...CreateOp
 		o(buf)
 	}
 
-	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(` RETURNING ("id") `)
 	buf.WriteString(`;`)
 
 	return v.orm.Tag(v.wtag).Tx(ctx, "meta_create", func(tx orm.Tx) {
@@ -332,7 +331,7 @@ func (v *RepoModel) DeleteMeta(ctx context.Context, pk []uuid.UUID) error {
 	})
 }
 
-const sqlMetaReadMetaAll = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
+const sqlMetaReadMetaAll = `SELECT "id", "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta";
 `
 
@@ -343,7 +342,7 @@ func (v *RepoModel) ReadMetaAll(ctx context.Context) ([]Meta,
 		q.SQL(sqlMetaReadMetaAll)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
-			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
+			if e := bind.Scan(&m.Id, &m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -356,7 +355,7 @@ func (v *RepoModel) ReadMetaAll(ctx context.Context) ([]Meta,
 	return result, nil
 }
 
-const sqlMetaReadMetaById = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
+const sqlMetaReadMetaById = `SELECT "id", "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
 			 WHERE "id" = ANY($1)
 `
@@ -383,7 +382,7 @@ func (v *RepoModel) ReadMetaById(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
-			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
+			if e := bind.Scan(&m.Id, &m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -396,7 +395,7 @@ func (v *RepoModel) ReadMetaById(
 	return result, nil
 }
 
-const sqlMetaReadMetaByUserId = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
+const sqlMetaReadMetaByUserId = `SELECT "id", "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
 			 WHERE "user_id" = ANY($1)
 `
@@ -423,7 +422,7 @@ func (v *RepoModel) ReadMetaByUserId(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
-			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
+			if e := bind.Scan(&m.Id, &m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -436,7 +435,7 @@ func (v *RepoModel) ReadMetaByUserId(
 	return result, nil
 }
 
-const sqlMetaReadMetaByRoles = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
+const sqlMetaReadMetaByRoles = `SELECT "id", "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
 			 WHERE "roles" = ANY($1)
 `
@@ -463,7 +462,7 @@ func (v *RepoModel) ReadMetaByRoles(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
-			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
+			if e := bind.Scan(&m.Id, &m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
 				return e
 			}
 			result = append(result, m)
@@ -476,7 +475,7 @@ func (v *RepoModel) ReadMetaByRoles(
 	return result, nil
 }
 
-const sqlMetaReadMetaByFail = `SELECT "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
+const sqlMetaReadMetaByFail = `SELECT "id", "id", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at"
 			 FROM "meta"
 			 WHERE "fail" = ANY($1)
 `
@@ -503,7 +502,7 @@ func (v *RepoModel) ReadMetaByFail(
 		q.SQL(buf.String(), args)
 		q.Bind(func(bind orm.Scanner) error {
 			m := Meta{}
-			if e := bind.Scan(&m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
+			if e := bind.Scan(&m.Id, &m.Id, &m.UserId, &m.Roles, &m.Fail, &m.CreatedAt, &m.UpdatedAt, &m.DeletedAt); e != nil {
 				return e
 			}
 			result = append(result, m)

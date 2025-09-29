@@ -17,20 +17,20 @@ import (
 )
 
 type Server struct {
-	app    env.AppInfo
-	server *web.Server
-	route  *web.BaseRouter
-	conf   Config
+	appInfo env.AppInfo
+	server  *web.Server
+	route   *web.BaseRouter
+	conf    Config
 }
 
-func New(app env.AppInfo, c Config) *Server {
+func New(ctx xc.Context, app env.AppInfo, c Config) *Server {
 	router := web.NewBaseRouter()
 	conf := web.Config{Addr: c.Addr, Tag: "metric"}
 	return &Server{
-		server: web.NewServer(conf, router),
-		route:  router,
-		conf:   c,
-		app:    app,
+		server:  web.NewServer(ctx.Context(), conf, router),
+		route:   router,
+		conf:    c,
+		appInfo: app,
 	}
 }
 
@@ -44,35 +44,57 @@ func (v *Server) Down() error {
 	return v.server.Down()
 }
 
-func (v *Server) AddHandler(path string, ctrl func(http.ResponseWriter, *http.Request), methods ...string) {
+func (v *Server) AddHandler(path string, ctrl func(ctx web.Ctx), methods ...string) {
 	v.route.Route(path, ctrl, methods...)
 }
 
 func (v *Server) pprofRegister() {
-	v.route.Route("/pprof", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/goroutine", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/allocs", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/block", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/heap", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/mutex", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/threadcreate", pprof.Index, http.MethodGet)
-	v.route.Route("/pprof/cmdline", pprof.Cmdline, http.MethodGet)
-	v.route.Route("/pprof/profile", pprof.Profile, http.MethodGet)
-	v.route.Route("/pprof/symbol", pprof.Symbol, http.MethodGet)
-	v.route.Route("/pprof/trace", pprof.Trace, http.MethodGet)
+	v.route.Route("/pprof", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/goroutine", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/allocs", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/block", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/heap", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/mutex", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/threadcreate", func(ctx web.Ctx) {
+		pprof.Index(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/cmdline", func(ctx web.Ctx) {
+		pprof.Cmdline(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/profile", func(ctx web.Ctx) {
+		pprof.Profile(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/symbol", func(ctx web.Ctx) {
+		pprof.Symbol(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
+	v.route.Route("/pprof/trace", func(ctx web.Ctx) {
+		pprof.Trace(ctx.Response(), ctx.Request())
+	}, http.MethodGet)
 }
 
 func (v *Server) prometheusRegister() {
-	registerAppInfo(v.app)
-	registerCounter(string(v.app.AppName), v.conf.Counter)
-	registerCounterVec(string(v.app.AppName), v.conf.CounterVec)
-	registerGauge(string(v.app.AppName), v.conf.Gauge)
-	registerGaugeVec(string(v.app.AppName), v.conf.GaugeVec)
-	registerHistogram(string(v.app.AppName), v.conf.Histogram)
-	registerHistogramVec(string(v.app.AppName), v.conf.HistogramVec)
+	registerAppInfo(v.appInfo)
+	registerCounter(string(v.appInfo.AppName), v.conf.Counter)
+	registerCounterVec(string(v.appInfo.AppName), v.conf.CounterVec)
+	registerGauge(string(v.appInfo.AppName), v.conf.Gauge)
+	registerGaugeVec(string(v.appInfo.AppName), v.conf.GaugeVec)
+	registerHistogram(string(v.appInfo.AppName), v.conf.Histogram)
+	registerHistogramVec(string(v.appInfo.AppName), v.conf.HistogramVec)
 
 	handler := promhttp.HandlerFor(object.prometheus, promhttp.HandlerOpts{Registry: object.prometheus})
-	v.route.Route("/metrics", func(w http.ResponseWriter, r *http.Request) {
-		handler.ServeHTTP(w, r)
+	v.route.Route("/metrics", func(ctx web.Ctx) {
+		handler.ServeHTTP(ctx.Response(), ctx.Request())
 	}, http.MethodGet)
 }

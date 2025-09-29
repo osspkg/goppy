@@ -22,17 +22,6 @@ go get -u go.osspkg.com/goppy/v2
 - Command support
 - Database support and automatic migration
 
-## Plugins
-
-| Plugin        | Comment                                                                                                                                                             | Import                                                                                                                                                                       |
-|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **metrics**   | Profiling application (pprof) and metrics collection (prometheus) with access via HTTP.                                                                             | `go.osspkg.com/goppy/v2/metrics`<br/> `metrics.WithServer()`                                                                                                                 |
-| **http**      | Out of the box multi-server launch of web servers with separate routing. Grouping of routers with connection to a group of dedicated middleware. HTTP clients pool. | `go.osspkg.com/goppy/v2/web`<br/> `web.WithServer()`<br/> `web.WithClient()`                                                                                                 |
-| **websocket** | Ready-made websocket handler for server and client. Websocket server pool.                                                                                          | `go.osspkg.com/goppy/v2/ws`<br/> `ws.WithServer()`<br/> `ws.WithClient()`<br/> `ws.WithServerPool()`                                                                         |
-| **database**  | Multiple connection pools with MySQL, SQLite, Postgres databases.                                                                                                   | `go.osspkg.com/goppy/v2/orm`<br/> `orm.WithORM()` <br/>`orm.WithMigration()` <br/><br/> `orm.WithMysqlClient()`  <br/> `orm.WithSqliteClient()`<br/> `orm.WithPgsqlClient()` |
-| **geoip**     | Definition of geo-IP information.                                                                                                                                   | `go.osspkg.com/goppy/v2/geoip`<br/> `geoip.WithMaxMindGeoIP()` + `geoip.CloudflareMiddleware()`<br/> `geoip.MaxMindMiddleware()`                                             |
-| **oauth**     | Authorization via OAuth provider (Yandex, Google). JWT Cookie.                                                                                                      | `go.osspkg.com/goppy/v2/auth`<br/> `auth.WithOAuth()`<br/> `auth.WithJWT()` + `auth.JWTGuardMiddleware()`                                                                    |
-
 ## Quick Start
 
 Config:
@@ -56,15 +45,16 @@ Code:
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 
-	"go.osspkg.com/console"
+	"go.osspkg.com/logx"
+
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/metrics"
 	"go.osspkg.com/goppy/v2/plugins"
 	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/logx"
 )
 
 func main() {
@@ -76,10 +66,14 @@ func main() {
 		web.WithServer(),
 	)
 	app.Plugins(
-		plugins.Plugin{
+		plugins.Kind{
 			Inject: NewController,
-			Resolve: func(routes web.RouterPool, c *Controller) {
-				router := routes.Main()
+			Resolve: func(routes web.ServerPool, c *Controller) {
+				router, ok := routes.Main()
+				if !ok {
+					return
+				}
+
 				router.Use(web.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
@@ -88,7 +82,7 @@ func main() {
 			},
 		},
 	)
-	app.Command("env", func(s console.CommandSetter) {
+	app.Command("env", func() {
 		fmt.Println(os.Environ())
 	})
 	app.Run()
@@ -100,16 +94,27 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Users(ctx web.Context) {
+func (v *Controller) Users(ctx web.Ctx) {
 	metrics.Gauge("users_request").Inc()
-	data := []int64{1, 2, 3, 4}
+	data := Model{
+		data: []int64{1, 2, 3, 4},
+	}
 	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx web.Context) {
+func (v *Controller) User(ctx web.Ctx) {
 	id, _ := ctx.Param("id").Int() // nolint: errcheck
 	ctx.String(200, "user id: %d", id)
 	logx.Info("user - %d", id)
 }
+
+type Model struct {
+	data []int64
+}
+
+func (m Model) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.data)
+}
+
 
 ```

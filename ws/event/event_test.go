@@ -18,7 +18,7 @@ func TestUnit_Event(t *testing.T) {
 		ID int `json:"id"`
 	}
 
-	ev := poolEvents.Get()
+	ev := Pool.Get()
 	ev.WithID(1)
 	err := ev.Encode(&data{ID: 123})
 	casecheck.NoError(t, err)

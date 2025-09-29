@@ -21,8 +21,8 @@ import (
 type (
 	OAuth interface {
 		ApplyProvider(p ...Provider)
-		Request(code string) func(web.Context)
-		Callback(code string, handler func(web.Context, User, Code)) func(web.Context)
+		Request(code string) func(web.Ctx)
+		Callback(code string, handler func(web.Ctx, User, Code)) func(web.Ctx)
 	}
 
 	Option interface {
@@ -87,8 +87,8 @@ func (v *service) getProvider(name string) (Provider, error) {
 	return nil, ErrProviderNotFound
 }
 
-func (v *service) Request(code string) func(web.Context) {
-	return func(ctx web.Context) {
+func (v *service) Request(code string) func(web.Ctx) {
+	return func(ctx web.Ctx) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
 			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{
@@ -107,8 +107,8 @@ func (v *service) Request(code string) func(web.Context) {
 	}
 }
 
-func (v *service) Callback(code string, handler func(web.Context, User, Code)) func(web.Context) {
-	return func(ctx web.Context) {
+func (v *service) Callback(code string, handler func(web.Ctx, User, Code)) func(web.Ctx) {
+	return func(ctx web.Ctx) {
 		name, err := ctx.Param(code).String()
 		if err != nil {
 			ctx.ErrorJSON(http.StatusBadRequest, err, map[string]any{

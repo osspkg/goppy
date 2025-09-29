@@ -11,8 +11,8 @@ import (
 )
 
 // WithOAuth init oauth service
-func WithOAuth(opts ...func(option oauth.Option)) plugins.Plugin {
-	return plugins.Plugin{
+func WithOAuth(opts ...func(option oauth.Option)) plugins.Kind {
+	return plugins.Kind{
 		Config: &oauth.ConfigGroup{},
 		Inject: func(conf *oauth.ConfigGroup) oauth.OAuth {
 			obj := oauth.New(conf.Providers)

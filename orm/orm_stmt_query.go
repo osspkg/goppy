@@ -7,50 +7,53 @@ package orm
 
 import (
 	"context"
+	"fmt"
 
 	"go.osspkg.com/ioutils/pool"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
 var poolQuery = pool.New[*query](func() *query { return &query{} })
 
 type query struct {
-	D string
-	Q string
-	P []any
-	B func(bind Scanner) error
+	Dialect dialect.Connector
+	Query   string
+	Args    []any
+	Binding func(bind Scanner) error
 }
 
 func (v *query) SQL(query string, args ...any) {
-	switch v.D {
-	case PgSQLDialect:
-		applyPGSqlCastTypes(args)
-	default:
+	if cast := v.Dialect.CastTypesFunc(); cast != nil {
+		cast(args)
 	}
 
-	v.Q, v.P = query, args
+	v.Query, v.Args = query, args
 }
 
 func (v *query) Bind(call func(bind Scanner) error) {
-	v.B = call
+	v.Binding = call
 }
 
 func (v *query) Reset() {
-	v.Q, v.P, v.B, v.D = "", v.P[:0], nil, ""
+	v.Query, v.Args, v.Binding, v.Dialect = "", v.Args[:0], nil, nil
 }
 
 type scan struct {
-	D string
-	S Scanner
+	Dialect  dialect.Connector
+	Scanning Scanner
 }
 
 func (v *scan) Scan(args ...any) error {
-	switch v.D {
-	case PgSQLDialect:
-		applyPGSqlCastTypes(args)
-	default:
+	if cast := v.Dialect.CastTypesFunc(); cast != nil {
+		cast(args)
 	}
 
-	return v.S.Scan(args...)
+	if err := v.Scanning.Scan(args...); err != nil {
+		return fmt.Errorf("failed scan: %w", err)
+	}
+
+	return nil
 }
 
 type (
@@ -72,31 +75,35 @@ func (v *_stmt) Query(ctx context.Context, name string, call func(q Querier)) er
 	})
 }
 
-func callQueryContext(ctx context.Context, db dbGetter, call func(q Querier), dialect string) error {
-	q := poolQuery.Get()
-	defer func() { poolQuery.Put(q) }()
+func callQueryContext(ctx context.Context, db queryGetter, call func(q Querier), dc dialect.Connector) error {
+	obj := poolQuery.Get()
+	defer func() { poolQuery.Put(obj) }()
 
-	q.D = dialect
+	obj.Dialect = dc
 
-	call(q)
+	call(obj)
 
-	rows, err := db.QueryContext(ctx, q.Q, q.P...)
+	rows, err := db.QueryContext(ctx, obj.Query, obj.Args...)
 	if err != nil {
 		return err
 	}
 	defer rows.Close() // nolint: errcheck
-	if q.B != nil {
+
+	if obj.Binding != nil {
 		for rows.Next() {
-			if err = q.B(&scan{D: dialect, S: rows}); err != nil {
-				return err
+			if err = obj.Binding(&scan{Dialect: dc, Scanning: rows}); err != nil {
+				return fmt.Errorf("failed binding: %w", err)
 			}
 		}
 	}
+
 	if err = rows.Close(); err != nil {
-		return err
+		return fmt.Errorf("failed closing rows: %w", err)
 	}
+
 	if err = rows.Err(); err != nil {
-		return err
+		return fmt.Errorf("failed closing rows: %w", err)
 	}
+
 	return nil
 }

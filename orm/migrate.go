@@ -16,124 +16,113 @@ import (
 
 	"go.osspkg.com/errors"
 	"go.osspkg.com/logx"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
-type (
-	ConfigMigrate struct {
-		List []ConfigMigrateItem `yaml:"db_migrate"`
-	}
-
-	ConfigMigrateItem struct {
-		Tags    string `yaml:"tags"`
-		Dialect string `yaml:"dialect"`
-		Dir     string `yaml:"dir"`
-	}
-)
-
-func (v *ConfigMigrate) Default() {
-	if len(v.List) == 0 {
-		v.List = []ConfigMigrateItem{
-			{
-				Tags:    "master",
-				Dialect: MySQLDialect,
-				Dir:     "./migrations/" + MySQLDialect,
-			},
-			{
-				Tags:    "master",
-				Dialect: PgSQLDialect,
-				Dir:     "./migrations/" + PgSQLDialect,
-			},
-			{
-				Tags:    "master",
-				Dialect: SQLiteDialect,
-				Dir:     "./migrations/" + SQLiteDialect,
-			},
-		}
-	}
+type Migrator interface {
+	Run(ctx context.Context) error
 }
 
-// ---------------------------------------------------------------------------------------------------------------------
-
-type Migrate struct {
-	Conn ORM
-	FS   MFS
+type migrate struct {
+	conn ORM
+	fs   FS
 	mux  sync.Mutex
 }
 
-func (v *Migrate) Run(ctx context.Context, dialect string) error {
-	return v.executor(ctx, dialect,
-		func(stmt Stmt, mig Migrator) (map[string]struct{}, error) {
+func NewMigrate(o ORM, fs FS) Migrator {
+	return &migrate{
+		conn: o,
+		fs:   fs,
+	}
+}
+
+func (v *migrate) Run(ctx context.Context) error {
+	return v.executor(ctx,
+		func(dialectName dialect.Name, stmt Stmt, mig dialect.Migrator) (map[string]struct{}, error) {
 			if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
 				for _, createQuery := range mig.CreateTableQuery() {
 					if err := migrateCreateTable(ctx, stmt, createQuery); err != nil {
-						return nil, err
+						return nil, fmt.Errorf("create table for '%s': %w", dialectName, err)
 					}
 				}
-				if !migrateTableCheck(ctx, stmt, mig.CheckTableQuery()) {
-					return nil, fmt.Errorf("cant create migration table")
-				}
 			}
+
 			return migrateCompletedList(ctx, stmt, mig.CompletedQuery())
 		},
-		func(name string, stmt Stmt, mig Migrator) error {
+		func(name string, stmt Stmt, mig dialect.Migrator) error {
 			return migrateSave(ctx, stmt, mig.SaveQuery(), name)
 		},
 	)
 }
 
-func (v *Migrate) executor(ctx context.Context, dialect string,
-	call func(stmt Stmt, mig Migrator) (map[string]struct{}, error),
-	save func(name string, stmt Stmt, mig Migrator) error,
+func (v *migrate) executor(
+	ctx context.Context,
+	getExists func(dialectName dialect.Name, stmt Stmt, mig dialect.Migrator) (map[string]struct{}, error),
+	saveNew func(name string, stmt Stmt, mig dialect.Migrator) error,
 ) error {
 	v.mux.Lock()
 	defer v.mux.Unlock()
 
-	defer v.FS.Done()
+	defer v.fs.Done()
+	for v.fs.Next() {
 
-	for v.FS.Next() {
-		if dialect != v.FS.Dialect() {
+		dialectName := v.fs.Dialect()
+
+		mig, ok := dialect.GetMigrator(dialectName)
+		if !ok {
 			continue
 		}
 
-		mig, err := dialectExtract(v.FS.Dialect())
-		if err != nil {
-			return err
-		}
+		for _, tag := range v.fs.Tags() {
 
-		for _, tag := range v.FS.Tags() {
-			stmt := v.Conn.Tag(tag)
-			exist, err := call(stmt, mig)
+			stmt := v.conn.Tag(tag)
+			exist, err := getExists(dialectName, stmt, mig)
 			if err != nil {
-				return err
+				return fmt.Errorf("get completed migration for tag '%s:%s': %w", dialectName, tag, err)
 			}
-			list, err := v.FS.FileNames()
+
+			list, err := v.fs.FileNames()
 			if err != nil {
-				return errors.Wrapf(err, "get migration files")
+				return fmt.Errorf("get migration files for tag '%s:%s': %w", dialectName, tag, err)
 			}
+
 			for _, filePath := range list {
 				name := filepath.Base(filePath)
 				if _, ok := exist[name]; ok {
 					continue
 				}
-				logx.Info("New DB migration", "dialect", dialect, "tag", tag, "file", filePath)
-				sqldata, err := v.FS.FileData(filePath)
+
+				rawData, err := v.fs.FileData(filePath)
 				if err != nil {
-					return errors.Wrapf(err, "read migration file [%s]", name)
+					logx.Error("New DB migration", "dialect", dialectName, "tag", tag,
+						"file", filePath, "err", err)
+
+					return fmt.Errorf("read migration file '%s' for tag '%s:%s': %w ", name, dialectName, tag, err)
 				}
-				for _, subsql := range strings.Split(sqldata, ";") {
+
+				for _, subsql := range strings.Split(rawData, ";") {
 					subsql = removeSQLComment(subsql)
 					if len(subsql) == 0 {
 						continue
 					}
-					if err = stmt.Exec(ctx, "new migration", func(q Executor) {
-						q.SQL(subsql)
-					}); err != nil {
-						return errors.Wrapf(err, "exec migration file [%s], sql: `%s`", name, subsql)
+
+					if err = stmt.Exec(ctx, "new migration", func(q Executor) { q.SQL(subsql) }); err != nil {
+						logx.Error("New DB migration", "dialect", dialectName, "tag", tag,
+							"file", filePath, "sql", subsql, "err", err)
+
+						return errors.Wrapf(err, "exec migration file '%s', sql: '%s'", name, subsql)
 					}
 				}
-				if err = save(name, stmt, mig); err != nil {
-					return errors.Wrapf(err, "save migrated file [%s]", name)
+
+				if err = saveNew(name, stmt, mig); err != nil {
+					logx.Error("New DB migration", "dialect", dialectName, "tag", tag,
+						"file", filePath, "err", err)
+
+					return errors.Wrapf(err, "save migrated file '%s'", name)
 				}
+
+				logx.Info("New DB migration", "dialect", dialectName, "tag", tag, "file", filePath)
 			}
 		}
 

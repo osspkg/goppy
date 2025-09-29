@@ -31,20 +31,31 @@ func easyjson40f907c5DecodeGoOsspkgComGoppyV2AuthOauth(in *jlexer.Lexer, out *mo
 	for !in.IsDelim('}') {
 		key := in.UnsafeFieldName(false)
 		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
 		switch key {
 		case "name":
-			out.Name = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Name = string(in.String())
+			}
 		case "picture":
-			out.Icon = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Icon = string(in.String())
+			}
 		case "email":
-			out.Email = string(in.String())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Email = string(in.String())
+			}
 		case "email_verified":
-			out.EmailVerified = bool(in.Bool())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.EmailVerified = bool(in.Bool())
+			}
 		default:
 			in.SkipRecursive()
 		}

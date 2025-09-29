@@ -35,7 +35,7 @@ func ConflictIgnore() CreateOption {
 
 func ConflictUpdate(fields []string, ups []string) CreateOption {
 	return func(b *strings.Builder) {
-		fmt.Fprintf(b, ` ON CONFLICT("%s") DO NOTHING SET `, strings.Join(fields, `","`))
+		fmt.Fprintf(b, ` ON CONFLICT("%s") DO UPDATE SET `, strings.Join(fields, `","`))
 
 		j := len(ups) - 1
 		for i, up := range ups {

@@ -17,58 +17,70 @@ var poolTx = pool.New[*tx](func() *tx { return &tx{} })
 
 type (
 	Tx interface {
-		Exec(vv ...func(e Executor))
-		Query(vv ...func(q Querier))
+		Exec(args ...func(e Executor))
+		Query(args ...func(q Querier))
 	}
 
 	tx struct {
-		v []any
+		funcs []any
 	}
 
-	dbGetter interface {
+	queryGetter interface {
 		QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
 		PrepareContext(ctx context.Context, query string) (*sql.Stmt, error)
 	}
 )
 
-func (v *tx) Exec(vv ...func(q Executor)) {
-	for _, f := range vv {
-		v.v = append(v.v, f)
+func (v *tx) Exec(args ...func(q Executor)) {
+	if v.funcs == nil {
+		v.funcs = make([]any, 0, len(args))
+	}
+
+	for _, f := range args {
+		v.funcs = append(v.funcs, f)
 	}
 }
 
-func (v *tx) Query(vv ...func(q Querier)) {
-	for _, f := range vv {
-		v.v = append(v.v, f)
+func (v *tx) Query(args ...func(q Querier)) {
+	if v.funcs == nil {
+		v.funcs = make([]any, 0, len(args))
+	}
+
+	for _, f := range args {
+		v.funcs = append(v.funcs, f)
 	}
 }
 
 func (v *tx) Reset() {
-	v.v = v.v[:0]
+	v.funcs = v.funcs[:0]
 }
 
 func (v *_stmt) Tx(ctx context.Context, name string, call func(v Tx)) error {
-	q := poolTx.Get()
-	defer poolTx.Put(q)
+	obj := poolTx.Get()
+	defer poolTx.Put(obj)
 
-	call(q)
+	call(obj)
 
 	return v.TxContext(ctx, name, func(ctx context.Context, db DB) error {
-		for i, c := range q.v {
-			if cc, ok := c.(func(q Executor)); ok {
-				if err := callExecContext(ctx, db, cc, v.dialect); err != nil {
+		for i, cb := range obj.funcs {
+
+			if ex, ok := cb.(func(q Executor)); ok {
+				if err := callExecContext(ctx, db, ex, v.dialect); err != nil {
 					return err
 				}
 				continue
 			}
-			if cc, ok := c.(func(q Querier)); ok {
-				if err := callQueryContext(ctx, db, cc, v.dialect); err != nil {
+
+			if qu, ok := cb.(func(q Querier)); ok {
+				if err := callQueryContext(ctx, db, qu, v.dialect); err != nil {
 					return err
 				}
 				continue
 			}
-			return fmt.Errorf("unknown query model #%d", i)
+
+			return fmt.Errorf("unknown query func #%d", i)
 		}
+
 		return nil
 	})
 }

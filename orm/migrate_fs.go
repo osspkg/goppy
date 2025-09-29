@@ -13,12 +13,14 @@ import (
 	"strings"
 
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
-type MFS interface {
+type FS interface {
 	Done()
 	Next() bool
-	Dialect() string
+	Dialect() dialect.Name
 	Tags() []string
 	FileNames() ([]string, error)
 	FileData(filename string) (string, error)
@@ -27,33 +29,33 @@ type MFS interface {
 // ---------------------------------------------------------------------------------------------------------------------
 
 type (
-	memFS struct {
+	virtual struct {
 		conf []Migration
 		curr int
 	}
 	Migration struct {
 		Tags    []string
-		Dialect string
+		Dialect dialect.Name
 		Data    map[string]string
 	}
 )
 
-func NewInMemoryFS(c []Migration) MFS {
-	return &memFS{
+func NewVirtualFS(c []Migration) FS {
+	return &virtual{
 		conf: c,
 		curr: -1,
 	}
 }
 
-func (o *memFS) Done() {
+func (o *virtual) Done() {
 	o.curr = -1
 }
 
-func (o *memFS) Dialect() string {
+func (o *virtual) Dialect() dialect.Name {
 	return o.conf[o.curr].Dialect
 }
 
-func (o *memFS) Next() bool {
+func (o *virtual) Next() bool {
 	if len(o.conf) <= 0 {
 		return false
 	}
@@ -61,11 +63,11 @@ func (o *memFS) Next() bool {
 	return len(o.conf) > o.curr
 }
 
-func (o *memFS) Tags() []string {
+func (o *virtual) Tags() []string {
 	return o.conf[o.curr].Tags
 }
 
-func (o *memFS) FileNames() ([]string, error) {
+func (o *virtual) FileNames() ([]string, error) {
 	list := make([]string, 0)
 	for name := range o.conf[o.curr].Data {
 		list = append(list, name)
@@ -74,7 +76,7 @@ func (o *memFS) FileNames() ([]string, error) {
 	return list, nil
 }
 
-func (o *memFS) FileData(filename string) (string, error) {
+func (o *virtual) FileData(filename string) (string, error) {
 	b, ok := o.conf[o.curr].Data[filename]
 	if !ok {
 		return "", fmt.Errorf("not found: %s", filename)
@@ -85,11 +87,11 @@ func (o *memFS) FileData(filename string) (string, error) {
 // ---------------------------------------------------------------------------------------------------------------------
 
 type osFS struct {
-	conf []ConfigMigrateItem
+	conf []Config
 	curr int
 }
 
-func NewOperationSystemFS(c []ConfigMigrateItem) MFS {
+func NewOperationSystemFS(c []Config) FS {
 	return &osFS{
 		conf: c,
 		curr: -1,
@@ -100,7 +102,7 @@ func (o *osFS) Done() {
 	o.curr = -1
 }
 
-func (o *osFS) Dialect() string {
+func (o *osFS) Dialect() dialect.Name {
 	return o.conf[o.curr].Dialect
 }
 

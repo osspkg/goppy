@@ -23,19 +23,19 @@ type (
 	Option func(*dns.Client)
 )
 
-func OptionNetTCP() Option {
+func WithNetTCP() Option {
 	return func(client *dns.Client) {
 		client.Net = "tcp"
 	}
 }
 
-func OptionNetUDP() Option {
+func WithNetUDP() Option {
 	return func(client *dns.Client) {
 		client.Net = "udp"
 	}
 }
 
-func OptionNetDOT() Option {
+func WithNetDOT() Option {
 	return func(client *dns.Client) {
 		client.Net = "tcp-tls"
 	}
@@ -70,7 +70,7 @@ func (v *Client) Exchange(question dns.Question) ([]dns.RR, error) {
 	for _, address := range ns {
 		resp, _, err := v.cli.Exchange(msg, address)
 		if err != nil {
-			errs = errors.Wrap(errs, errors.Wrapf(err, "name: %s, dns: %s", question.Name, address))
+			errs = errors.Wrap(errs, errors.Wrapf(err, "dns client: name: %s, dns: %s", question.Name, address))
 			continue
 		}
 

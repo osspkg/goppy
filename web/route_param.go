@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-var uriParamRex = regexp.MustCompile(`\{([a-z0-9]+)\:?([^{}]*)\}`)
+var rexUrlParams = regexp.MustCompile(`\{([a-z0-9]+)\:?([^{}]*)\}`)
 
 type paramMatch struct {
 	incr    int
@@ -32,68 +32,76 @@ func newParamMatch() *paramMatch {
 	}
 }
 
-func (v *paramMatch) Add(vv string) error {
-	result := vv
+func (v *paramMatch) Add(uri string) error {
+	result := "^" + uri + "$"
 
-	patterns := uriParamRex.FindAllString(vv, -1)
-	for _, pattern := range patterns {
-		res := uriParamRex.FindAllStringSubmatch(pattern, 1)[0]
-
+	for _, pattern := range rexUrlParams.FindAllString(result, -1) {
 		key := fmt.Sprintf("k%d", v.incr)
+		res := rexUrlParams.FindAllStringSubmatch(pattern, 1)[0]
+
 		rex := ".+"
 		if len(res) == 3 && len(res[2]) > 0 {
 			rex = res[2]
 		}
-		result = strings.Replace(result, res[0], fmt.Sprintf("(?P<%s>%s)", key, rex), 1)
 
-		v.links[key] = vv
+		result = strings.Replace(result, res[0], "(?P<"+key+">"+rex+")", 1)
+
+		v.links[key] = uri
 		v.keys[key] = res[1]
 		v.incr++
 	}
 
-	result = "^" + result + "$"
-
 	if _, err := regexp.Compile(result); err != nil {
-		return fmt.Errorf("regex compilation error for `%s`: %w", vv, err)
+		return fmt.Errorf("regex compilation error for `%s`: %w", uri, err)
 	}
 
-	if len(v.pattern) != 0 {
-		v.pattern += "|"
+	pattern := v.pattern
+	if len(pattern) != 0 {
+		pattern += "|"
 	}
-	v.pattern += result
-	v.rex = regexp.MustCompile(v.pattern)
+	pattern += result
+
+	rex, err := regexp.Compile(pattern)
+	if err != nil {
+		return fmt.Errorf("regex compilation error for `%s`: %w", uri, err)
+	}
+
+	v.rex, v.pattern = rex, pattern
+
 	return nil
 }
 
-func (v *paramMatch) Match(vv string, vr uriParamData) (string, bool) {
+func (v *paramMatch) Match(uri string, params uriParamData) (string, bool) {
 	if v.rex == nil {
 		return "", false
 	}
 
-	matches := v.rex.FindStringSubmatch(vv)
+	matches := v.rex.FindStringSubmatch(uri)
 	if len(matches) == 0 {
 		return "", false
 	}
 
 	link := ""
-	for indx, name := range v.rex.SubexpNames() {
-		val := matches[indx]
+	for i, name := range v.rex.SubexpNames() {
+		val := matches[i]
 		if len(val) == 0 {
 			continue
 		}
+
 		if l, ok := v.links[name]; ok {
 			link = l
 		}
+
 		if key, ok := v.keys[name]; ok {
-			vr[key] = val
+			params[key] = val
 		}
 	}
 
 	return link, true
 }
 
-func hasParamMatch(vv string) bool {
-	return uriParamRex.MatchString(vv)
+func hasParamMatch(uri string) bool {
+	return rexUrlParams.MatchString(uri)
 }
 
 /**********************************************************************************************************************/

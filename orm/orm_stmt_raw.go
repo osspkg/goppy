@@ -7,8 +7,11 @@ package orm
 
 import (
 	"context"
+	"fmt"
 
 	"go.osspkg.com/errors"
+
+	"go.osspkg.com/goppy/v2/orm/metric"
 )
 
 // PingContext database ping
@@ -16,9 +19,13 @@ func (v *_stmt) PingContext(ctx context.Context) (err error) {
 	if v.err != nil {
 		return v.err
 	}
-	execTime(v.tag, "ping", func() {
-		err = v.conn.PingContext(ctx)
+
+	metric.ExecTime(v.tag, "ping", func() {
+		if err = v.db.PingContext(ctx); err != nil {
+			err = fmt.Errorf("failed pinging database: %w", err)
+		}
 	})
+
 	return
 }
 
@@ -27,9 +34,13 @@ func (v *_stmt) CallContext(ctx context.Context, name string, callFunc func(cont
 	if v.err != nil {
 		return v.err
 	}
-	execTime(v.tag, name, func() {
-		err = callFunc(ctx, v.conn)
+
+	metric.ExecTime(v.tag, name, func() {
+		if err = callFunc(ctx, v.db); err != nil {
+			err = fmt.Errorf("failed calling %s: %w", name, err)
+		}
 	})
+
 	return
 }
 
@@ -39,19 +50,27 @@ func (v *_stmt) TxContext(ctx context.Context, name string, callFunc func(contex
 		return v.err
 	}
 
-	dbx, err := v.conn.BeginTx(ctx, nil)
+	dbx, err := v.db.BeginTx(ctx, nil)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed beginning transaction: %w", err)
 	}
-	execTime(v.tag, name, func() {
-		err = callFunc(ctx, dbx)
+
+	metric.ExecTime(v.tag, name, func() {
+		if err = callFunc(ctx, dbx); err != nil {
+			err = fmt.Errorf("failed calling %s: %w", name, err)
+		}
 	})
+
 	if err != nil {
 		return errors.Wrap(
-			errors.Wrapf(err, "execute tx"),
-			errors.Wrapf(dbx.Rollback(), "rollback tx"),
+			errors.Wrapf(err, "failed execute transaction"),
+			errors.Wrapf(dbx.Rollback(), "failed rollback transaction"),
 		)
 	}
 
-	return dbx.Commit()
+	if err = dbx.Commit(); err != nil {
+		return fmt.Errorf("failed committing transaction: %w", err)
+	}
+
+	return nil
 }

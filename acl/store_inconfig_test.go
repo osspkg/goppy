@@ -15,27 +15,27 @@ import (
 
 func TestUnit_NewInConfigStorage(t *testing.T) {
 	conf := &acl.ConfigInConfigStorage{ACL: map[string]string{
-		"u1": "123",
-		"u2": "456",
+		"u1": "MTIz",
+		"u2": "NDU2",
 	}}
 	store := acl.NewInConfigStorage(conf)
 	casecheck.NotNil(t, store)
 
 	val, err := store.FindACL("u1")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "123", val)
+	casecheck.Equal(t, []byte{49, 50, 51}, val)
 
 	val, err = store.FindACL("u2")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "456", val)
+	casecheck.Equal(t, []byte{52, 53, 54}, val)
 
 	val, err = store.FindACL("u3")
 	casecheck.Error(t, err)
-	casecheck.Equal(t, "", val)
+	casecheck.Equal(t, []byte{}, val)
 
-	err = store.ChangeACL("u2", "789")
+	err = store.ChangeACL("u2", []byte("789"))
 	casecheck.Error(t, err)
 
-	err = store.ChangeACL("u5", "333")
+	err = store.ChangeACL("u5", []byte("333"))
 	casecheck.Error(t, err)
 }

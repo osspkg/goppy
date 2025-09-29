@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *event) {
+func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *entity) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -31,17 +31,20 @@ func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *even
 	for !in.IsDelim('}') {
 		key := in.UnsafeFieldName(false)
 		in.WantColon()
-		if in.IsNull() {
-			in.Skip()
-			in.WantComma()
-			continue
-		}
 		switch key {
 		case "e":
-			out.Id = Id(in.Uint16())
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Id = Id(in.Uint16())
+			}
 		case "d":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Data).UnmarshalJSON(data))
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				if data := in.Raw(); in.Ok() {
+					in.AddError((out.Data).UnmarshalJSON(data))
+				}
 			}
 		case "err":
 			if in.IsNull() {
@@ -51,7 +54,11 @@ func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *even
 				if out.Err == nil {
 					out.Err = new(string)
 				}
-				*out.Err = string(in.String())
+				if in.IsNull() {
+					in.Skip()
+				} else {
+					*out.Err = string(in.String())
+				}
 			}
 		default:
 			in.SkipRecursive()
@@ -63,7 +70,7 @@ func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *even
 		in.Consumed()
 	}
 }
-func easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(out *jwriter.Writer, in event) {
+func easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(out *jwriter.Writer, in entity) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -86,25 +93,25 @@ func easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(out *jwriter.Writer, in eve
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v event) MarshalJSON() ([]byte, error) {
+func (v entity) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
 	easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v event) MarshalEasyJSON(w *jwriter.Writer) {
+func (v entity) MarshalEasyJSON(w *jwriter.Writer) {
 	easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *event) UnmarshalJSON(data []byte) error {
+func (v *entity) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
 	easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *event) UnmarshalEasyJSON(l *jlexer.Lexer) {
+func (v *entity) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(l, v)
 }

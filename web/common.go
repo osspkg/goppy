@@ -6,6 +6,7 @@
 package web
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -48,4 +49,36 @@ func urlSplit(uri string) []string {
 		}
 	}
 	return vv
+}
+
+/**********************************************************************************************************************/
+
+func typingJSONKey(v any) string {
+	switch vv := v.(type) {
+	case string:
+		return vv
+	case []byte:
+		return string(vv)
+	case fmt.Stringer:
+		return vv.String()
+	case fmt.GoStringer:
+		return vv.GoString()
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
+func typingJSONValue(v any) any {
+	switch vv := v.(type) {
+	case string:
+		return vv
+	case []byte:
+		return string(vv)
+	case fmt.Stringer:
+		return vv.String()
+	case fmt.GoStringer:
+		return vv.GoString()
+	default:
+		return v
+	}
 }

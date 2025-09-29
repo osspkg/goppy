@@ -7,4 +7,4 @@ log:
 
 http:
   - tag: main
-    addr: 0.0.0.0:10000
+    addr: localhost:10000

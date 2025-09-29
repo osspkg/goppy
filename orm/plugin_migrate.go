@@ -12,39 +12,28 @@ import (
 	"go.osspkg.com/goppy/v2/plugins"
 )
 
-func WithMigration(ms ...Migration) plugins.Plugin {
+func WithMigration(ms ...Migration) plugins.Kind {
 	if len(ms) > 0 {
-		return plugins.Plugin{
+		return plugins.Kind{
 			Inject: func(ctx xc.Context, o ORM) error {
-				m := &Migrate{
-					Conn: o,
-					FS:   NewInMemoryFS(ms),
+				if err := NewMigrate(o, NewVirtualFS(ms)).Run(ctx.Context()); err != nil {
+					logx.Error("Run DB migration", "err", err)
+					return err
 				}
-				go dialectOnRegistered(func(dialect string) {
-					if err := m.Run(ctx.Context(), dialect); err != nil {
-						logx.Error("Run DB migration", "dialect", dialect, "err", err)
-						ctx.Close()
-						return
-					}
-				})
+
 				return nil
 			},
 		}
 	}
-	return plugins.Plugin{
-		Config: &ConfigMigrate{},
-		Inject: func(ctx xc.Context, c *ConfigMigrate, o ORM) error {
-			m := &Migrate{
-				Conn: o,
-				FS:   NewOperationSystemFS(c.List),
+
+	return plugins.Kind{
+		Config: &ConfigGroup{},
+		Inject: func(ctx xc.Context, c *ConfigGroup, o ORM) error {
+			if err := NewMigrate(o, NewOperationSystemFS(c.List)).Run(ctx.Context()); err != nil {
+				logx.Error("Run DB migration", "err", err)
+				return err
 			}
-			go dialectOnRegistered(func(dialect string) {
-				if err := m.Run(ctx.Context(), dialect); err != nil {
-					logx.Error("Run DB migration", "dialect", dialect, "err", err)
-					ctx.Close()
-					return
-				}
-			})
+
 			return nil
 		},
 	}
