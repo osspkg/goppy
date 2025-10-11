@@ -14,8 +14,8 @@ import (
 
 func TestUnit_NewHandler(t *testing.T) {
 	h := newCtrlHandler()
-	h.Route("/aaa/{id}", func(_ http.ResponseWriter, _ *http.Request) {}, []string{http.MethodPost})
-	h.Route("", func(_ http.ResponseWriter, _ *http.Request) {}, []string{http.MethodPost})
+	h.Route("/aaa/{id}", func(_ Ctx) {}, []string{http.MethodPost})
+	h.Route("", func(_ Ctx) {}, []string{http.MethodPost})
 
 	code, ctrl, vr, midd := h.Match("/aaa/bbb", http.MethodPost)
 	casecheck.Equal(t, 200, code)
@@ -58,7 +58,7 @@ func TestUnit_NewHandler(t *testing.T) {
 	casecheck.Equal(t, 1, len(midd))
 	casecheck.Equal(t, uriParamData(nil), vr)
 
-	h.NoFoundHandler(func(_ http.ResponseWriter, _ *http.Request) {})
+	h.NoFoundHandler(func(_ Ctx) {})
 
 	code, ctrl, vr, midd = h.Match("/test", http.MethodGet)
 	casecheck.Equal(t, http.StatusOK, code)
@@ -69,7 +69,7 @@ func TestUnit_NewHandler(t *testing.T) {
 
 func TestUnit_NewHandler2(t *testing.T) {
 	h := newCtrlHandler()
-	h.Route("/api/v{id}/data/#", func(_ http.ResponseWriter, _ *http.Request) {}, []string{http.MethodGet})
+	h.Route("/api/v{id}/data/#", func(_ Ctx) {}, []string{http.MethodGet})
 
 	h.Middlewares("/api/v{id}", RecoveryMiddleware())
 

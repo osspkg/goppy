@@ -8,7 +8,9 @@ package ws
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gorilla/websocket"
 	"go.osspkg.com/do"
@@ -18,34 +20,26 @@ import (
 	"go.osspkg.com/goppy/v2/ws/event"
 )
 
-type (
-	Option interface {
-		Set(key, value string)
-	}
-)
-
 type _client struct {
-	events    map[event.Id]EventHandler
-	servers   map[string]*connect
-	ctx       context.Context
-	cancel    context.CancelFunc
-	openFunc  []func(cid string)
-	closeFunc []func(cid string)
-	mux       syncing.Lock
-	wg        syncing.Group
+	events     *syncing.Map[event.Id, EventHandler]
+	servers    *syncing.Map[string, *connect]
+	ctx        context.Context
+	cancel     context.CancelFunc
+	openFuncs  *syncing.Slice[func(cid string)]
+	closeFuncs *syncing.Slice[func(cid string)]
+	wg         syncing.Group
 }
 
 func NewClient(ctx context.Context) Client {
 	ctx, cancel := context.WithCancel(ctx)
 	return &_client{
-		events:    make(map[event.Id]EventHandler, 10),
-		servers:   make(map[string]*connect, 10),
-		ctx:       ctx,
-		cancel:    cancel,
-		openFunc:  make([]func(cid string), 0, 2),
-		closeFunc: make([]func(cid string), 0, 2),
-		mux:       syncing.NewLock(),
-		wg:        syncing.NewGroup(),
+		events:     syncing.NewMap[event.Id, EventHandler](10),
+		servers:    syncing.NewMap[string, *connect](10),
+		ctx:        ctx,
+		cancel:     cancel,
+		openFuncs:  syncing.NewSlice[func(cid string)](2),
+		closeFuncs: syncing.NewSlice[func(cid string)](2),
+		wg:         syncing.NewGroup(ctx),
 	}
 }
 
@@ -58,21 +52,26 @@ func (v *_client) Down() error {
 	return nil
 }
 
-func (v *_client) Open(url string, opts ...func(Option)) (string, error) {
+func (v *_client) Open(url string, opts ...func(h http.Header, d *websocket.Dialer)) (string, error) {
 	headers := make(http.Header)
-	for _, opt := range opts {
-		opt(headers)
+	dial := &websocket.Dialer{
+		Proxy:            http.ProxyFromEnvironment,
+		HandshakeTimeout: 45 * time.Second,
 	}
 
-	conn, resp, err := websocket.DefaultDialer.DialContext(v.ctx, url, headers)
+	for _, opt := range opts {
+		opt(headers, dial)
+	}
+
+	conn, resp, err := dial.DialContext(v.ctx, url, headers)
 	if err != nil {
 		logx.Error("WS Client", "do", "open connect", "err", err, "url", url)
 		return "", err
 	}
 
-	cid := resp.Header.Get("Sec-WebSocket-Accept")
+	clientId := resp.Header.Get("Sec-WebSocket-Accept")
 
-	v.wg.Background(func() {
+	v.wg.Background("open connect", func(ctx context.Context) {
 		defer func() {
 			if err := resp.Body.Close(); err != nil {
 				logx.Error("WS Client", "do", "close connect body", "err", err, "url", url)
@@ -80,109 +79,70 @@ func (v *_client) Open(url string, opts ...func(Option)) (string, error) {
 			}
 		}()
 
-		c := newConnect(v.ctx, cid, resp.Header, v, conn)
+		c := newConnect(v.ctx, clientId, resp.Header, v, conn)
 
-		c.OnClose(func(cid string) {
-			v.delConn(cid)
-		})
-		c.OnOpen(func(string) {
-			v.addConn(c)
-		})
+		c.AddOnCloseFunc(func(cid string) { v.delConn(cid) })
+		c.AddOnOpenFunc(func(string) { v.addConn(c) })
 		c.Run()
 	})
 
-	return cid, nil
+	return clientId, nil
 }
 
-func (v *_client) GetEventHandler(eid event.Id) (h EventHandler, ok bool) {
-	v.mux.RLock(func() {
-		h, ok = v.events[eid]
-	})
-	return
+func (v *_client) GetEventHandler(eventId event.Id) (EventHandler, bool) {
+	return v.events.Get(eventId)
 }
 
-func (v *_client) SetEventHandler(h EventHandler, eids ...event.Id) {
-	v.mux.Lock(func() {
-		for _, eid := range eids {
-			v.events[eid] = h
+func (v *_client) SetEventHandler(handler EventHandler, eventIDs ...event.Id) {
+	for _, eventId := range eventIDs {
+		v.events.Set(eventId, handler)
+	}
+
+}
+
+func (v *_client) DelEventHandler(eventIDs ...event.Id) {
+	for _, eventId := range eventIDs {
+		v.events.Del(eventId)
+	}
+}
+
+func (v *_client) CountConn() int {
+	return v.servers.Size()
+}
+
+func (v *_client) addConn(conn *connect) {
+	v.servers.Set(conn.ConnectID(), conn)
+
+	for call := range v.openFuncs.Yield() {
+		if err := do.Recovery(func() { call(conn.ConnectID()) }); err != nil {
+			logx.Error("WS Server", "do", "run open func", "panic", err, "serverId", conn.ConnectID())
 		}
-	})
+	}
 }
 
-func (v *_client) DelEventHandler(eids ...event.Id) {
-	v.mux.Lock(func() {
-		for _, eid := range eids {
-			delete(v.events, eid)
+func (v *_client) delConn(serverId string) {
+	v.servers.Del(serverId)
+
+	go func() {
+		for call := range v.closeFuncs.Yield() {
+			if err := do.Recovery(func() { call(serverId) }); err != nil {
+				logx.Error("WS Server", "do", "run close func", "panic", err, "serverId", serverId)
+			}
 		}
-	})
+	}()
 }
 
-func (v *_client) CountConn() (cc int) {
-	v.mux.RLock(func() {
-		cc = len(v.servers)
-	})
-	return
+func (v *_client) AddOnCloseFunc(callback func(serverId string)) {
+	v.closeFuncs.Append(callback)
 }
 
-func (v *_client) addConn(c *connect) {
-	v.mux.Lock(func() {
-		v.servers[c.ConnectID()] = c
-	})
-
-	go v.mux.RLock(func() {
-		for _, cb := range v.openFunc {
-			go func(call func(cid string)) {
-				err := do.Recovery(func() {
-					call(c.ConnectID())
-				})
-				if err != nil {
-					logx.Error("WS Client", "do", "run open func", "panic", err, "cid", c.ConnectID())
-				}
-			}(cb)
-		}
-	})
+func (v *_client) AddOnOpenFunc(callback func(serverId string)) {
+	v.openFuncs.Append(callback)
 }
 
-func (v *_client) delConn(id string) {
-	v.mux.Lock(func() {
-		delete(v.servers, id)
-	})
-
-	go v.mux.RLock(func() {
-		for _, cb := range v.closeFunc {
-			go func(call func(cid string)) {
-				err := do.Recovery(func() {
-					call(id)
-				})
-				if err != nil {
-					logx.Error("WS Client", "do", "run close func", "panic", err, "cid", id)
-				}
-			}(cb)
-		}
-	})
-}
-
-func (v *_client) OnClose(cb func(cid string)) {
-	v.mux.Lock(func() {
-		v.closeFunc = append(v.closeFunc, cb)
-	})
-}
-
-func (v *_client) OnOpen(cb func(cid string)) {
-	v.mux.Lock(func() {
-		v.openFunc = append(v.openFunc, cb)
-	})
-}
-
-func (v *_client) CloseOne(cid string) {
-	var conn *connect
-	v.mux.RLock(func() {
-		if cc, ok := v.servers[cid]; ok {
-			conn = cc
-		}
-	})
-
-	if conn == nil {
+func (v *_client) CloseConnect(serverId string) {
+	conn, ok := v.servers.Extract(serverId)
+	if !ok {
 		return
 	}
 
@@ -194,54 +154,54 @@ func (v *_client) CloseAll() {
 	v.wg.Wait()
 }
 
-func (v *_client) BroadcastEvent(eid event.Id, m any) (err error) {
-	event.New(func(ev event.Event) {
-		ev.WithID(eid)
-		if err = ev.Encode(m); err != nil {
-			logx.Error("WS Client", "do", "broadcast event", "err", err, "eid", eid)
-			return
-		}
+func (v *_client) BroadcastEvent(eventId event.Id, message any) error {
+	ev := event.Pool.Get()
+	defer event.Pool.Put(ev)
 
-		var b []byte
-		b, err = json.Marshal(ev)
-		if err != nil {
-			logx.Error("WS Client", "do", "broadcast event", "err", err, "eid", eid)
-			return
-		}
+	ev.WithID(eventId)
+	if err := ev.Encode(message); err != nil {
+		logx.Error("WS Client", "do", "broadcast event", "err", err, "eventId", eventId)
+		return fmt.Errorf("encode message for id '%d': %w", eventId, err)
+	}
 
-		v.mux.RLock(func() {
-			for _, c := range v.servers {
-				c.AppendMessage(b)
-			}
-		})
-	})
-	return
+	b, err := json.Marshal(ev)
+	if err != nil {
+		logx.Error("WS Client", "do", "broadcast event", "err", err, "eventId", eventId)
+		return fmt.Errorf("encode event for id '%d': %w", eventId, err)
+	}
+
+	go func() {
+		for _, conn := range v.servers.Yield() {
+			conn.SendRawMessage(b)
+		}
+	}()
+
+	return nil
 }
 
-func (v *_client) SendEvent(eid event.Id, m any, cids ...string) (err error) {
-	event.New(func(ev event.Event) {
-		ev.WithID(eid)
-		if err = ev.Encode(m); err != nil {
-			logx.Error("WS Client", "do", "send event", "err", err, "eid", eid)
-			return
-		}
+func (v *_client) SendEvent(eventId event.Id, message any, serverIDs ...string) error {
+	ev := event.Pool.Get()
+	defer event.Pool.Put(ev)
 
-		var b []byte
-		b, err = json.Marshal(ev)
-		if err != nil {
-			logx.Error("WS Client", "do", "send event", "err", err, "eid", eid)
-			return
-		}
+	ev.WithID(eventId)
+	if err := ev.Encode(message); err != nil {
+		logx.Error("WS Client", "do", "send event", "err", err, "eventId", eventId)
+		return fmt.Errorf("encode message for id '%d': %w", eventId, err)
+	}
 
-		v.mux.RLock(func() {
-			for _, cid := range cids {
-				c, ok := v.servers[cid]
-				if !ok {
-					continue
-				}
-				c.AppendMessage(b)
+	b, err := json.Marshal(ev)
+	if err != nil {
+		logx.Error("WS Client", "do", "send event", "err", err, "eventId", eventId)
+		return fmt.Errorf("encode event for id '%d': %w", eventId, err)
+	}
+
+	go func() {
+		for _, clientId := range serverIDs {
+			if conn, ok := v.servers.Get(clientId); ok {
+				conn.SendRawMessage(b)
 			}
-		})
-	})
-	return
+		}
+	}()
+
+	return nil
 }

@@ -14,40 +14,39 @@ import (
 )
 
 func TestUnit_NewInMemoryStorage(t *testing.T) {
-	opt := acl.OptionInMemoryStorageSetupData(map[string]string{
-		"u1": "123",
-		"u2": "456",
+	store := acl.NewInMemoryStorage(map[string][]byte{
+		"u1": []byte("123"),
+		"u2": []byte("456"),
 	})
-	store := acl.NewInMemoryStorage(opt)
 	casecheck.NotNil(t, store)
 
 	val, err := store.FindACL("u1")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "123", val)
+	casecheck.Equal(t, []byte{49, 50, 51}, val)
 
 	val, err = store.FindACL("u2")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "456", val)
+	casecheck.Equal(t, []byte{52, 53, 54}, val)
 
 	val, err = store.FindACL("u3")
 	casecheck.Error(t, err)
-	casecheck.Equal(t, "", val)
+	casecheck.Equal(t, []byte{}, val)
 
-	err = store.ChangeACL("u2", "789")
+	err = store.ChangeACL("u2", []byte("789"))
 	casecheck.NoError(t, err)
 
 	val, err = store.FindACL("u2")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "789", val)
+	casecheck.Equal(t, []byte{55, 56, 57}, val)
 
 	val, err = store.FindACL("u5")
 	casecheck.Error(t, err)
-	casecheck.Equal(t, "", val)
+	casecheck.Equal(t, []byte{}, val)
 
-	err = store.ChangeACL("u5", "333")
+	err = store.ChangeACL("u5", []byte("333"))
 	casecheck.NoError(t, err)
 
 	val, err = store.FindACL("u5")
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, "333", val)
+	casecheck.Equal(t, []byte{51, 51, 51}, val)
 }

@@ -7,7 +7,7 @@ log:
 
 http:
   - tag: main
-    addr: 0.0.0.0:10000
+    addr: 127.0.0.1:10000
 
 geoip:
   maxminddb: ./GeoIP2-Country-Test.mmdb

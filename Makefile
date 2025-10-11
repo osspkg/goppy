@@ -27,6 +27,9 @@ tests:
 .PHONY: pre-commit
 pre-commit: install setup license lint build tests
 
+.PHONY: ci
+ci: pre-commit
+
 .PHONY: tidy
 tidy:
 	go mod tidy -v

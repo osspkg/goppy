@@ -5,9 +5,18 @@
 
 package acl
 
+import (
+	"encoding/base64"
+	"fmt"
+	"sync"
+
+	"go.osspkg.com/logx"
+)
+
 type (
 	storeInConfig struct {
-		data map[string]string
+		data map[string][]byte
+		mux  sync.RWMutex
 	}
 
 	ConfigInConfigStorage struct {
@@ -18,21 +27,30 @@ type (
 func NewInConfigStorage(c *ConfigInConfigStorage) Storage {
 	v := &storeInConfig{}
 
-	v.data = make(map[string]string, len(c.ACL))
+	v.data = make(map[string][]byte, len(c.ACL))
 	for key, val := range c.ACL {
-		v.data[key] = val
+		b, err := base64.StdEncoding.DecodeString(val)
+		if err != nil {
+			logx.Error("base64 decoding failed", "err", err, "value", val)
+			continue
+		}
+		v.data[key] = b
 	}
 
 	return v
 }
 
-func (v *storeInConfig) FindACL(email string) (string, error) {
-	if acl, ok := v.data[email]; ok {
+func (v *storeInConfig) FindACL(uid string) ([]byte, error) {
+	v.mux.RLock()
+	defer v.mux.RUnlock()
+
+	if acl, ok := v.data[uid]; ok {
 		return acl, nil
 	}
-	return "", errUserNotFound
+
+	return nil, fmt.Errorf("%s not exist", uid)
 }
 
-func (v *storeInConfig) ChangeACL(email, data string) error {
-	return errChangeNotSupported
+func (v *storeInConfig) ChangeACL(uid string, _ []byte) error {
+	return fmt.Errorf("change %s not supported", uid)
 }

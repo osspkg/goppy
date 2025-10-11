@@ -6,6 +6,7 @@
 package xdns
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -24,13 +25,13 @@ type Server struct {
 	wg      syncing.Group
 }
 
-func NewServer(conf Config) *Server {
+func NewServer(ctx context.Context, conf Config) *Server {
 	return &Server{
 		conf:    conf,
 		serv:    make([]*dns.Server, 0, 2),
 		qtypes:  make(map[uint16]struct{}, len(conf.QTypes)),
 		handler: DefaultExchanger(),
-		wg:      syncing.NewGroup(),
+		wg:      syncing.NewGroup(ctx),
 	}
 }
 
@@ -63,13 +64,14 @@ func (v *Server) Up(ctx xc.Context) error {
 
 	for _, srv := range v.serv {
 		srv := srv
-		v.wg.Background(func() {
+		v.wg.Background("dns server", func(_ context.Context) {
 			defer ctx.Close()
-			logx.Info("DNS Server", "do", "start", "address", srv.Addr, "net", srv.Net)
 
-			if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-				logx.Error("DNS Server", "do", "start", "address", srv.Addr, "net", srv.Net, "err", err)
-			}
+			logx.Info("DNS Server", "do", "start", "ip", srv.Addr, "net", srv.Net)
+
+			servErr := srv.ListenAndServe()
+
+			logx.Warn("DNS Server", "do", "stop", "err", servErr, "ip", srv.Addr, "net", srv.Net)
 		})
 	}
 
@@ -77,15 +79,14 @@ func (v *Server) Up(ctx xc.Context) error {
 }
 
 func (v *Server) Down() error {
+	defer v.wg.Wait()
+
 	for _, srv := range v.serv {
 		if err := srv.Shutdown(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logx.Error("DNS Server", "do", "stop", "address", srv.Addr, "net", srv.Net, "err", err)
-		} else {
-			logx.Info("DNS Server", "do", "stop", "address", srv.Addr, "net", srv.Net)
+			logx.Error("DNS Server", "do", "shutdown", "err", err, "ip", srv.Addr, "net", srv.Net)
 		}
 	}
 
-	v.wg.Wait()
 	return nil
 }
 
@@ -96,10 +97,16 @@ func (v *Server) HandleFunc(r HandlerDNS) {
 func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	defer func() {
 		if err := recover(); err != nil {
-			logx.Error("DNS Server", "do", "handler: panic", "question", msg, "err", fmt.Errorf("%+v", err))
+			logx.Error("DNS Server",
+				"do", "handler panic",
+				"question", msg.String(),
+				"err", fmt.Errorf("%+v", err))
 		}
 		if err := w.Close(); err != nil {
-			logx.Error("DNS Server", "do", "handler: close connect", "question", msg, "err", err)
+			logx.Error("DNS Server",
+				"do", "close connect",
+				"question", msg.String(),
+				"err", err)
 		}
 	}()
 
@@ -115,7 +122,11 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 
 		answers, err := v.handler.Exchange(q)
 		if err != nil {
-			logx.Error("DNS Server", "do", "exchange", "domain", q.Name, "qtype", QTypeString(q.Qtype), "err", err)
+			logx.Error("DNS Server",
+				"do", "exchange",
+				"domain", q.Name,
+				"qtype", QTypeString(q.Qtype),
+				"err", err)
 		} else {
 			for _, answer := range answers {
 				if answer == nil {
@@ -127,6 +138,10 @@ func (v *Server) dnsHandler(w dns.ResponseWriter, msg *dns.Msg) {
 	}
 
 	if err := w.WriteMsg(response); err != nil {
-		logx.Error("DNS Server", "do", "response: write", "question", msg, "answer", response, "err", err)
+		logx.Error("DNS Server",
+			"do", "write response",
+			"question", msg.String(),
+			"answer", response.String(),
+			"err", err)
 	}
 }

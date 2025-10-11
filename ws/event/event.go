@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	poolEvents = pool.New[*event](func() *event { return &event{} })
+	Pool = pool.New[*entity](func() *entity { return &entity{} })
 )
 
 type Id uint16
@@ -31,31 +31,25 @@ type (
 	}
 
 	//easyjson:json
-	event struct {
+	entity struct {
 		Id   Id              `json:"e"`
 		Data json.RawMessage `json:"d,omitempty"`
 		Err  *string         `json:"err,omitempty"`
 	}
 )
 
-func New(call func(ev Event)) {
-	m := poolEvents.Get()
-	call(m)
-	poolEvents.Put(m)
-}
-
-func (v *event) ID() Id {
+func (v *entity) ID() Id {
 	return v.Id
 }
 
-func (v *event) Decode(in any) error {
+func (v *entity) Decode(in any) error {
 	if v.Err != nil {
 		return fmt.Errorf("%s", *v.Err)
 	}
 	return json.Unmarshal(v.Data, in)
 }
 
-func (v *event) Encode(in any) (err error) {
+func (v *entity) Encode(in any) (err error) {
 	v.Data, err = json.Marshal(in)
 	if err != nil {
 		return err
@@ -64,15 +58,15 @@ func (v *event) Encode(in any) (err error) {
 	return nil
 }
 
-func (v *event) WithID(id Id) {
+func (v *entity) WithID(id Id) {
 	v.Id = id
 }
 
-func (v *event) Reset() {
+func (v *entity) Reset() {
 	v.Id, v.Err, v.Data = 0, nil, v.Data[:0]
 }
 
-func (v *event) WithError(err error) {
+func (v *entity) WithError(err error) {
 	if err == nil {
 		return
 	}

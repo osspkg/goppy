@@ -5,6 +5,8 @@
 
 package xdns
 
+import "fmt"
+
 type (
 	ConfigGroup struct {
 		DNS Config `yaml:"dns"`
@@ -18,4 +20,11 @@ type (
 func (v *ConfigGroup) Default() {
 	v.DNS.Addr = "0.0.0.0:53"
 	v.DNS.QTypes = []string{"A"}
+}
+
+func (v *ConfigGroup) Validate() error {
+	if len(v.DNS.Addr) == 0 {
+		return fmt.Errorf("dns server: missing addr")
+	}
+	return nil
 }

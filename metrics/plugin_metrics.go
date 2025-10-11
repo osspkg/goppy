@@ -6,9 +6,10 @@
 package metrics
 
 import (
-	"net/http"
-
 	"github.com/prometheus/client_golang/prometheus"
+	"go.osspkg.com/xc"
+
+	"go.osspkg.com/goppy/v2/web"
 
 	"go.osspkg.com/goppy/v2/env"
 	"go.osspkg.com/goppy/v2/plugins"
@@ -37,15 +38,15 @@ func (v *ConfigGroup) Default() {
 	}
 }
 
-func WithServer() plugins.Plugin {
-	return plugins.Plugin{
+func WithServer() plugins.Kind {
+	return plugins.Kind{
 		Config: &ConfigGroup{},
-		Inject: func(app env.AppInfo, c *ConfigGroup) Metrics {
-			return New(app, c.Config)
+		Inject: func(ctx xc.Context, app env.AppInfo, c *ConfigGroup) Metrics {
+			return New(ctx, app, c.Config)
 		},
 	}
 }
 
 type Metrics interface {
-	AddHandler(path string, ctrl func(http.ResponseWriter, *http.Request), methods ...string)
+	AddHandler(path string, ctrl func(ctx web.Ctx), methods ...string)
 }

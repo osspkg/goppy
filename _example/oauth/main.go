@@ -25,10 +25,14 @@ func main() {
 		}),
 	)
 	app.Plugins(
-		plugins.Plugin{
+		plugins.Kind{
 			Inject: NewController,
-			Resolve: func(routes web.RouterPool, c *Controller, oa oauth.OAuth) {
-				router := routes.Main()
+			Resolve: func(routes web.ServerPool, c *Controller, oa oauth.OAuth) {
+				router, ok := routes.Main()
+				if !ok {
+					return
+				}
+
 				router.Use(web.ThrottlingMiddleware(100))
 
 				router.Get("/oauth/r/{code}", oa.Request("code"))
@@ -46,7 +50,7 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) CallBack(ctx web.Context, user oauth.User, code oauth.Code) {
+func (v *Controller) CallBack(ctx web.Ctx, user oauth.User, code oauth.Code) {
 	ctx.String(
 		200,
 		"code: %s, email: %s, name: %s, ico: %s",

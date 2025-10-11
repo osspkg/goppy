@@ -24,11 +24,11 @@ func main() {
 		ws.WithClient(),
 	)
 	application.Plugins(
-		plugins.Plugin{
+		plugins.Kind{
 			Inject: NewController,
 			Resolve: func(c *Controller, ctx xc.Context, cli ws.Client) error {
 				cli.SetEventHandler(c.EventListener, 99, 1, 65000)
-				cli.OnClose(func(cid string) {
+				cli.AddOnCloseFunc(func(cid string) {
 					fmt.Println("server close connect")
 					ctx.Close()
 				})

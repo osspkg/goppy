@@ -21,7 +21,6 @@ const (
 )
 
 var (
-	ErrOneOpenConnect = errors.New("connection can be started once")
 	ErrUnknownEventID = errors.New("unknown event id")
 )
 
@@ -39,15 +38,9 @@ func NewUpgrade() *websocket.Upgrader {
 
 func SetupPingPong(c *websocket.Conn) {
 	c.SetPingHandler(func(_ string) error {
-		return errors.Wrap(
-			c.SetReadDeadline(time.Now().Add(PongWait)),
-			// v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
-		)
+		return c.SetReadDeadline(time.Now().Add(PongWait))
 	})
 	c.SetPongHandler(func(_ string) error {
-		return errors.Wrap(
-			c.SetReadDeadline(time.Now().Add(PongWait)),
-			// v.conn.SetWriteDeadline(time.Now().Add(PongWait)),
-		)
+		return c.SetReadDeadline(time.Now().Add(PongWait))
 	})
 }

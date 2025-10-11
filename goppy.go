@@ -8,6 +8,7 @@ package goppy
 import (
 	"fmt"
 	"os"
+	"reflect"
 
 	"go.osspkg.com/config"
 	configEnv "go.osspkg.com/config/env"
@@ -47,7 +48,7 @@ type (
 
 	Goppy interface {
 		Logger(l logx.Logger)
-		Plugins(args ...plugins.Plugin)
+		Plugins(args ...plugins.Kind)
 		Command(name string, call any)
 		ConfigResolvers(rc ...config.Resolver)
 		ConfigData(data, ext string)
@@ -93,17 +94,26 @@ func (v *_app) ConfigData(data, ext string) {
 }
 
 // Plugins setting the list of plugins to initialize
-func (v *_app) Plugins(args ...plugins.Plugin) {
+func (v *_app) Plugins(args ...plugins.Kind) {
 	for _, arg := range args {
-		reflectResolve(arg.Config, plugins.AllowedKindConfig, func(in any) {
-			v.configs = append(v.configs, in)
-		})
-		reflectResolve(arg.Inject, plugins.AllowedKindInject, func(in any) {
-			v.plugins = append(v.plugins, in)
-		})
-		reflectResolve(arg.Resolve, plugins.AllowedKindResolve, func(in any) {
-			v.plugins = append(v.plugins, in)
-		})
+
+		for _, item := range reflectAnySlice(arg.Config) {
+			reflectResolve(item, plugins.AllowedKindConfig(), func(in any) {
+				v.configs = append(v.configs, in)
+			})
+		}
+
+		for _, item := range reflectAnySlice(arg.Inject) {
+			reflectResolve(item, plugins.AllowedKindInject(), func(in any) {
+				v.plugins = append(v.plugins, in)
+			})
+		}
+
+		for _, item := range reflectAnySlice(arg.Resolve) {
+			reflectResolve(item, plugins.AllowedKindResolve(), func(in any) {
+				v.plugins = append(v.plugins, in)
+			})
+		}
 	}
 }
 
@@ -146,11 +156,27 @@ func (v *_app) Run() {
 	apps.Run()
 }
 
+func reflectAnySlice(arg any) []any {
+	refVal := reflect.ValueOf(arg)
+	if refVal.Kind() != reflect.Slice {
+		return []any{arg}
+	}
+
+	result := make([]any, 0, refVal.Len())
+	for i := 0; i < refVal.Len(); i++ {
+		result = append(result, refVal.Index(i).Interface())
+	}
+
+	return result
+}
+
 func reflectResolve(arg any, k plugins.AllowedKind, call func(any)) {
 	if arg == nil {
 		return
 	}
-	k.MustValidate(arg)
+	if err := k.Validate(arg); err != nil {
+		panic(err.Error())
+	}
 	call(arg)
 }
 
@@ -225,6 +251,13 @@ func (v *_app) recoveryConfig(filename string) error {
 	for _, cfg := range v.configs {
 		if vv, ok := cfg.(plugins.Defaulter); ok {
 			vv.Default()
+			continue
+		}
+
+		if vv, ok := cfg.(plugins.Defaulter2); ok {
+			if err = vv.Default(); err != nil {
+				return err
+			}
 		}
 	}
 

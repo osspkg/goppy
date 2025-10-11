@@ -20,39 +20,37 @@ import (
 )
 
 type (
-	resolver interface {
+	eventResolver interface {
 		GetEventHandler(eid event.Id) (EventHandler, bool)
 	}
 
 	connect struct {
-		id        string
-		header    http.Header
-		resolver  resolver
-		conn      *websocket.Conn
-		dataC     chan []byte
-		ctx       context.Context
-		cancel    context.CancelFunc
-		openFunc  []func(cid string)
-		closeFunc []func(cid string)
-		status    syncing.Switch
-		mux       syncing.Lock
+		id         string
+		header     http.Header
+		resolver   eventResolver
+		conn       *websocket.Conn
+		dataC      chan []byte
+		ctx        context.Context
+		cancel     context.CancelFunc
+		openFuncs  *syncing.Slice[func(cid string)]
+		closeFuncs *syncing.Slice[func(cid string)]
+		status     syncing.Switch
 	}
 )
 
-func newConnect(ctx context.Context, id string, head http.Header, r resolver, conn *websocket.Conn) *connect {
+func newConnect(ctx context.Context, id string, head http.Header, r eventResolver, conn *websocket.Conn) *connect {
 	ctx, cancel := context.WithCancel(ctx)
 	return &connect{
-		id:        id,
-		header:    head,
-		resolver:  r,
-		conn:      conn,
-		dataC:     make(chan []byte, internal.BusBufferSize),
-		ctx:       ctx,
-		cancel:    cancel,
-		closeFunc: make([]func(string), 0, 2),
-		openFunc:  make([]func(string), 0, 2),
-		status:    syncing.NewSwitch(),
-		mux:       syncing.NewLock(),
+		id:         id,
+		header:     head,
+		resolver:   r,
+		conn:       conn,
+		dataC:      make(chan []byte, internal.BusBufferSize),
+		ctx:        ctx,
+		cancel:     cancel,
+		closeFuncs: syncing.NewSlice[func(cid string)](2),
+		openFuncs:  syncing.NewSlice[func(cid string)](2),
+		status:     syncing.NewSwitch(),
 	}
 }
 
@@ -81,38 +79,24 @@ func (v *connect) Run() {
 		return
 	}
 
-	v.mux.RLock(func() {
-		for _, cb := range v.openFunc {
-			go func(call func(cid string)) {
-				err := do.Recovery(func() {
-					call(v.ConnectID())
-				})
-				if err != nil {
-					logx.Error("WS Connect", "do", "run open func", "panic", err, "cid", v.ConnectID())
-				}
-			}(cb)
+	for call := range v.openFuncs.Yield() {
+		if err := do.Recovery(func() { call(v.ConnectID()) }); err != nil {
+			logx.Error("WS Connect", "do", "run open func", "panic", err, "cid", v.ConnectID())
 		}
-	})
+	}
 
 	internal.SetupPingPong(v.conn)
 
-	wg := syncing.NewGroup()
-	wg.Background(func() { internal.PumpWrite(v) })
-	wg.Background(func() { internal.PumpRead(v) })
+	wg := syncing.NewGroup(v.ctx)
+	wg.Background("pump write", func(_ context.Context) { internal.PumpWrite(v) })
+	wg.Background("pump read", func(_ context.Context) { internal.PumpRead(v) })
 	wg.Wait()
 
-	v.mux.RLock(func() {
-		for _, cb := range v.closeFunc {
-			go func(call func(cid string)) {
-				err := do.Recovery(func() {
-					call(v.ConnectID())
-				})
-				if err != nil {
-					logx.Error("WS Connect", "do", "run close func", "panic", err, "cid", v.ConnectID())
-				}
-			}(cb)
+	for call := range v.closeFuncs.Yield() {
+		if err := do.Recovery(func() { call(v.ConnectID()) }); err != nil {
+			logx.Error("WS Connect", "do", "run close func", "panic", err, "cid", v.ConnectID())
 		}
-	})
+	}
 }
 
 func (v *connect) Close() {
@@ -125,66 +109,68 @@ func (v *connect) Close() {
 	}
 }
 
-func (v *connect) OnClose(cb func(cid string)) {
-	v.mux.Lock(func() {
-		v.closeFunc = append(v.closeFunc, cb)
-	})
+func (v *connect) AddOnCloseFunc(call func(cid string)) {
+	v.closeFuncs.Append(call)
 }
 
-func (v *connect) OnOpen(cb func(cid string)) {
-	v.mux.Lock(func() {
-		v.openFunc = append(v.openFunc, cb)
-	})
+func (v *connect) AddOnOpenFunc(call func(cid string)) {
+	v.openFuncs.Append(call)
 }
 
-func (v *connect) ReadMessage() <-chan []byte {
+func (v *connect) SendMessageChan() <-chan []byte {
 	return v.dataC
 }
 
-func (v *connect) WriteMessage(b []byte) {
-	event.New(func(ev event.Event) {
-		if err := json.Unmarshal(b, ev); err != nil {
-			logx.Error("WS Connect", "do", "decode message", "err", err, "cid", v.ConnectID())
-			return
-		}
-		call, ok := v.resolver.GetEventHandler(ev.ID())
-		if !ok {
-			ev.WithError(internal.ErrUnknownEventID)
-		} else if err := call(ev, v); err != nil {
-			ev.WithError(err)
-		}
-		if bb, err := json.Marshal(ev); err != nil {
-			logx.Error("WS Connect", "do", "encode message", "err", err, "cid", v.ConnectID())
-		} else {
-			v.AppendMessage(bb)
-		}
-	})
+func (v *connect) ReceiveMessage(b []byte) {
+	ev := event.Pool.Get()
+	defer event.Pool.Put(ev)
+
+	if err := json.Unmarshal(b, ev); err != nil {
+		logx.Error("WS Connect", "do", "decode receive message", "err", err, "cid", v.ConnectID())
+		return
+	}
+
+	call, ok := v.resolver.GetEventHandler(ev.ID())
+	if !ok {
+		ev.WithError(internal.ErrUnknownEventID)
+	} else if err := call(ev, v); err != nil {
+		ev.WithError(err)
+	}
+
+	if bb, err := json.Marshal(ev); err != nil {
+		logx.Error("WS Connect", "do", "encode receive message", "err", err, "cid", v.ConnectID())
+	} else {
+		v.SendRawMessage(bb)
+	}
 }
 
-func (v *connect) AppendMessage(b []byte) {
-	if len(b) == 0 {
+func (v *connect) SendRawMessage(message []byte) {
+	if len(message) == 0 {
 		return
 	}
 	select {
-	case v.dataC <- b:
+	case v.dataC <- message:
 	default:
-		logx.Error("WS Connect", "do", "append message", "err", "write chan is full", "cid", v.ConnectID())
+		logx.Error("WS Connect", "do", "send message", "err", "write chan is full", "cid", v.ConnectID())
 	}
 	return
 }
 
-func (v *connect) Encode(eid event.Id, in any) {
-	event.New(func(ev event.Event) {
-		ev.WithID(eid)
-		if err := ev.Encode(in); err != nil {
-			logx.Error("WS Connect", "do", "encode message", "err", err, "cid", v.ConnectID())
-			return
-		}
-		b, err := json.Marshal(ev)
-		if err != nil {
-			logx.Error("WS Connect", "do", "encode event", "err", err, "cid", v.ConnectID())
-			return
-		}
-		v.AppendMessage(b)
-	})
+func (v *connect) SendEvent(eventId event.Id, message any) {
+	ev := event.Pool.Get()
+	defer event.Pool.Put(ev)
+
+	ev.WithID(eventId)
+	if err := ev.Encode(message); err != nil {
+		logx.Error("WS Connect", "do", "encode message", "err", err, "cid", v.ConnectID())
+		return
+	}
+
+	b, err := json.Marshal(ev)
+	if err != nil {
+		logx.Error("WS Connect", "do", "encode event", "err", err, "cid", v.ConnectID())
+		return
+	}
+
+	v.SendRawMessage(b)
 }

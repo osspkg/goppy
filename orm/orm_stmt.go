@@ -9,6 +9,8 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
 type (
@@ -33,23 +35,23 @@ type (
 
 	_stmt struct {
 		tag     string
-		dialect string
-		conn    *sql.DB
+		dialect dialect.Connector
+		db      *sql.DB
 		err     error
 	}
 )
 
 // newStmt init new statement
-func newStmt(tag, dialect string, conn *sql.DB, err error) Stmt {
+func newStmt(tag string, dialect dialect.Connector, db *sql.DB, err error) Stmt {
 	return &_stmt{
 		tag:     tag,
 		dialect: dialect,
-		conn:    conn,
+		db:      db,
 		err:     err,
 	}
 }
 
 func (v *_stmt) Close() error {
 	v.err = fmt.Errorf("closed connect")
-	return v.conn.Close()
+	return v.db.Close()
 }

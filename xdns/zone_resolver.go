@@ -13,12 +13,12 @@ type ZoneResolve struct {
 	dns []string
 }
 
-func NewSimpleZoneResolve(dns ...string) *ZoneResolve {
+func DefaultZoneResolve(dns ...string) *ZoneResolve {
 	if len(dns) == 0 {
 		dns = append(dns, "1.1.1.1", "1.0.0.1", "8.8.8.8", "8.8.4.4")
 	}
-	ndns := address.FixIPPort("53", dns...)
-	return &ZoneResolve{dns: ndns}
+	dns = address.FixIPPort("53", dns...)
+	return &ZoneResolve{dns: dns}
 }
 
 func (v *ZoneResolve) Resolve(name string) []string {
@@ -26,7 +26,7 @@ func (v *ZoneResolve) Resolve(name string) []string {
 }
 
 func DefaultExchanger(dns ...string) HandlerDNS {
-	cli := NewClient(OptionNetUDP())
-	cli.SetZoneResolver(NewSimpleZoneResolve(dns...))
+	cli := NewClient(WithNetUDP())
+	cli.SetZoneResolver(DefaultZoneResolve(dns...))
 	return cli
 }

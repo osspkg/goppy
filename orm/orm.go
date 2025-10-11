@@ -10,10 +10,13 @@ import (
 	"fmt"
 	"time"
 
+	"go.osspkg.com/do"
 	"go.osspkg.com/errors"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/routine"
 	"go.osspkg.com/syncing"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
 var (
@@ -23,13 +26,13 @@ var (
 type (
 	_orm struct {
 		pool  *syncing.Map[string, Stmt]
-		conns *syncing.Map[string, Connector]
+		conns *syncing.Map[string, dialect.Connector]
 		ctx   context.Context
 	}
 
 	ORM interface {
 		Tag(name string) Stmt
-		Register(c Connector, onSuccess func()) error
+		ApplyConfig(dialectName dialect.Name, c dialect.ConfigInterface) error
 		Close()
 	}
 )
@@ -38,16 +41,31 @@ type (
 func New(ctx context.Context) ORM {
 	db := &_orm{
 		pool:  syncing.NewMap[string, Stmt](10),
-		conns: syncing.NewMap[string, Connector](10),
+		conns: syncing.NewMap[string, dialect.Connector](10),
 		ctx:   ctx,
 	}
 
-	routine.Interval(ctx, time.Second*15, db.checkConnects)
+	do.Async(func() {
+		tik := routine.Ticker{
+			Interval: time.Second * 15,
+			OnStart:  false,
+			Calls: []routine.TickFunc{
+				func(ctx context.Context, _ time.Time) {
+					db.checkConnects(ctx)
+				},
+			},
+		}
+		tik.Run(ctx)
+	}, func(err error) {
+		logx.Error("Validate DB connects", "err", err)
+	})
 
 	return db
 }
 
 func (v *_orm) Close() {
+	v.conns.Reset()
+
 	for _, tag := range v.pool.Keys() {
 		stmt, ok := v.pool.Extract(tag)
 		if !ok {
@@ -57,8 +75,6 @@ func (v *_orm) Close() {
 		if err := stmt.Close(); err != nil {
 			logx.Error("Close DB connect", "err", err, "tag", tag)
 		}
-
-		v.conns.Del(tag)
 	}
 }
 
@@ -67,40 +83,52 @@ func (v *_orm) Tag(name string) Stmt {
 	if s, ok := v.pool.Get(name); ok {
 		return s
 	}
-	return newStmt(name, "", nil, ErrTagNotFound)
+	return newStmt(name, nil, nil, ErrTagNotFound)
 }
 
-func (v *_orm) Register(c Connector, onSuccess func()) error {
-	for _, tag := range c.Tags() {
-		if _, ok := v.conns.Get(tag); ok {
-			return fmt.Errorf("db connect alredy exist: %s", tag)
-		}
+func (v *_orm) ApplyConfig(dialectName dialect.Name, cfg dialect.ConfigInterface) error {
+	c, ok := dialect.GetConnector(dialectName)
+	if !ok {
+		return fmt.Errorf("dialect '%s' not registered", dialectName)
+	}
 
-		if err := v.appendConnect(c, tag); err != nil {
+	c.ApplyConfig(cfg)
+
+	for _, tag := range c.Tags() {
+		cc, has := v.pool.Get(tag)
+
+		stmt, err := v.initConnect(c, tag)
+		if err != nil {
 			return fmt.Errorf("create db connect [%s:%s]: %w", c.Dialect(), tag, err)
 		}
 
+		v.pool.Set(tag, stmt)
 		v.conns.Set(tag, c)
-		logx.Info("Create DB connect", "dialect", c.Dialect(), "tag", tag)
-	}
 
-	go onSuccess()
+		logx.Info("Create new DB connect", "dialect", c.Dialect(), "tag", tag)
+
+		if has {
+			if err = cc.Close(); err != nil {
+				logx.Error("Close old DB connect", "dialect", c.Dialect(), "tag", tag, "err", err)
+			}
+		}
+
+	}
 
 	return nil
 }
 
-func (v *_orm) appendConnect(c Connector, tag string) error {
+func (v *_orm) initConnect(c dialect.Connector, tag string) (Stmt, error) {
 	db, err := c.Connect(v.ctx, tag)
 	if err != nil {
-		return fmt.Errorf("connect failed: %w", err)
+		return nil, fmt.Errorf("connect failed: %w", err)
 	}
 
 	if err = db.PingContext(v.ctx); err != nil {
-		return fmt.Errorf("connect ping failed: %w", err)
+		return nil, fmt.Errorf("connect ping failed: %w", err)
 	}
 
-	v.pool.Set(tag, newStmt(tag, c.Dialect(), db, nil))
-	return nil
+	return newStmt(tag, c, db, nil), nil
 }
 
 func (v *_orm) checkConnects(ctx context.Context) {
@@ -129,8 +157,12 @@ func (v *_orm) checkConnects(ctx context.Context) {
 			continue
 		}
 
-		if err := v.appendConnect(c, tag); err != nil {
+		stmt, err := v.initConnect(c, tag)
+		if err != nil {
 			logx.Error("Create DB connect", "err", err, "tag", tag)
+			continue
 		}
+
+		v.pool.Set(tag, stmt)
 	}
 }

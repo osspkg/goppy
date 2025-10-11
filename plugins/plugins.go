@@ -6,32 +6,32 @@
 package plugins
 
 type (
-	// Plugin plugin structure
-	Plugin struct {
+	// Kind plugin structure
+	Kind struct {
 		Config  any
 		Inject  any
 		Resolve any
 	}
 
-	Plugins []Plugin
+	Kinds []Kind
 )
 
-func (p Plugins) Inject(list ...any) Plugins {
+func (p Kinds) Inject(list ...any) Kinds {
 	for _, vv := range list {
 		switch v := vv.(type) {
-		case Plugins:
+		case Kinds:
 			p = append(p, v...)
-		case Plugin:
+		case Kind:
 			p = append(p, v)
 		default:
-			p = append(p, Plugin{Inject: vv})
+			p = append(p, Kind{Inject: vv})
 		}
 	}
 	return p
 }
 
-func Inject(list ...any) Plugins {
-	return Plugins{}.Inject(list...)
+func Inject(list ...any) Kinds {
+	return (make(Kinds, 0, len(list))).Inject(list...)
 }
 
 // Defaulter interface for setting default values for a structure
@@ -39,6 +39,12 @@ type Defaulter interface {
 	Default()
 }
 
+// Defaulter2 interface for setting default values for a structure
+type Defaulter2 interface {
+	Default() error
+}
+
+// Validator config validate
 type Validator interface {
 	Validate() error
 }

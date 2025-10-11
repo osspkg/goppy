@@ -9,108 +9,131 @@ import (
 	"context"
 	"time"
 
-	"go.osspkg.com/errors"
-)
-
-var (
-	errFeatureGreaterMax  = errors.New("feature number is greater than the maximum")
-	errUserNotFound       = errors.New("user not found")
-	errChangeNotSupported = errors.New("changing ACL is not supported")
-)
-
-type (
-	ACL interface {
-		GetAll(email string) ([]uint8, error)
-		Get(email string, feature uint16) (uint8, error)
-		Set(email string, feature uint16, level uint8) error
-		Flush(email string)
-		AutoFlush(ctx context.Context, interval time.Duration)
-	}
-
-	Storage interface {
-		FindACL(email string) (string, error)
-		ChangeACL(email, access string) error
-	}
+	"go.osspkg.com/algorithms/structs/bitmap"
+	"go.osspkg.com/ioutils/cache"
+	"go.osspkg.com/syncing"
 )
 
 type object struct {
-	cache *cache
 	store Storage
+	opts  Options
+	cache cache.Cache[string, *entity]
+	mux   syncing.Funnel[string]
 }
 
-func New(store Storage, size uint) ACL {
+func New(ctx context.Context, store Storage, option Options) ACL {
 	return &object{
+		opts:  option,
 		store: store,
-		cache: newCache(size),
+		cache: cache.New[string, *entity](
+			cache.OptTimeClean[string, *entity](ctx, option.CacheCheckInterval),
+			cache.OptCountRandomClean[string, *entity](ctx, option.CacheSize, option.CacheCheckInterval),
+		),
+		mux: syncing.NewFunnel[string](),
 	}
 }
 
-func (v *object) AutoFlush(ctx context.Context, interval time.Duration) {
-	tick := time.NewTicker(interval)
-	defer tick.Stop()
+func (o *object) resolve(uid string) (*entity, error) {
+	if ent, ok := o.cache.Get(uid); ok {
+		return ent, nil
+	}
 
-	for {
-		select {
-		case <-ctx.Done():
+	data, err := o.store.FindACL(uid)
+	if err != nil {
+		return nil, err
+	}
+
+	ent := &entity{
+		bitmap: bitmap.New(),
+		ts:     time.Now().Add(o.opts.CacheDeadline).Unix(),
+	}
+
+	if err = ent.bitmap.UnmarshalBinary(data); err != nil {
+		return nil, err
+	}
+
+	o.cache.Set(uid, ent)
+
+	return ent, nil
+}
+
+func (o *object) HasOne(uid string, feature uint16) (has bool, err error) {
+	o.mux.Valve(uid, func() {
+		var ent *entity
+		if ent, err = o.resolve(uid); err != nil {
 			return
-		case ts := <-tick.C:
-			v.cache.FlushByTime(ts.Unix())
 		}
-	}
+
+		has = ent.bitmap.Has(uint64(feature))
+	})
+	return
 }
 
-func (v *object) GetAll(email string) ([]uint8, error) {
-	if !v.cache.Has(email) {
-		if err := v.loadFromStore(email); err != nil {
-			return nil, err
+func (o *object) HasMany(uid string, features ...uint16) (has map[uint16]bool, err error) {
+	o.mux.Valve(uid, func() {
+		if len(features) < 1 {
+			return
 		}
-	}
 
-	return v.cache.GetAll(email)
-}
-
-func (v *object) Get(email string, feature uint16) (uint8, error) {
-	if !v.cache.Has(email) {
-		if err := v.loadFromStore(email); err != nil {
-			return 0, err
+		var ent *entity
+		if ent, err = o.resolve(uid); err != nil {
+			return
 		}
-	}
 
-	return v.cache.Get(email, feature)
-}
-
-func (v *object) Set(email string, feature uint16, level uint8) error {
-	if !v.cache.Has(email) {
-		if err := v.loadFromStore(email); err != nil {
-			return err
+		has = make(map[uint16]bool, len(features))
+		for _, feature := range features {
+			has[feature] = ent.bitmap.Has(uint64(feature))
 		}
-	}
-
-	if err := v.cache.Set(email, feature, level); err != nil {
-		return err
-	}
-	return v.saveToStore(email)
+	})
+	return
 }
 
-func (v *object) Flush(email string) {
-	v.cache.Flush(email)
+func (o *object) Set(uid string, features ...uint16) (err error) {
+	o.mux.Valve(uid, func() {
+		if len(features) < 1 {
+			return
+		}
+
+		var ent *entity
+		if ent, err = o.resolve(uid); err != nil {
+			return
+		}
+
+		for _, feature := range features {
+			ent.bitmap.Set(uint64(feature))
+		}
+
+		var b []byte
+		if b, err = ent.bitmap.MarshalBinary(); err != nil {
+			return
+		}
+
+		err = o.store.ChangeACL(uid, b)
+	})
+	return
 }
 
-func (v *object) loadFromStore(email string) error {
-	access, err := v.store.FindACL(email)
-	if err != nil {
-		return errors.Wrap(err, errUserNotFound)
-	}
-	v.cache.SetAll(email, str2uint(access)...)
-	return nil
-}
+func (o *object) Del(uid string, features ...uint16) (err error) {
+	o.mux.Valve(uid, func() {
+		if len(features) < 1 {
+			return
+		}
 
-func (v *object) saveToStore(email string) error {
-	access, err := v.cache.GetAll(email)
-	if err != nil {
-		return err
-	}
+		var ent *entity
+		if ent, err = o.resolve(uid); err != nil {
+			return
+		}
 
-	err = v.store.ChangeACL(email, uint2str(access...))
-	return errors.Wrapf(err, "change acl")
+		for _, feature := range features {
+			ent.bitmap.Del(uint64(feature))
+		}
+
+		var b []byte
+		if b, err = ent.bitmap.MarshalBinary(); err != nil {
+			return
+		}
+
+		err = o.store.ChangeACL(uid, b)
+	})
+	return
 }

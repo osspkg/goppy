@@ -9,22 +9,6 @@ http:
   - tag: main
     addr: 0.0.0.0:10000
 
-mysql:
-  - tags: mysql_master,mysql_slave
-    host: 127.0.0.1
-    port: 3306
-    schema: test_database
-    user: test
-    password: test
-
-pgsql:
-  - tags: pgsql_master,pgsql_slave
-    host: 127.0.0.1
-    port: 5432
-    schema: postgres
-    user: postgres
-    password: postgres
-
 sqlite:
   - tags: sqlite_master
     file: ./sqlite.db

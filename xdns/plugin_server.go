@@ -6,14 +6,16 @@
 package xdns
 
 import (
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v2/plugins"
 )
 
-func WithServer() plugins.Plugin {
-	return plugins.Plugin{
+func WithServer() plugins.Kind {
+	return plugins.Kind{
 		Config: &ConfigGroup{},
-		Inject: func(c *ConfigGroup) *Server {
-			return NewServer(c.DNS)
+		Inject: func(ctx xc.Context, c *ConfigGroup) *Server {
+			return NewServer(ctx.Context(), c.DNS)
 		},
 	}
 }

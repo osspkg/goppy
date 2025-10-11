@@ -6,7 +6,9 @@
 package acl_test
 
 import (
+	"context"
 	"testing"
+	"time"
 
 	"go.osspkg.com/casecheck"
 
@@ -14,14 +16,22 @@ import (
 )
 
 func TestUnit_NewACL(t *testing.T) {
-	store := acl.NewInMemoryStorage()
-	aclStore := acl.New(store, 3)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	store := acl.NewInMemoryStorage(map[string][]byte{})
+
+	aclStore := acl.New(ctx, store, acl.Options{
+		CacheSize:          10,
+		CacheDeadline:      time.Minute,
+		CacheCheckInterval: time.Minute,
+	})
 
 	email := "demo@example.com"
 
 	t.Log("user not exist")
 
-	levels, err := aclStore.GetAll(email)
+	levels, err := aclStore.HasMany(email, 1, 2, 3, 4)
 	casecheck.Error(t, err)
 	casecheck.Nil(t, levels)
 
@@ -29,17 +39,17 @@ func TestUnit_NewACL(t *testing.T) {
 
 	t.Log("user exist")
 
-	casecheck.NoError(t, store.ChangeACL(email, ""))
+	casecheck.NoError(t, store.ChangeACL(email, []byte("")))
 
-	casecheck.Error(t, aclStore.Set(email, 10, 1))
+	casecheck.NoError(t, aclStore.Set(email, 10, 1))
 
-	levels, err = aclStore.GetAll(email)
+	levels, err = aclStore.HasMany(email, 1, 2, 3, 4)
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, []uint8{0, 0, 0}, levels)
+	casecheck.Equal(t, map[uint16]bool{1: true, 2: false, 3: false, 4: false}, levels)
 
 	casecheck.NoError(t, aclStore.Set(email, 2, 10))
 
-	levels, err = aclStore.GetAll(email)
+	levels, err = aclStore.HasMany(email, 1, 2, 3, 4)
 	casecheck.NoError(t, err)
-	casecheck.Equal(t, []uint8{0, 0, 9}, levels)
+	casecheck.Equal(t, map[uint16]bool{1: true, 2: true, 3: false, 4: false}, levels)
 }

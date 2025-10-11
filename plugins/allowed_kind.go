@@ -7,7 +7,6 @@ package plugins
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 )
 
@@ -17,12 +16,15 @@ type AllowedKind struct {
 	errMessage string
 }
 
-var (
-	AllowedKindConfig = AllowedKind{
+func AllowedKindConfig() AllowedKind {
+	return AllowedKind{
 		kind:       []reflect.Kind{reflect.Ptr},
 		errMessage: "Plugin.Config can only be a reference to an object",
 	}
-	AllowedKindInject = AllowedKind{
+}
+
+func AllowedKindInject() AllowedKind {
+	return AllowedKind{
 		kind: []reflect.Kind{reflect.Ptr, reflect.Func},
 		typed: []reflect.Kind{
 			reflect.Bool,
@@ -33,26 +35,29 @@ var (
 		},
 		errMessage: "Plugin.Inject unsupported",
 	}
-	AllowedKindResolve = AllowedKind{
+}
+
+func AllowedKindResolve() AllowedKind {
+	return AllowedKind{
 		kind:       []reflect.Kind{reflect.Func},
 		errMessage: "Plugin.Resolve can only be a function that accepts dependencies",
 	}
-)
+}
 
-func (v AllowedKind) MustValidate(in any) {
+func (v AllowedKind) Validate(in any) error {
 	into := reflect.TypeOf(in)
 	for _, k := range v.kind {
 		if into.Kind() == k {
-			return
+			return nil
 		}
 	}
 	if v.typed != nil {
 		for _, k := range v.typed {
 			if into.Kind() == k && into.Name() != k.String() {
-				return
+				return nil
 			}
 		}
 	}
-	fmt.Printf("%s, but got `%T`\n", v.errMessage, in)
-	os.Exit(1)
+
+	return fmt.Errorf("%s, but got `%T`", v.errMessage, in)
 }

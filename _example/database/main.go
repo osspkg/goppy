@@ -6,9 +6,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"go.osspkg.com/logx"
+
+	"go.osspkg.com/goppy/v2/orm/clients/sqlite"
 
 	"go.osspkg.com/goppy/v2"
 	"go.osspkg.com/goppy/v2/orm"
@@ -21,24 +24,30 @@ func main() {
 	app := goppy.New("goppy_database", "v1.0.0", "")
 	app.Plugins(
 		web.WithServer(),
-		orm.WithMysqlClient(),
-		orm.WithSqliteClient(),
-		orm.WithPgsqlClient(),
-		orm.WithORM(),
+		orm.WithORM(sqlite.Name),
 		orm.WithMigration(orm.Migration{
-			Tags:    []string{"mysql_master"},
+			Tags:    []string{"sqlite_master"},
 			Dialect: "mysql",
 			Data: map[string]string{
-				"0001_data.sql": "CREATE TABLE IF NOT EXISTS `demo` (\n  `id` int NOT NULL AUTO_INCREMENT PRIMARY KEY\n);",
+				"0002_data.sql": `
+					CREATE TABLE IF NOT EXISTS "demo2"
+					(
+						"id" integer NOT NULL PRIMARY KEY AUTOINCREMENT
+					);
+`,
 			},
 		}),
 		orm.WithMigration(),
 	)
 	app.Plugins(
-		plugins.Plugin{
+		plugins.Kind{
 			Inject: NewController,
-			Resolve: func(routes web.RouterPool, c *Controller) {
-				router := routes.Main()
+			Resolve: func(routes web.ServerPool, c *Controller) {
+				router, ok := routes.Main()
+				if !ok {
+					return
+				}
+
 				router.Use(web.ThrottlingMiddleware(100))
 				router.Get("/users", c.Users)
 
@@ -61,27 +70,29 @@ func NewController(orm orm.ORM) *Controller {
 	}
 }
 
-func (v *Controller) Users(ctx web.Context) {
-	data := []int64{1, 2, 3, 4}
+func (v *Controller) Users(ctx web.Ctx) {
+	data := Model{data: []int64{1, 2, 3, 4}}
 	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx web.Context) {
+func (v *Controller) User(ctx web.Ctx) {
 	id, _ := ctx.Param("id").Int() // nolint: errcheck
 
-	err := v.orm.Tag("mysql_master").PingContext(ctx.Context())
+	err := v.orm.Tag("sqlite_master").PingContext(ctx.Context())
 	if err != nil {
-		ctx.ErrorJSON(500, err, web.ErrCtx{"id": id})
+		ctx.ErrorJSON(500, err, "id", id)
 		return
 	}
 
-	err = v.orm.Tag("sqlite_master").PingContext(ctx.Context())
-	if err != nil {
-		ctx.ErrorJSON(500, err, web.ErrCtx{"id": id})
-		return
-	}
-
-	ctx.ErrorJSON(400, fmt.Errorf("user not found"), web.ErrCtx{"id": id})
+	ctx.ErrorJSON(200, fmt.Errorf("user not found"), "id", id)
 
 	logx.Info("user", "id", id)
+}
+
+type Model struct {
+	data []int64
+}
+
+func (m Model) MarshalJSON() ([]byte, error) {
+	return json.Marshal(m.data)
 }

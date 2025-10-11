@@ -6,51 +6,36 @@
 package acl
 
 import (
-	"sync"
+	"fmt"
+
+	"go.osspkg.com/ioutils/cache"
 )
 
-type OptionInMemoryStorage func(v *storeInMemory)
-
-func OptionInMemoryStorageSetupData(data map[string]string) OptionInMemoryStorage {
-	return func(v *storeInMemory) {
-		v.data = make(map[string]string, len(data))
-		for key, val := range data {
-			v.data[key] = val
-		}
-	}
-}
-
 type storeInMemory struct {
-	data map[string]string
-	mux  sync.Mutex
+	data cache.Cache[string, []byte]
 }
 
-func NewInMemoryStorage(opts ...OptionInMemoryStorage) Storage {
+func NewInMemoryStorage(data map[string][]byte) Storage {
 	v := &storeInMemory{
-		data: make(map[string]string),
+		data: cache.New[string, []byte](),
 	}
 
-	for _, opt := range opts {
-		opt(v)
-	}
+	v.data.Replace(data)
 
 	return v
 }
 
-func (v *storeInMemory) FindACL(email string) (string, error) {
-	v.mux.Lock()
-	defer v.mux.Unlock()
-
-	if acl, ok := v.data[email]; ok {
-		return acl, nil
+func (v *storeInMemory) FindACL(uid string) ([]byte, error) {
+	b, ok := v.data.Get(uid)
+	if !ok {
+		return nil, fmt.Errorf("%s not exist", uid)
 	}
-	return "", errUserNotFound
+
+	return b, nil
 }
 
-func (v *storeInMemory) ChangeACL(email, data string) error {
-	v.mux.Lock()
-	defer v.mux.Unlock()
+func (v *storeInMemory) ChangeACL(uid string, access []byte) error {
+	v.data.Set(uid, access)
 
-	v.data[email] = data
 	return nil
 }

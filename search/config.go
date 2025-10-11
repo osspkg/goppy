@@ -5,16 +5,11 @@
 
 package search
 
-const (
-	indexFilename = "/store/root.bolt"
+import "fmt"
 
+const (
 	customAnalyzerName = "goppy_analyzer"
 	customFilterName   = "goppy_filter"
-
-	structScoreField = "Score"
-
-	FieldText = "text"
-	FieldDate = "date"
 )
 
 type (
@@ -22,15 +17,13 @@ type (
 		Search Config `yaml:"search"`
 	}
 	Config struct {
-		Folder  string  `yaml:"folder"`
-		Indexes []Index `yaml:"indexes"`
-	}
-	Index struct {
-		Name   string       `yaml:"name"`
-		Fields []IndexField `yaml:"fields"`
-	}
-	IndexField struct {
-		Name string `yaml:"name"`
-		Type string `yaml:"type"`
+		Folder string `yaml:"folder"`
 	}
 )
+
+func (c Config) Validate() error {
+	if len(c.Folder) == 0 {
+		return fmt.Errorf("storage folder is required")
+	}
+	return nil
+}

@@ -71,13 +71,13 @@ func Generate(c common.Config, v *visitor.Visitor) (err error) {
 
 		if len(seq) > 0 {
 			common.Write(w, "-- SEQUENCE\n")
-			common.Write(w, strings.Join(seq, ";\n"))
+			common.Write(w, "%s", strings.Join(seq, ";\n")) //nolint:govet
 			common.Write(w, ";\n\n")
 		}
 		if len(query) > 0 {
 			common.Write(w, "-- TABLE\n")
 			common.Write(w, "CREATE TABLE IF NOT EXISTS %s (\n", dialects.EscapeCol(c.Dialect, string(m.Table)))
-			common.Write(w, strings.Join(query, ",\n"))
+			common.Write(w, "%s", strings.Join(query, ",\n")) //nolint:govet
 			common.Write(w, "\n);\n\n")
 		}
 

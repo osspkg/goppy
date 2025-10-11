@@ -7,21 +7,24 @@ package orm
 
 import (
 	"context"
+	"fmt"
 
 	"go.osspkg.com/ioutils/pool"
+
+	"go.osspkg.com/goppy/v2/orm/dialect"
 )
 
 var poolExec = pool.New[*exec](func() *exec { return &exec{} })
 
 type exec struct {
-	D string
-	Q string
-	P [][]any
-	B func(rowsAffected, lastInsertId int64) error
+	Dialect dialect.Connector
+	Query   string
+	Args    [][]any
+	Binding func(rowsAffected, lastInsertId int64) error
 }
 
 func (v *exec) SQL(query string, args ...any) {
-	v.Q = query
+	v.Query = query
 	v.Params(args...)
 }
 
@@ -30,21 +33,19 @@ func (v *exec) Params(args ...any) {
 		return
 	}
 
-	switch v.D {
-	case PgSQLDialect:
-		applyPGSqlCastTypes(args)
-	default:
+	if cast := v.Dialect.CastTypesFunc(); cast != nil {
+		cast(args)
 	}
 
-	v.P = append(v.P, args)
+	v.Args = append(v.Args, args)
 }
 
 func (v *exec) Bind(call func(rowsAffected, lastInsertId int64) error) {
-	v.B = call
+	v.Binding = call
 }
 
 func (v *exec) Reset() {
-	v.Q, v.P, v.B, v.D = "", v.P[:0], nil, ""
+	v.Query, v.Args, v.Binding, v.Dialect = "", v.Args[:0], nil, nil
 }
 
 type (
@@ -56,53 +57,65 @@ type (
 	}
 )
 
-func (v *_stmt) Exec(ctx context.Context, name string, call func(q Executor)) error {
+func (v *_stmt) Exec(ctx context.Context, name string, call func(e Executor)) error {
 	return v.CallContext(ctx, name, func(ctx context.Context, db DB) error {
 		return callExecContext(ctx, db, call, v.dialect)
 	})
 }
 
-func callExecContext(ctx context.Context, db dbGetter, call func(q Executor), dialect string) error {
-	q := poolExec.Get()
-	defer func() { poolExec.Put(q) }()
+func callExecContext(ctx context.Context, db queryGetter, call func(e Executor), dc dialect.Connector) error {
+	obj := poolExec.Get()
+	defer func() { poolExec.Put(obj) }()
 
-	q.D = dialect
+	obj.Dialect = dc
 
-	call(q)
+	call(obj)
 
-	if len(q.P) == 0 {
-		q.P = append(q.P, []any{})
+	if len(obj.Args) == 0 {
+		obj.Args = append(obj.Args, []any{})
 	}
-	stmt, err := db.PrepareContext(ctx, q.Q)
+
+	stmt, err := db.PrepareContext(ctx, obj.Query)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close() // nolint: errcheck
+
 	var rowsAffected, lastInsertId int64
-	for _, params := range q.P {
+	for _, params := range obj.Args {
 		result, err0 := stmt.ExecContext(ctx, params...)
 		if err0 != nil {
-			return err0
+			return fmt.Errorf("failed exec: %w", err0)
 		}
+
 		rows, err0 := result.RowsAffected()
 		if err0 != nil {
-			return err0
+			return fmt.Errorf("failed get row affected: %w", err0)
 		}
+
 		rowsAffected += rows
 
-		if dialect != PgSQLDialect {
+		if obj.Dialect.HasLastInsertId() {
 			rows, err0 = result.LastInsertId()
 			if err0 != nil {
-				return err0
+				return fmt.Errorf("failed get last insert id: %w", err0)
 			}
+
 			lastInsertId = rows
 		}
 	}
+
 	if err = stmt.Close(); err != nil {
-		return err
+		return fmt.Errorf("failed close: %w", err)
 	}
-	if q.B == nil {
+
+	if obj.Binding == nil {
 		return nil
 	}
-	return q.B(rowsAffected, lastInsertId)
+
+	if err = obj.Binding(rowsAffected, lastInsertId); err != nil {
+		return fmt.Errorf("failed bind: %w", err)
+	}
+
+	return nil
 }

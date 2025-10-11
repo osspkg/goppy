@@ -8,30 +8,18 @@ package geoip
 import (
 	"fmt"
 	"net"
-	"net/http"
 
 	"github.com/oschwald/geoip2-golang"
 
 	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/web"
 )
 
-type ConfigMaxMind struct {
-	GeoIP struct {
-		MaxMindDB string `yaml:"maxminddb"`
-	} `yaml:"geoip"`
-}
-
-func (v *ConfigMaxMind) Default() {
-	v.GeoIP.MaxMindDB = "./GeoIP2-City.mmdb"
-}
-
 // WithMaxMindGeoIP information resolver through local MaxMind database
-func WithMaxMindGeoIP() plugins.Plugin {
-	return plugins.Plugin{
-		Config: &ConfigMaxMind{},
-		Inject: func(conf *ConfigMaxMind) GeoIP {
-			return newMaxMindGeoIP(conf)
+func WithMaxMindGeoIP() plugins.Kind {
+	return plugins.Kind{
+		Config: &ConfigGroup{},
+		Inject: func(conf *ConfigGroup) GeoIP {
+			return NewMaxMindGeoIP(conf)
 		},
 	}
 }
@@ -43,12 +31,12 @@ type (
 	}
 
 	maxmind struct {
-		conf *ConfigMaxMind
+		conf *ConfigGroup
 		db   *geoip2.Reader
 	}
 )
 
-func newMaxMindGeoIP(c *ConfigMaxMind) *maxmind {
+func NewMaxMindGeoIP(c *ConfigGroup) GeoIP {
 	return &maxmind{
 		conf: c,
 	}
@@ -71,24 +59,9 @@ func (v *maxmind) Down() error {
 }
 
 func (v *maxmind) Country(ip net.IP) (string, error) {
-	vv, err := v.db.Country(ip)
+	value, err := v.db.Country(ip)
 	if err != nil {
 		return "", err
 	}
-	return vv.Country.IsoCode, nil
-}
-
-// MaxMindMiddleware determine geo-ip information through local MaxMind database
-func MaxMindMiddleware(resolver GeoIP) web.Middleware {
-	return func(call func(http.ResponseWriter, *http.Request)) func(http.ResponseWriter, *http.Request) {
-		return func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			cip := net.ParseIP(r.Header.Get("X-Real-IP"))
-			country, _ := resolver.Country(cip) // nolint: errcheck
-			ctx = SetCountryName(ctx, country)
-			ctx = SetClientIP(ctx, cip)
-			ctx = SetProxyIPs(ctx, parseXForwardedFor(r.Header.Get("X-Forwarded-For"), cip))
-			call(w, r.WithContext(ctx))
-		}
-	}
+	return value.Country.IsoCode, nil
 }
