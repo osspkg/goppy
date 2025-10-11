@@ -116,5 +116,4 @@ func (m Model) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.data)
 }
 
-
 ```

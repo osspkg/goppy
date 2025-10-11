@@ -17,7 +17,7 @@
 
 ## Guide
 
-[![guide](https://img.shields.io/badge/giude-goppy.ru-green)](https://goppy.ru)
+[![guide](https://img.shields.io/badge/giude-goppy.osspkg.com-green)](https://goppy.osspkg.com)
 [![wiki](https://img.shields.io/badge/wiki-github-red)](https://github.com/osspkg/goppy/wiki)
 
 ## Contribute
