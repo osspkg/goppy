@@ -29,7 +29,7 @@ func CmdTest() console.CommandGetter {
 				pack = append(pack, "goveralls -coverprofile=coverage.out -repotoken "+coverallsToken)
 			}
 
-			global.ExecPack(pack...)
+			global.ExecPack(true, pack...)
 		})
 	})
 }

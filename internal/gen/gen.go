@@ -56,7 +56,7 @@ func Command() console.CommandGetter {
 					console.Fatalf("unknown generate type: %s", s)
 				}
 
-				global.ExecPack("gofmt -w -s .", "goimports -l -w .")
+				global.ExecPack(true, "gofmt -w -s .", "goimports -l -w .")
 			}
 
 		})

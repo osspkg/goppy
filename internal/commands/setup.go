@@ -124,7 +124,7 @@ func installTools() {
 	console.Infof("install tools")
 	for name, install := range tools1 {
 		if !fs.FileExist(toolDir + "/" + name) {
-			global.ExecPack(install)
+			global.ExecPack(true, install)
 		}
 	}
 
@@ -134,7 +134,7 @@ func installTools() {
 	if ok {
 		for name, install := range tools {
 			if !fs.FileExist(toolDir + "/" + name) {
-				global.ExecPack(install)
+				global.ExecPack(true, install)
 			}
 		}
 	}
@@ -161,7 +161,7 @@ func updateGoMod() {
 		)
 	}
 
-	global.ExecPack(cmds...)
+	global.ExecPack(true, cmds...)
 }
 
 func updateGitIgnore() {

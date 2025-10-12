@@ -72,7 +72,7 @@ func CmdLicense() console.CommandGetter {
 				console.FatalIfErr(err, "Update go file `%s`", file)
 			}
 
-			global.ExecPack("gofmt -w -s .")
+			global.ExecPack(true, "gofmt -w -s .")
 		})
 	})
 }

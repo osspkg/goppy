@@ -170,7 +170,7 @@ func Cmd() console.CommandGetter {
 				cmds = append(cmds, "git tag "+m.Prefix+m.Version.String())
 			}
 			cmds = append(cmds, "git push", "git push --tags")
-			global.ExecPack(cmds...)
+			global.ExecPack(true, cmds...)
 		})
 	})
 }

@@ -48,7 +48,7 @@ func Exec(command string) ([]byte, error) {
 	return sh.Call(ctx, command)
 }
 
-func ExecPack(list ...string) {
+func ExecPack(withFatal bool, list ...string) {
 	ctx, cncl := context.WithCancel(context.Background())
 	go events.OnStopSignal(func() {
 		cncl()
@@ -64,5 +64,11 @@ func ExecPack(list ...string) {
 		},
 	}
 	err = sh.CallPackageContext(ctx, out, list...)
-	console.FatalIfErr(err, "run command")
+	if withFatal {
+		console.FatalIfErr(err, "run command")
+	} else {
+		if err != nil {
+			console.Warnf("run command: %s", err.Error())
+		}
+	}
 }

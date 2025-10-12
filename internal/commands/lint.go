@@ -36,9 +36,12 @@ func CmdLint() console.CommandGetter {
 				))
 			}
 
+			global.ExecPack(true, cmds...)
+
+			cmds = make([]string, 0, 50)
 			cmds = append(cmds, "govulncheck ./...")
 
-			global.ExecPack(cmds...)
+			global.ExecPack(false, cmds...)
 		})
 	})
 }

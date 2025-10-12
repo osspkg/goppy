@@ -68,7 +68,7 @@ func CmdBuild() console.CommandGetter {
 				}
 			}
 
-			global.ExecPack(pack...)
+			global.ExecPack(true, pack...)
 		})
 	})
 }

@@ -61,7 +61,7 @@ func CmdGenerate() console.CommandGetter {
 				writeFile(currdir+"/"+filename, tmpl, data)
 			}
 
-			global.ExecPack("gofmt -w .", "go mod tidy -v", "goppy setup-app")
+			global.ExecPack(true, "gofmt -w .", "go mod tidy -v", "goppy setup-app")
 		})
 	})
 }
