@@ -3,11 +3,12 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package fields
+package table
 
-type ModelNameType string
-
-type TableType string
+import (
+	"bytes"
+	"fmt"
+)
 
 type FieldType int8
 
@@ -19,17 +20,16 @@ const (
 
 type TField interface {
 	Name() string
-	Col() string
 	Type() FieldType
-	RawType() string
-	Attr() *Attrs
+	GoType() string
+	Attrs() *Attrs
+	String() string
 }
 
 type base struct {
 	name      string
-	col       string
 	fieldType FieldType
-	rawType   string
+	goType    string
 	attr      *Attrs
 }
 
@@ -37,18 +37,28 @@ func (b base) Name() string {
 	return b.name
 }
 
-func (b base) Col() string {
-	return b.col
-}
-
 func (b base) Type() FieldType {
 	return b.fieldType
 }
 
-func (b base) RawType() string {
-	return b.rawType
+func (b base) GoType() string {
+	return b.goType
 }
 
-func (b base) Attr() *Attrs {
+func (b base) Attrs() *Attrs {
 	return b.attr
+}
+
+func (b base) String() string {
+	buf := bytes.NewBufferString("")
+
+	fmt.Fprintf(buf, "name=%s; ", b.Name())
+	fmt.Fprintf(buf, "type=%#v; ", b.Type())
+	fmt.Fprintf(buf, "go-type=%s; ", b.GoType())
+
+	for i, datum := range b.attr.data {
+		fmt.Fprintf(buf, "attr[%d]={key:'%s',do:'%v',val:'%v'}; ", i, datum.Key, datum.Do, datum.Value)
+	}
+
+	return buf.String()
 }

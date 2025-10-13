@@ -5,11 +5,13 @@
 
 package common
 
-import "go.osspkg.com/goppy/v2/internal/gen/ormbuilder/dialects"
+type CodeInfo struct {
+	FilePath string
+	PkgName  string
+	Imports  []Import
+}
 
-type Config struct {
-	Dialect         dialects.Dialect
-	DBRead, DBWrite string
-	Dir, SQLDir     string
-	FileIndex       int64
+type Import struct {
+	Name string
+	Pkg  string
 }

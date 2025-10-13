@@ -3,4 +3,10 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package sql
+package common
+
+type Config struct {
+	DBRead, DBWrite string
+	CurrDir, SQLDir string
+	FileIndex       int64
+}

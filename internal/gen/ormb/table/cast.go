@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package fields
+package table
 
 type BigInt struct{ base }
 type Int struct{ base }
@@ -15,17 +15,15 @@ type Bool struct{ base }
 type Real struct{ base }
 type JSONB struct{ base }
 
-func Create(rt string, t FieldType, c, n string) TField {
-
+func CreateFieldType(fieldType FieldType, fieldName string, goType string) TField {
 	b := base{
-		name:      n,
-		col:       c,
-		fieldType: t,
-		rawType:   rt,
+		name:      fieldName,
+		fieldType: fieldType,
+		goType:    goType,
 		attr:      NewAttrs(),
 	}
 
-	switch rt {
+	switch goType {
 	case "int32", "uint32":
 		return Int{b}
 	case "int16", "uint16", "int8", "uint8":
