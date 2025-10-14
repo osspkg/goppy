@@ -11,7 +11,24 @@ import (
 	"strings"
 
 	"go.osspkg.com/ioutils/pool"
+
+	"go.osspkg.com/goppy/v2/orm"
 )
+
+type Repo struct {
+	orm        orm.ORM
+	rtag, wtag string
+}
+
+func NewRepo(orm orm.ORM) *Repo {
+	return &Repo{
+		orm:  orm,
+		rtag: "slave",
+		wtag: "master",
+	}
+}
+func (v *Repo) Sync() orm.Stmt   { return v.orm.Tag(v.rtag) }
+func (v *Repo) Master() orm.Stmt { return v.orm.Tag(v.wtag) }
 
 var _sqlBuilderPool = pool.New[*strings.Builder](func() *strings.Builder {
 	return new(strings.Builder)
@@ -20,26 +37,25 @@ var _sqlBuilderPool = pool.New[*strings.Builder](func() *strings.Builder {
 type ReadOption func(b *strings.Builder)
 
 func Limit(arg uint64) ReadOption {
-	return func(b *strings.Builder) {
-		fmt.Fprintf(b, " LIMIT %d ", arg)
-	}
+	return func(b *strings.Builder) { fmt.Fprintf(b, " LIMIT %d ", arg) }
 }
 
 type CreateOption func(b *strings.Builder)
 
 func ConflictIgnore() CreateOption {
-	return func(b *strings.Builder) {
-		b.WriteString(" ON CONFLICT DO NOTHING ")
-	}
+	return func(b *strings.Builder) { b.WriteString(" ON CONFLICT DO NOTHING ") }
 }
-
 func ConflictUpdate(fields []string, ups []string) CreateOption {
 	return func(b *strings.Builder) {
-		fmt.Fprintf(b, ` ON CONFLICT("%s") DO UPDATE SET `, strings.Join(fields, `","`))
-
+		result := make([]string, 0, len(fields))
+		for _, value := range fields {
+			result = append(result, "\""+strings.TrimSpace(value)+"\"")
+		}
+		fmt.Fprintf(b, " ON CONFLICT(%s) DO UPDATE SET ", strings.Join(result, ", "))
 		j := len(ups) - 1
 		for i, up := range ups {
-			fmt.Fprintf(b, `"%s" = EXCLUDED."%s"`, up, up)
+			up = strings.TrimSpace(up)
+			fmt.Fprintf(b, "\"%s\" = EXCLUDED.\"%s\"", up, up)
 			if i < j {
 				b.WriteString(",")
 			}
