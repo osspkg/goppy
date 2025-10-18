@@ -12,6 +12,9 @@ type atomicError struct {
 }
 
 func (a *atomicError) Set(err error) {
+	if err == nil {
+		return
+	}
 	a.v.Store(err)
 }
 
