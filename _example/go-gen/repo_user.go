@@ -14,7 +14,7 @@ import (
 
 const sqlCreateUser = `INSERT INTO "users" ("name", "value", "meta0") VALUES ($1, $2, $3)`
 
-func (v *Repo) CreateBulkUser(ctx context.Context, ms []User, opts ...CreateOption) error {
+func (v *Repo) CreateBulkUser(ctx context.Context, ms []*User, opts ...CreateOption) error {
 	if len(ms) == 0 {
 		return nil
 	}
@@ -37,7 +37,7 @@ func (v *Repo) CreateBulkUser(ctx context.Context, ms []User, opts ...CreateOpti
 		}
 	})
 }
-func (v *Repo) CreateUser(ctx context.Context, m User, opts ...CreateOption) error {
+func (v *Repo) CreateUser(ctx context.Context, m *User, opts ...CreateOption) error {
 	buf := _sqlBuilderPool.Get()
 	defer func() { _sqlBuilderPool.Put(buf) }()
 	buf.WriteString(sqlCreateUser)
@@ -173,7 +173,7 @@ func (v *Repo) SelectUserByMeta0(ctx context.Context, args ...Meta) ([]User, err
 
 const sqlUpdateUserById = `UPDATE "users" SET "meta0"=$3, "name"=$1, "value"=$2 WHERE "id"=$4;`
 
-func (v *Repo) UpdateUserById(ctx context.Context, ms ...User) error {
+func (v *Repo) UpdateUserById(ctx context.Context, ms ...*User) error {
 	if len(ms) == 0 {
 		return nil
 	}
