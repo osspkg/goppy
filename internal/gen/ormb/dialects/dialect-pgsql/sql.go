@@ -98,7 +98,7 @@ func (q SQL) field(t string, f table.TField, res *Result) error {
 	_, isPK := f.Attrs().GetByKeyDo(table.AttrKeyIndex, table.AttrDoIndexPK)
 	_, isUNQ := f.Attrs().GetByKeyDo(table.AttrKeyIndex, table.AttrDoIndexUniq)
 	_, isIDX := f.Attrs().GetByKeyDo(table.AttrKeyIndex, table.AttrDoIndexIdx)
-	attrsFK, isFK := f.Attrs().GetByKeyDo(table.AttrKeyIndex, table.AttrDoIndexPK)
+	attrsFK, isFK := f.Attrs().GetByKeyDo(table.AttrKeyIndex, table.AttrDoIndexFK)
 	attrsLen, isLEN := f.Attrs().GetByKey(table.AttrKeyFieldLen)
 	noArray := false
 

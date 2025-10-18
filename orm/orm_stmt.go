@@ -37,21 +37,23 @@ type (
 		tag     string
 		dialect dialect.Connector
 		db      *sql.DB
-		err     error
+		err     *atomicError
 	}
 )
 
 // newStmt init new statement
 func newStmt(tag string, dialect dialect.Connector, db *sql.DB, err error) Stmt {
+	ae := &atomicError{}
+	ae.Set(err)
 	return &_stmt{
 		tag:     tag,
 		dialect: dialect,
 		db:      db,
-		err:     err,
+		err:     ae,
 	}
 }
 
 func (v *_stmt) Close() error {
-	v.err = fmt.Errorf("closed connect")
+	v.err.Set(fmt.Errorf("closed connect"))
 	return v.db.Close()
 }

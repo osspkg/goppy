@@ -12,7 +12,7 @@ import (
 	"go.osspkg.com/goppy/v2/orm"
 )
 
-const sqlCreateUser = `INSERT INTO "users" ("name", "value", "meta0") VALUES ($1, $2, $3);`
+const sqlCreateUser = `INSERT INTO "users" ("name", "value", "meta0") VALUES ($1, $2, $3)`
 
 func (v *Repo) CreateBulkUser(ctx context.Context, ms []User, opts ...CreateOption) error {
 	if len(ms) == 0 {
@@ -24,7 +24,8 @@ func (v *Repo) CreateBulkUser(ctx context.Context, ms []User, opts ...CreateOpti
 	for _, o := range opts {
 		o(buf)
 	}
-	buf.WriteString(` RETURNING ("id");`)
+	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(";")
 	return v.Master().Tx(ctx, "users_create_bulk", func(tx orm.Tx) {
 		for _, m := range ms {
 			tx.Query(func(q orm.Querier) {
@@ -43,7 +44,8 @@ func (v *Repo) CreateUser(ctx context.Context, m User, opts ...CreateOption) err
 	for _, o := range opts {
 		o(buf)
 	}
-	buf.WriteString(` RETURNING ("id");`)
+	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(";")
 	return v.Master().Query(ctx, "users_create", func(q orm.Querier) {
 		q.SQL(buf.String(), m.Name, m.Value, m.Meta0)
 		q.Bind(func(bind orm.Scanner) error {
