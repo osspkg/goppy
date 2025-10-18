@@ -16,8 +16,8 @@ import (
 
 // PingContext database ping
 func (v *_stmt) PingContext(ctx context.Context) (err error) {
-	if v.err != nil {
-		return v.err
+	if err = v.err.Get(); err != nil {
+		return
 	}
 
 	metric.ExecTime(v.tag, "ping", func() {
@@ -31,8 +31,8 @@ func (v *_stmt) PingContext(ctx context.Context) (err error) {
 
 // CallContext basic query execution
 func (v *_stmt) CallContext(ctx context.Context, name string, callFunc func(context.Context, DB) error) (err error) {
-	if v.err != nil {
-		return v.err
+	if err = v.err.Get(); err != nil {
+		return
 	}
 
 	metric.ExecTime(v.tag, name, func() {
@@ -46,8 +46,8 @@ func (v *_stmt) CallContext(ctx context.Context, name string, callFunc func(cont
 
 // TxContext the basic execution of a query in a transaction
 func (v *_stmt) TxContext(ctx context.Context, name string, callFunc func(context.Context, DB) error) error {
-	if v.err != nil {
-		return v.err
+	if err := v.err.Get(); err != nil {
+		return err
 	}
 
 	dbx, err := v.db.BeginTx(ctx, nil)

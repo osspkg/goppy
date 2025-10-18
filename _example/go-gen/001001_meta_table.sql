@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS "meta"
 	CONSTRAINT "meta__id__pk" PRIMARY KEY ( "id" ),
 	"uid" UUID NOT NULL,
 	"user_id" BIGINT NOT NULL,
+	CONSTRAINT "meta__user_id__fk" FOREIGN KEY ( "user_id" ) REFERENCES "users" ( "id" ) ON DELETE CASCADE NOT DEFERRABLE,
 	"roles" TEXT[] NOT NULL,
 	CONSTRAINT "meta__roles__unq" UNIQUE ( "roles" ),
 	"fail" BOOLEAN NOT NULL,

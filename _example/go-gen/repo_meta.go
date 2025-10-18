@@ -15,7 +15,7 @@ import (
 	"go.osspkg.com/goppy/v2/orm"
 )
 
-const sqlCreateMeta = `INSERT INTO "meta" ("uid", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") VALUES ($1, $2, $3, $4, $5, $6, $7);`
+const sqlCreateMeta = `INSERT INTO "meta" ("uid", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
 func (v *Repo) CreateBulkMeta(ctx context.Context, ms []Meta, opts ...CreateOption) error {
 	if len(ms) == 0 {
@@ -31,7 +31,8 @@ func (v *Repo) CreateBulkMeta(ctx context.Context, ms []Meta, opts ...CreateOpti
 	for _, o := range opts {
 		o(buf)
 	}
-	buf.WriteString(` RETURNING ("id");`)
+	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(";")
 	return v.Master().Tx(ctx, "meta_create_bulk", func(tx orm.Tx) {
 		for _, m := range ms {
 			tx.Query(func(q orm.Querier) {
@@ -52,7 +53,8 @@ func (v *Repo) CreateMeta(ctx context.Context, m Meta, opts ...CreateOption) err
 	for _, o := range opts {
 		o(buf)
 	}
-	buf.WriteString(` RETURNING ("id");`)
+	buf.WriteString(` RETURNING ("id")`)
+	buf.WriteString(";")
 	return v.Master().Query(ctx, "meta_create", func(q orm.Querier) {
 		q.SQL(buf.String(), m.UID, m.UserId, m.Roles, m.Fail, m.CreatedAt, m.UpdatedAt, m.DeletedAt)
 		q.Bind(func(bind orm.Scanner) error {

@@ -91,11 +91,11 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 
 		common.Writef(w, `const sqlCreate%s=`, t.ModelName)
 		common.Write(w, sqlComma)
-		common.Writef(w, `INSERT INTO %s (%s) VALUES (%s);`,
+		common.Writef(w, `INSERT INTO %s (%s) VALUES (%s)`,
 			c.E.Cols(t.TableName), c.E.Cols(cols...), c.E.VarsRangeStr(1, len(cols)))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) CreateBulk%s(ctx context.Context, ms []%s, opts ...CreateOption) error {`,
+		common.Writelnf(w, `func (v *Repo) CreateBulk%s(ctx context.Context, ms []*%s, opts ...CreateOption) error {`,
 			t.ModelName, t.ModelName)
 		common.Writeln(w, `if len(ms) == 0 {`)
 		common.Writeln(w, `return nil`)
@@ -118,8 +118,9 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 		common.Writeln(w, `o(buf)`)
 		common.Writeln(w, `}`)
 		if len(pk.Col) > 0 {
-			common.Writelnf(w, "buf.WriteString(` RETURNING (%s);`)", c.E.Cols(pk.Col))
+			common.Writelnf(w, "buf.WriteString(` RETURNING (%s)`)", c.E.Cols(pk.Col))
 		}
+		common.Writeln(w, `buf.WriteString(";")`)
 
 		common.Writelnf(w, `return v.Master().Tx(ctx, "%s_create_bulk", func(tx orm.Tx) {`, t.TableName)
 		common.Writeln(w, `for _, m := range ms {`)
@@ -137,7 +138,7 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 	}
 
 	{
-		common.Writelnf(w, `func (v *Repo) Create%s(ctx context.Context, m %s, opts ...CreateOption) error {`,
+		common.Writelnf(w, `func (v *Repo) Create%s(ctx context.Context, m *%s, opts ...CreateOption) error {`,
 			t.ModelName, t.ModelName)
 
 		if _, ok := t.GetAttrsByKeyDo(table.AttrKeyFieldAuto, table.AttrValueCRUDc); ok {
@@ -155,8 +156,9 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 		common.Writeln(w, `o(buf)`)
 		common.Writeln(w, `}`)
 		if len(pk.Col) > 0 {
-			common.Writelnf(w, "buf.WriteString(` RETURNING (%s);`)", c.E.Cols(pk.Col))
+			common.Writelnf(w, "buf.WriteString(` RETURNING (%s)`)", c.E.Cols(pk.Col))
 		}
+		common.Writeln(w, `buf.WriteString(";")`)
 
 		common.Writelnf(w, `return v.Master().Query(ctx, "%s_create", func(q orm.Querier) {`, t.TableName)
 		common.Writelnf(w, `q.SQL(buf.String(),m.%s)`, strings.Join(fields, ", m."))
@@ -255,7 +257,7 @@ func (c Code) updates(w io.Writer, t *table.Table) {
 			c.E.Cols(item.Col), c.E.Vars(len(cols)))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) Update%sBy%s(ctx context.Context, ms ...%s) error {`,
+		common.Writelnf(w, `func (v *Repo) Update%sBy%s(ctx context.Context, ms ...*%s) error {`,
 			t.ModelName, item.Name, t.ModelName)
 		common.Writeln(w, `if len(ms) == 0 {`)
 		common.Writeln(w, `return nil`)
