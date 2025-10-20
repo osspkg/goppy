@@ -17,7 +17,7 @@ import (
 
 const sqlCreateMeta = `INSERT INTO "meta" ("uid", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") VALUES ($1, $2, $3, $4, $5, $6, $7)`
 
-func (v *Repo) CreateBulkMeta(ctx context.Context, ms []Meta, opts ...CreateOption) error {
+func (v *Repo) CreateBulkMeta(ctx context.Context, ms []*Meta, opts ...CreateOption) error {
 	if len(ms) == 0 {
 		return nil
 	}
@@ -44,7 +44,7 @@ func (v *Repo) CreateBulkMeta(ctx context.Context, ms []Meta, opts ...CreateOpti
 		}
 	})
 }
-func (v *Repo) CreateMeta(ctx context.Context, m Meta, opts ...CreateOption) error {
+func (v *Repo) CreateMeta(ctx context.Context, m *Meta, opts ...CreateOption) error {
 	m.UID = uuid.New()
 	m.CreatedAt = time.Now()
 	buf := _sqlBuilderPool.Get()
@@ -278,7 +278,7 @@ func (v *Repo) SelectMetaByDeletedAt(ctx context.Context, args ...time.Time) ([]
 
 const sqlUpdateMetaById = `UPDATE "meta" SET "created_at"=$5, "deleted_at"=$7, "fail"=$4, "roles"=$3, "uid"=$1, "updated_at"=$6, "user_id"=$2 WHERE "id"=$8;`
 
-func (v *Repo) UpdateMetaById(ctx context.Context, ms ...Meta) error {
+func (v *Repo) UpdateMetaById(ctx context.Context, ms ...*Meta) error {
 	if len(ms) == 0 {
 		return nil
 	}
