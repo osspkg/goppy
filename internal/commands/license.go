@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"go.osspkg.com/console"
+	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
 
@@ -38,8 +39,7 @@ func CmdLicense() console.CommandGetter {
 				for sl := range licenses {
 					supLics = append(supLics, sl)
 				}
-				console.Errorf("Update `%s`. Supported license %v", licFilename, supLics)
-				os.Exit(1)
+				console.Fatalf("Update `%s`. Supported license %v", licFilename, supLics)
 			} else {
 				console.FatalIfErr(codec.FileEncoder(licFilename).Decode(model), "Read `%s`", licFilename)
 			}
@@ -59,10 +59,18 @@ func CmdLicense() console.CommandGetter {
 
 			console.FatalIfErr(licenseBuild(model), "Update main license")
 
-			goFiles, err := fs.SearchFilesByExt(fs.CurrentDir(), ".go")
+			ignoreFiles := do.Entries[string, string, struct{}](model.IgnoreFiles, func(s string) (string, struct{}) {
+				return s, struct{}{}
+			})
+
+			currDir := fs.CurrentDir()
+			goFiles, err := fs.SearchFilesByExt(currDir, ".go")
 			console.FatalIfErr(err, "Get go files")
 			for _, file := range goFiles {
 				if strings.HasSuffix(file, "_easyjson.go") || strings.Contains(file, "/vendor/") {
+					continue
+				}
+				if _, ok := ignoreFiles[strings.TrimLeft(strings.TrimPrefix(file, currDir), "/")]; ok {
 					continue
 				}
 				err = fs.RewriteFile(file, func(b []byte) ([]byte, error) {
@@ -78,10 +86,11 @@ func CmdLicense() console.CommandGetter {
 }
 
 type License struct {
-	Author   string `yaml:"author"`
-	LicShort string `yaml:"lic_short"`
-	LicFile  string `yaml:"lic_file"`
-	Years    string `yaml:"-"`
+	Author      string   `yaml:"author"`
+	LicShort    string   `yaml:"lic_short"`
+	LicFile     string   `yaml:"lic_file"`
+	IgnoreFiles []string `yaml:"ignore_files,omitempty"`
+	Years       string   `yaml:"-"`
 }
 
 func (l *License) Default() {
