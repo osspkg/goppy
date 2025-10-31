@@ -18,7 +18,7 @@ require (
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/config v0.2.0
 	go.osspkg.com/console v0.3.3
-	go.osspkg.com/do v0.2.0
+	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.3.0
@@ -45,7 +45,7 @@ require (
 	github.com/BurntSushi/toml v1.5.0 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.13.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bits-and-blooms/bitset v1.24.1 // indirect
+	github.com/bits-and-blooms/bitset v1.24.3 // indirect
 	github.com/blevesearch/bleve_index_api v1.2.10 // indirect
 	github.com/blevesearch/geo v0.2.4 // indirect
 	github.com/blevesearch/go-faiss v1.0.25 // indirect

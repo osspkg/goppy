@@ -58,11 +58,13 @@ func CmdSetupApp() console.CommandGetter {
 
 func createScripts(force bool) {
 	console.Infof("create services and deb scripts")
-	postinstData, postrmData, preinstData, prermData := bashPrefix, bashPrefix, bashPrefix, bashPrefix
+	scriptsDir := global.GetScriptsDir()
 
 	mainFiles, err := fs.SearchFiles(fs.CurrentDir(), "main.go")
 	console.FatalIfErr(err, "detect main.go")
 	for _, main := range mainFiles {
+		postInstallData, postRemoveData, preInstallData, preRemoveData := bashPrefix, bashPrefix, bashPrefix, bashPrefix
+
 		appName := fs.DirName(main)
 		repl := strings.NewReplacer(
 			"{%app_name%}", appName,
@@ -74,23 +76,24 @@ func createScripts(force bool) {
 				"create init config [%s]", appName)
 		}
 
-		postinstData += repl.Replace(postinst)
-		preinstData += repl.Replace(preinstDir)
-		preinstData += repl.Replace(preinst)
-		prermData += repl.Replace(prerm)
-	}
+		preRemoveData += repl.Replace(preRemove)
+		preInstallData += repl.Replace(preInstall)
+		postInstallData += repl.Replace(postInstall)
+		postRemoveData += repl.Replace(postRemove)
 
-	files := map[string]string{
-		"postinst.sh": postinstData,
-		"postrm.sh":   postrmData,
-		"preinst.sh":  preinstData,
-		"prerm.sh":    prermData,
-	}
-	scriptsDir := global.GetScriptsDir()
-	for fileName, fileValue := range files {
-		filePath := scriptsDir + "/" + fileName
-		if !fs.FileExist(filePath) || force {
-			console.FatalIfErr(os.WriteFile(filePath, []byte(fileValue), 0755), "create postinst")
+		files := map[string]string{
+			appName + "_prerm.sh":    preRemoveData,
+			appName + "_preinst.sh":  preInstallData,
+			appName + "_postinst.sh": postInstallData,
+			appName + "_postrm.sh":   postRemoveData,
+			"scripts-info.md":        debDoc,
+		}
+
+		for fileName, fileValue := range files {
+			filePath := scriptsDir + "/" + fileName
+			if !fs.FileExist(filePath) || force {
+				console.FatalIfErr(os.WriteFile(filePath, []byte(fileValue), 0755), "create deb scripts")
+			}
 		}
 	}
 }
@@ -311,14 +314,22 @@ ci: pre-commit
 `
 
 var systemctlConfig = `[Unit]
+Description={%app_name%}
+Documentation=https://{%app_name%}.website/
 After=network.target
 
 [Service]
-User=root
-Group=root
+Type=simple
+
+User={%app_name%}
+Group={%app_name%}
+
+ProtectSystem=full
+ProtectHome=yes
+PrivateTmp=true
+
 Restart=on-failure
 RestartSec=30s
-Type=simple
 ExecStart=/usr/bin/{%app_name%} --config=/etc/{%app_name%}/config.yaml
 KillMode=process
 KillSignal=SIGTERM
@@ -328,32 +339,146 @@ WantedBy=default.target
 `
 
 var (
-	bashPrefix = "#!/bin/bash\n\n"
-	postinst   = `
-if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
-    systemctl start {%app_name%}
-    systemctl enable {%app_name%}
-    systemctl daemon-reload
-fi
+	bashPrefix = `#!/bin/bash
+set -e
+
 `
-	preinstDir = `
-if ! [ -d /var/lib/{%app_name%}/ ]; then
-    mkdir /var/lib/{%app_name%}
-fi
+	debDoc = `
+# The order of execution
+
+## Install
+preinst: install
+postinst: configure
+
+## Update
+prerm: upgrade
+preinst: upgrade
+postrm: upgrade
+postinst: configure
+
+## Remove
+prerm: remove   
+postrm: remove 
+
+## Purge
+prerm: remove   
+postrm: remove
+postrm: purge 
 `
-	preinst = `
-if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
-    systemctl stop {%app_name%}
-    systemctl disable {%app_name%}
-    systemctl daemon-reload
-fi
+	preRemove = `
+do_remove(){
+	if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
+		systemctl stop {%app_name%}
+		systemctl disable {%app_name%}
+		systemctl daemon-reload
+	fi
+}
+
+do_upgrade(){
+	if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
+		systemctl stop {%app_name%}
+		systemctl disable {%app_name%}
+		systemctl daemon-reload
+	fi
+}
+
+do_other(){
+
+}
+
+case "$1" in
+  remove)
+    do_remove
+    ;;
+  upgrade)
+    do_upgrade
+    ;;
+  *)
+    do_other
+    ;;
+esac
 `
-	prerm = `
-if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
-    systemctl stop {%app_name%}
-    systemctl disable {%app_name%}
-    systemctl daemon-reload
-fi
+
+	preInstall = `
+do_install(){
+	if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
+		systemctl stop {%app_name%}
+		systemctl disable {%app_name%}
+		systemctl daemon-reload
+	fi
+}
+
+do_upgrade(){
+	if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
+		systemctl stop {%app_name%}
+		systemctl disable {%app_name%}
+		systemctl daemon-reload
+	fi
+}
+
+do_other(){
+
+}
+
+case "$1" in
+  install)
+    do_install
+    ;;
+  upgrade)
+    do_upgrade
+    ;;
+  *)
+    do_other
+    ;;
+esac
+`
+
+	postInstall = `
+do_configure(){
+	if [ -f "/etc/systemd/system/{%app_name%}.service" ]; then
+		systemctl start {%app_name%}
+		systemctl enable {%app_name%}
+		systemctl daemon-reload
+	fi
+}
+
+do_other(){
+
+}
+
+case "$1" in
+  configure)
+    do_configure
+    ;;
+  *)
+    do_other
+    ;;
+esac
+`
+	postRemove = `
+do_remove(){
+
+}
+
+do_purge(){
+	rm -rf /var/lib/{%app_name%}
+}
+
+do_other(){
+
+}
+
+case "$1" in
+  remove)
+    do_remove
+    ;;
+  purge)
+    do_purge
+    ;;
+  *)
+    do_other
+    ;;
+esac
 `
 )
 

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"go.osspkg.com/console"
+	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v2/internal/global"
@@ -18,10 +19,11 @@ func CmdBuild() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("build", "Building app")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
-			flagsSetter.StringVar("arch", "amd64,arm64", "")
-			flagsSetter.StringVar("mode", "app", "")
+			flagsSetter.StringVar("arch", "amd64,arm64", "set architecture")
+			flagsSetter.StringVar("mode", "app", "set application mode (app, plugin)")
+			flagsSetter.StringVar("main", "", "set main package for build")
 		})
-		setter.ExecFunc(func(_ []string, arch, mode string) {
+		setter.ExecFunc(func(_ []string, arch, mode, _main string) {
 			console.Infof("--- BUILD ---")
 
 			pack := make([]string, 0, 10)
@@ -29,6 +31,18 @@ func CmdBuild() console.CommandGetter {
 
 			mainFiles, err := fs.SearchFiles(fs.CurrentDir(), "main.go")
 			console.FatalIfErr(err, "detect main.go")
+
+			mb := do.TreatValue(strings.Split(_main, ","), strings.ToLower, strings.TrimSpace)
+			if len(mb) > 0 {
+				mainFiles = do.Filter(mainFiles, func(value string, index int) bool {
+					for _, s := range mb {
+						if strings.HasSuffix(value, s+"/main.go") {
+							return true
+						}
+					}
+					return false
+				})
+			}
 
 			for _, main := range mainFiles {
 				appName := fs.DirName(main)
