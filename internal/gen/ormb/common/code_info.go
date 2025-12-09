@@ -6,9 +6,10 @@
 package common
 
 type CodeInfo struct {
-	FilePath string
-	PkgName  string
-	Imports  []Import
+	FilePath  string
+	PkgName   string
+	ModelName string
+	Imports   []Import
 }
 
 type Import struct {

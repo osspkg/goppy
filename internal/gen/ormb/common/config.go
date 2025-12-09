@@ -9,4 +9,5 @@ type Config struct {
 	DBRead, DBWrite string
 	CurrDir, SQLDir string
 	FileIndex       int64
+	ModelName       string
 }

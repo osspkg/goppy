@@ -206,6 +206,12 @@ type formDataParser struct {
 
 const FormDataTag = "formData"
 
+var (
+	writeType = reflect.TypeOf((*io.Writer)(nil)).Elem()
+	readType  = reflect.TypeOf((*io.Reader)(nil)).Elem()
+)
+
+//nolint:gocyclo
 func (v *formDataParser) Unmarshal() (err error) {
 	defer func() {
 		if recValue := recover(); recValue != nil {
@@ -215,10 +221,13 @@ func (v *formDataParser) Unmarshal() (err error) {
 
 	structRef := v.objRef.Type().Elem()
 	for i := 0; i < structRef.NumField(); i++ {
-		var value any
 		err = nil
 
 		field := structRef.Field(i)
+		if !field.IsExported() {
+			continue
+		}
+
 		tag, ok := field.Tag.Lookup(FormDataTag)
 		if !ok {
 			continue
@@ -229,150 +238,255 @@ func (v *formDataParser) Unmarshal() (err error) {
 			return fmt.Errorf("invalid tag of field `%s`", field.Name)
 		}
 
-		switch fieldType := field.Type.String(); fieldType {
-		case "io.Reader", "io.ReadSeeker":
-			value, err = v.resolveFile(formFieldName)
+		kindOrig := field.Type.Kind()
+		kindElem := field.Type.Kind()
+		fieldType := field.Type.String()
 
-		case "string":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return s, nil
-			})
+		isPtr := kindOrig == reflect.Ptr
 
-		case "*string":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return &s, nil
-			})
+		if isPtr {
+			fieldType = field.Type.Elem().String()
+			kindElem = field.Type.Elem().Kind()
+		}
 
-		case "[]byte":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return []byte(s), nil
-			})
+		switch kindElem {
+		case reflect.Struct:
+			value := v.objRef.Elem().FieldByName(field.Name)
+			isZero := value.IsZero()
 
-		case "*[]byte":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				b := []byte(s)
-				return &b, nil
-			})
-
-		case "int":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return strconv.Atoi(s)
-			})
-
-		case "*int":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				iv, er := strconv.Atoi(s)
-				if er != nil {
-					return nil, er
+			if isZero {
+				if isPtr {
+					value = reflect.New(v.objRef.Elem().FieldByName(field.Name).Type().Elem())
+				} else {
+					value = reflect.New(v.objRef.Elem().FieldByName(field.Name).Type())
 				}
-				return &iv, nil
-			})
+			}
 
-		case "int64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return strconv.ParseInt(s, 10, 64)
-			})
+			switch x := value.Interface().(type) {
+			case io.Writer:
+				err = v.resolveFile(formFieldName, func(r io.Reader, _ int) error {
+					_, e := io.Copy(x, r)
+					return e
+				})
+			case json.Unmarshaler:
+				err = v.resolveField(formFieldName, func(s string) error {
+					return x.UnmarshalJSON([]byte(s))
+				})
+			case xml.Unmarshaler:
+				err = v.resolveField(formFieldName, func(s string) error {
+					return xml.Unmarshal([]byte(s), x)
+				})
+			case encoding.TextUnmarshaler:
+				err = v.resolveField(formFieldName, func(s string) error {
+					return x.UnmarshalText([]byte(s))
+				})
+			case encoding.BinaryUnmarshaler:
+				err = v.resolveField(formFieldName, func(s string) error {
+					return x.UnmarshalBinary([]byte(s))
+				})
 
-		case "*int64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				iv, er := strconv.ParseInt(s, 10, 64)
-				if er != nil {
-					return nil, er
+			default:
+				return fmt.Errorf("unsupported struct `%s` for field `%s`", fieldType, field.Name)
+			}
+
+			if err != nil {
+				if canOmitempty {
+					continue
 				}
-				return &iv, nil
-			})
+				return fmt.Errorf("field `%s`: %w", field.Name, v.prepareError(err))
+			}
 
-		case "uint64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return strconv.ParseUint(s, 10, 64)
-			})
-
-		case "*uint64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				iv, er := strconv.ParseUint(s, 10, 64)
-				if er != nil {
-					return nil, er
+			if isZero {
+				if isPtr {
+					v.objRef.Elem().FieldByName(field.Name).Set(value)
+				} else {
+					v.objRef.Elem().FieldByName(field.Name).Set(value.Elem())
 				}
-				return &iv, nil
-			})
+			}
 
-		case "float64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return strconv.ParseFloat(s, 64)
-			})
+		case reflect.Interface:
+			value := v.objRef.Elem().FieldByName(field.Name)
+			isZero := value.IsZero()
+			refType := value.Type()
+			if !isZero {
+				refType = value.Elem().Type()
+			}
 
-		case "*float64":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				iv, er := strconv.ParseFloat(s, 64)
-				if er != nil {
-					return nil, er
+			switch {
+			case refType.AssignableTo(writeType):
+				err = v.resolveFile(formFieldName, func(r io.Reader, _ int) error {
+					cp := reflect.ValueOf(io.Copy)
+					args := []reflect.Value{value.Elem(), reflect.ValueOf(r)}
+					out := cp.Call(args)
+					var e error
+					if !out[1].IsNil() {
+						e = out[1].Interface().(error)
+					}
+					return e
+				})
+
+			case refType.AssignableTo(readType):
+				err = v.resolveFile(formFieldName, func(r io.Reader, size int) error {
+					w := data.NewBuffer(size)
+					if _, e := io.Copy(w, r); e != nil {
+						return e
+					}
+					v.objRef.Elem().FieldByName(field.Name).Set(reflect.ValueOf(w))
+					return nil
+				})
+
+			default:
+				return fmt.Errorf("unsupported interface `%s` for field `%s`", fieldType, field.Name)
+			}
+
+			if err != nil {
+				if canOmitempty {
+					continue
 				}
-				return &iv, nil
-			})
-
-		case "bool":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return strconv.ParseBool(s)
-			})
-
-		case "*bool":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				iv, er := strconv.ParseBool(s)
-				if er != nil {
-					return nil, er
-				}
-				return &iv, nil
-			})
-
-		case "time.Time":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				return time.Parse(s, time.RFC3339)
-			})
-
-		case "*time.Time":
-			value, err = v.resolveField(formFieldName, func(s string) (any, error) {
-				tv, er := time.Parse(s, time.RFC3339)
-				if er != nil {
-					return nil, er
-				}
-				return &tv, nil
-			})
+				return fmt.Errorf("field `%s`: %w", field.Name, v.prepareError(err))
+			}
 
 		default:
-			return fmt.Errorf("unsupported type `%s` for field `%s`", fieldType, field.Name)
-		}
+			var value any
 
-		if err != nil {
-			if canOmitempty {
-				continue
+			switch fieldType {
+			case "string":
+				err = v.resolveField(formFieldName, func(s string) error {
+					if isPtr {
+						value = &s
+					} else {
+						value = s
+					}
+					return nil
+				})
+
+			case "[]byte":
+				err = v.resolveField(formFieldName, func(s string) error {
+					b := []byte(s)
+					if isPtr {
+						value = &b
+					} else {
+						value = b
+					}
+					return nil
+				})
+
+			case "int":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := strconv.Atoi(s)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+
+			case "int64":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := strconv.ParseInt(s, 10, 64)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+			case "uint64":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := strconv.ParseUint(s, 10, 64)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+
+			case "float64":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := strconv.ParseFloat(s, 64)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+
+			case "bool":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := strconv.ParseBool(s)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+
+			case "time.Time":
+				err = v.resolveField(formFieldName, func(s string) error {
+					iv, e := time.Parse(s, time.RFC3339)
+					if e != nil {
+						return e
+					}
+					if isPtr {
+						value = &iv
+					} else {
+						value = iv
+					}
+					return nil
+				})
+
+			default:
+				return fmt.Errorf("unsupported type `%s` for field `%s`", fieldType, field.Name)
 			}
-			return fmt.Errorf("field `%s`: %w", field.Name, v.prepareError(err))
-		}
 
-		v.objRef.Elem().FieldByName(field.Name).Set(reflect.ValueOf(value))
+			if err != nil {
+				if canOmitempty {
+					continue
+				}
+				return fmt.Errorf("field `%s`: %w", field.Name, v.prepareError(err))
+			}
+
+			v.objRef.Elem().FieldByName(field.Name).Set(reflect.ValueOf(value))
+		}
 	}
 	return nil
 }
 
-func (v *formDataParser) resolveFile(fieldName string) (any, error) {
+func (v *formDataParser) resolveFile(fieldName string, call func(io.Reader, int) error) error {
 	file, head, err := v.httpReq.FormFile(fieldName)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	buff := data.NewBuffer(int(head.Size))
-	_, err = io.Copy(buff, file)
-
-	return buff, errors.Wrap(err, file.Close())
+	err = call(file, int(head.Size))
+	return errors.Wrap(err, file.Close())
 }
 
-func (v *formDataParser) resolveField(fieldName string, parseFunc func(s string) (any, error)) (any, error) {
-	tagValue := v.httpReq.FormValue(fieldName)
-	if len(tagValue) == 0 {
-		return nil, fmt.Errorf("field `%s` not found", fieldName)
+func (v *formDataParser) resolveField(fieldName string, parseFunc func(s string) error) error {
+	value := v.httpReq.FormValue(fieldName)
+	if len(value) == 0 {
+		return fmt.Errorf("field `%s` not found", fieldName)
 	}
 
-	return parseFunc(tagValue)
+	return parseFunc(value)
 }
 
 func (*formDataParser) parseTag(v string) (name string, omitEmpty, isValid bool) {

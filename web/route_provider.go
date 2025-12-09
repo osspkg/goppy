@@ -5,8 +5,6 @@
 
 package web
 
-//go:generate easyjson
-
 import (
 	"net/http"
 	"strings"

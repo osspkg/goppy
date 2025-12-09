@@ -29,9 +29,10 @@ func Command() console.CommandGetter {
 			flagsSetter.StringVar("db-read", "slave", "example: slave")
 			flagsSetter.StringVar("db-write", "master", "example: master")
 			flagsSetter.StringVar("sql-dir", "", "dir for store sql files")
+			flagsSetter.StringVar("model", "Repo", "model name")
 			flagsSetter.IntVar("index", 0, "index for sql file as prefix")
 		})
-		setter.ExecFunc(func(_ []string, _dialect, _dbRead, _dbWrite, _outDir string, _index int64) {
+		setter.ExecFunc(func(_ []string, _dialect, _dbRead, _dbWrite, _outDir, _modelName string, _index int64) {
 			console.Infof("--- GENERATE ---")
 
 			console.ShowDebug(false)
@@ -71,6 +72,7 @@ func Command() console.CommandGetter {
 					DBRead: _dbRead, DBWrite: _dbWrite,
 					CurrDir: currDir, SQLDir: _outDir,
 					FileIndex: _index,
+					ModelName: _modelName,
 				}
 
 				console.FatalIfErr(GenerateSQL(cc, vv, gen), "generate orm sql")

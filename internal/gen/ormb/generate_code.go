@@ -20,9 +20,10 @@ import (
 
 func GenerateCode(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error {
 	ci := common.CodeInfo{
-		FilePath: vv.FilePath,
-		PkgName:  vv.PkgName,
-		Imports:  nil,
+		FilePath:  vv.FilePath,
+		PkgName:   vv.PkgName,
+		ModelName: cc.ModelName,
+		Imports:   nil,
 	}
 
 	for n, p := range vv.Imports.Yield() {
@@ -56,19 +57,19 @@ func GenerateCode(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error 
 			common.Writelnf(w, `%s "%s"`, imp.Name, imp.Pkg)
 		}
 		common.Writeln(w, `)`)
-		common.Writeln(w, `type Repo struct {`)
+		common.Writelnf(w, `type %s struct {`, cc.ModelName)
 		common.Writeln(w, `orm orm.ORM`)
 		common.Writeln(w, `rtag, wtag string`)
 		common.Writeln(w, `}`)
-		common.Writeln(w, `func NewRepo(orm orm.ORM) *Repo {`)
-		common.Writeln(w, `return &Repo{`)
+		common.Writelnf(w, `func new%s(orm orm.ORM) *%s {`, cc.ModelName, cc.ModelName)
+		common.Writelnf(w, `return &%s{`, cc.ModelName)
 		common.Writeln(w, `orm:  orm,`)
 		common.Writelnf(w, `rtag: "%s",`, cc.DBRead)
 		common.Writelnf(w, `wtag: "%s",`, cc.DBWrite)
 		common.Writeln(w, `}`)
 		common.Writeln(w, `}`)
-		common.Writeln(w, `func (v *Repo) Sync() orm.Stmt { return v.orm.Tag(v.rtag) }`)
-		common.Writeln(w, `func (v *Repo) Master() orm.Stmt { return v.orm.Tag(v.wtag) }`)
+		common.Writelnf(w, `func (v *%s) Sync() orm.Stmt { return v.orm.Tag(v.rtag) }`, cc.ModelName)
+		common.Writelnf(w, `func (v *%s) Master() orm.Stmt { return v.orm.Tag(v.wtag) }`, cc.ModelName)
 		common.Writeln(w, `var _sqlBuilderPool = pool.New[*strings.Builder](func() *strings.Builder {`)
 		common.Writeln(w, `return new(strings.Builder)`)
 		common.Writeln(w, `})`)
@@ -104,14 +105,14 @@ func GenerateCode(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error 
 		common.Writeln(w, `}`)
 		common.Writeln(w, `}`)
 
-		filePath := fmt.Sprintf("%s/repo_init.go", cc.CurrDir)
+		filePath := fmt.Sprintf("%s/%s_init_codegen.go", cc.CurrDir, strings.ToLower(cc.ModelName))
 		if err := os.WriteFile(filePath, w.Bytes(), 0755); err != nil {
 			return fmt.Errorf(`failed to write file "%s": %w`, filePath, err)
 		}
 	}
 
 	for _, tab := range vv.Tables {
-		filePath := fmt.Sprintf("%s/repo_%s.go", cc.CurrDir, strings.ToLower(tab.ModelName))
+		filePath := fmt.Sprintf("%s/%s_%s_codegen.go", cc.CurrDir, strings.ToLower(cc.ModelName), strings.ToLower(tab.ModelName))
 		if err := os.WriteFile(filePath, g.Code.Build(tab, ci), 0755); err != nil {
 			return fmt.Errorf(`failed to write file "%s": %w`, filePath, err)
 		}

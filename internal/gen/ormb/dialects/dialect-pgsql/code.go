@@ -40,16 +40,16 @@ func (c Code) Build(t *table.Table, ci common.CodeInfo) []byte {
 	}
 
 	if slices.Contains(crud, table.AttrValueCRUDc) {
-		c.creates(buf, t)
+		c.creates(buf, t, ci)
 	}
 	if slices.Contains(crud, table.AttrValueCRUDr) {
-		c.selects(buf, t)
+		c.selects(buf, t, ci)
 	}
 	if slices.Contains(crud, table.AttrValueCRUDu) {
-		c.updates(buf, t)
+		c.updates(buf, t, ci)
 	}
 	if slices.Contains(crud, table.AttrValueCRUDd) {
-		c.deletes(buf, t)
+		c.deletes(buf, t, ci)
 	}
 
 	return buf.Bytes()
@@ -67,7 +67,7 @@ func (c Code) header(w io.Writer, ci common.CodeInfo) {
 	common.Writeln(w, `)`)
 }
 
-func (c Code) creates(w io.Writer, t *table.Table) {
+func (c Code) creates(w io.Writer, t *table.Table, ci common.CodeInfo) {
 	var (
 		cols   []string
 		fields []string
@@ -95,8 +95,8 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 			c.E.Cols(t.TableName), c.E.Cols(cols...), c.E.VarsRangeStr(1, len(cols)))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) CreateBulk%s(ctx context.Context, ms []*%s, opts ...CreateOption) error {`,
-			t.ModelName, t.ModelName)
+		common.Writelnf(w, `func (v *%s) CreateBulk%s(ctx context.Context, ms []*%s, opts ...CreateOption) error {`,
+			ci.ModelName, t.ModelName, t.ModelName)
 		common.Writeln(w, `if len(ms) == 0 {`)
 		common.Writeln(w, `return nil`)
 		common.Writeln(w, `}`)
@@ -138,8 +138,8 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 	}
 
 	{
-		common.Writelnf(w, `func (v *Repo) Create%s(ctx context.Context, m *%s, opts ...CreateOption) error {`,
-			t.ModelName, t.ModelName)
+		common.Writelnf(w, `func (v *%s) Create%s(ctx context.Context, m *%s, opts ...CreateOption) error {`,
+			ci.ModelName, t.ModelName, t.ModelName)
 
 		if _, ok := t.GetAttrsByKeyDo(table.AttrKeyFieldAuto, table.AttrValueCRUDc); ok {
 			for _, field := range t.Fields {
@@ -172,7 +172,7 @@ func (c Code) creates(w io.Writer, t *table.Table) {
 	}
 }
 
-func (c Code) deletes(w io.Writer, t *table.Table) {
+func (c Code) deletes(w io.Writer, t *table.Table, ci common.CodeInfo) {
 	var (
 		items []fieldItem
 	)
@@ -194,8 +194,8 @@ func (c Code) deletes(w io.Writer, t *table.Table) {
 			c.E.Cols(t.TableName), c.E.Cols(item.Col), c.E.Vars(1))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) Delete%sBy%s(ctx context.Context, ms ...%s) error {`,
-			t.ModelName, item.Name, item.GoType)
+		common.Writelnf(w, `func (v *%s) Delete%sBy%s(ctx context.Context, ms ...%s) error {`,
+			ci.ModelName, t.ModelName, item.Name, item.GoType)
 		common.Writeln(w, `if len(ms) == 0 {`)
 		common.Writeln(w, `return nil`)
 		common.Writeln(w, `}`)
@@ -209,7 +209,7 @@ func (c Code) deletes(w io.Writer, t *table.Table) {
 	}
 }
 
-func (c Code) updates(w io.Writer, t *table.Table) {
+func (c Code) updates(w io.Writer, t *table.Table, ci common.CodeInfo) {
 	var (
 		items  []fieldItem
 		cols   []string
@@ -257,8 +257,8 @@ func (c Code) updates(w io.Writer, t *table.Table) {
 			c.E.Cols(item.Col), c.E.Vars(len(cols)))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) Update%sBy%s(ctx context.Context, ms ...*%s) error {`,
-			t.ModelName, item.Name, t.ModelName)
+		common.Writelnf(w, `func (v *%s) Update%sBy%s(ctx context.Context, ms ...*%s) error {`,
+			ci.ModelName, t.ModelName, item.Name, t.ModelName)
 		common.Writeln(w, `if len(ms) == 0 {`)
 		common.Writeln(w, `return nil`)
 		common.Writeln(w, `}`)
@@ -293,7 +293,7 @@ func (c Code) updates(w io.Writer, t *table.Table) {
 	}
 }
 
-func (c Code) selects(w io.Writer, t *table.Table) {
+func (c Code) selects(w io.Writer, t *table.Table, ci common.CodeInfo) {
 	var (
 		items  []fieldItem
 		cols   []string
@@ -325,8 +325,8 @@ func (c Code) selects(w io.Writer, t *table.Table) {
 			c.E.Cols(cols...), c.E.Cols(t.TableName), c.E.Cols(pk.Col), c.E.Vars(1), c.E.Cols(pk.Col), c.E.Vars(2))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) Select%sCursor(ctx context.Context, from %s, lim uint) ([]%s,error) {`,
-			t.ModelName, pk.GoType, t.ModelName)
+		common.Writelnf(w, `func (v *%s) Select%sCursor(ctx context.Context, from %s, lim uint) ([]%s,error) {`,
+			ci.ModelName, t.ModelName, pk.GoType, t.ModelName)
 		common.Writelnf(w, `result := make([]%s,0,lim)`, t.ModelName)
 		common.Writelnf(w, `err := v.Sync().Query(ctx, "%s_read_all", func(q orm.Querier) {`,
 			t.TableName)
@@ -354,8 +354,8 @@ func (c Code) selects(w io.Writer, t *table.Table) {
 			c.E.Cols(cols...), c.E.Cols(t.TableName), c.E.Cols(item.Col), c.E.Vars(1))
 		common.Writeln(w, sqlComma)
 
-		common.Writelnf(w, `func (v *Repo) Select%sBy%s(ctx context.Context, args ...%s) ([]%s,error) {`,
-			t.ModelName, item.Name, item.GoType, t.ModelName)
+		common.Writelnf(w, `func (v *%s) Select%sBy%s(ctx context.Context, args ...%s) ([]%s,error) {`,
+			ci.ModelName, t.ModelName, item.Name, item.GoType, t.ModelName)
 		common.Writeln(w, `if len(args) == 0 {`)
 		common.Writeln(w, `return nil, nil`)
 		common.Writeln(w, `}`)
