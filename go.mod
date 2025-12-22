@@ -26,7 +26,7 @@ require (
 	go.osspkg.com/logx v0.6.0
 	go.osspkg.com/network v0.6.0
 	go.osspkg.com/random v0.5.0
-	go.osspkg.com/routine v0.4.0
+	go.osspkg.com/routine v0.4.1
 	go.osspkg.com/static v1.4.0
 	go.osspkg.com/syncing v0.4.3
 	go.osspkg.com/validate v0.1.0
