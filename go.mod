@@ -3,14 +3,14 @@ module go.osspkg.com/goppy/v2
 go 1.25.0
 
 require (
-	github.com/blevesearch/bleve/v2 v2.5.6
+	github.com/blevesearch/bleve/v2 v2.5.7
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.1
 	github.com/mattn/go-sqlite3 v1.14.32
-	github.com/miekg/dns v1.1.68
+	github.com/miekg/dns v1.1.69
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
@@ -22,27 +22,27 @@ require (
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
 	go.osspkg.com/grape v1.3.0
-	go.osspkg.com/ioutils v0.7.3
+	go.osspkg.com/ioutils v0.7.4
 	go.osspkg.com/logx v0.6.0
 	go.osspkg.com/network v0.6.0
 	go.osspkg.com/random v0.5.0
-	go.osspkg.com/routine v0.4.0
+	go.osspkg.com/routine v0.4.1
 	go.osspkg.com/static v1.4.0
 	go.osspkg.com/syncing v0.4.3
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.46.0
-	golang.org/x/exp v0.0.0-20251125195548-87e1e737ad39
+	golang.org/x/exp v0.0.0-20251219203646-944ab1f22d93
 	golang.org/x/mod v0.31.0
 	golang.org/x/oauth2 v0.34.0
-	google.golang.org/protobuf v1.36.10
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/BurntSushi/toml v1.5.0 // indirect
+	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.14.4 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
@@ -62,7 +62,7 @@ require (
 	github.com/blevesearch/zapx/v13 v13.4.2 // indirect
 	github.com/blevesearch/zapx/v14 v14.4.2 // indirect
 	github.com/blevesearch/zapx/v15 v15.4.2 // indirect
-	github.com/blevesearch/zapx/v16 v16.2.7 // indirect
+	github.com/blevesearch/zapx/v16 v16.2.8 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect

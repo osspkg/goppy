@@ -13,7 +13,7 @@ import (
 	"go.osspkg.com/do"
 	"go.osspkg.com/errors"
 	"go.osspkg.com/logx"
-	"go.osspkg.com/routine"
+	"go.osspkg.com/routine/tick"
 	"go.osspkg.com/syncing"
 
 	"go.osspkg.com/goppy/v2/orm/dialect"
@@ -46,12 +46,15 @@ func New(ctx context.Context) ORM {
 	}
 
 	do.Async(func() {
-		tik := routine.Ticker{
-			Interval: time.Second * 15,
-			OnStart:  false,
-			Calls: []routine.TickFunc{
-				func(ctx context.Context, _ time.Time) {
-					db.checkConnects(ctx)
+		tik := tick.Ticker{
+			Calls: []tick.Config{
+				{
+					Name:     "validate DB connects",
+					Interval: time.Second * 15,
+					Func: func(ctx context.Context, _ time.Time) error {
+						db.checkConnects(ctx)
+						return nil
+					},
 				},
 			},
 		}
