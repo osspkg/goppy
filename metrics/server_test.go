@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -17,10 +17,10 @@ import (
 	"go.osspkg.com/network/address"
 	"go.osspkg.com/xc"
 
-	"go.osspkg.com/goppy/v2/web/client"
+	"go.osspkg.com/goppy/v3/web/client"
 
-	"go.osspkg.com/goppy/v2/env"
-	"go.osspkg.com/goppy/v2/metrics"
+	"go.osspkg.com/goppy/v3/env"
+	"go.osspkg.com/goppy/v3/metrics"
 )
 
 func TestUnit_NewServer(t *testing.T) {

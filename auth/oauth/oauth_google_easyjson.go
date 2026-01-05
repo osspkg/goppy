@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson40f907c5DecodeGoOsspkgComGoppyV2AuthOauth(in *jlexer.Lexer, out *modelGoogle) {
+func easyjson40f907c5DecodeGoOsspkgComGoppyV3AuthOauth(in *jlexer.Lexer, out *modelGoogle) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -66,7 +66,7 @@ func easyjson40f907c5DecodeGoOsspkgComGoppyV2AuthOauth(in *jlexer.Lexer, out *mo
 		in.Consumed()
 	}
 }
-func easyjson40f907c5EncodeGoOsspkgComGoppyV2AuthOauth(out *jwriter.Writer, in modelGoogle) {
+func easyjson40f907c5EncodeGoOsspkgComGoppyV3AuthOauth(out *jwriter.Writer, in modelGoogle) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -96,23 +96,23 @@ func easyjson40f907c5EncodeGoOsspkgComGoppyV2AuthOauth(out *jwriter.Writer, in m
 // MarshalJSON supports json.Marshaler interface
 func (v modelGoogle) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson40f907c5EncodeGoOsspkgComGoppyV2AuthOauth(&w, v)
+	easyjson40f907c5EncodeGoOsspkgComGoppyV3AuthOauth(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v modelGoogle) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson40f907c5EncodeGoOsspkgComGoppyV2AuthOauth(w, v)
+	easyjson40f907c5EncodeGoOsspkgComGoppyV3AuthOauth(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *modelGoogle) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson40f907c5DecodeGoOsspkgComGoppyV2AuthOauth(&r, v)
+	easyjson40f907c5DecodeGoOsspkgComGoppyV3AuthOauth(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *modelGoogle) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson40f907c5DecodeGoOsspkgComGoppyV2AuthOauth(l, v)
+	easyjson40f907c5DecodeGoOsspkgComGoppyV3AuthOauth(l, v)
 }

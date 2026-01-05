@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -17,9 +17,9 @@ import (
 	"go.osspkg.com/casecheck"
 	"go.osspkg.com/errors"
 
-	"go.osspkg.com/goppy/v2/auth/signature"
-	"go.osspkg.com/goppy/v2/web/client"
-	"go.osspkg.com/goppy/v2/web/encoders"
+	"go.osspkg.com/goppy/v3/auth/signature"
+	"go.osspkg.com/goppy/v3/web/client"
+	"go.osspkg.com/goppy/v3/web/encoders"
 )
 
 type mockModelName struct {

@@ -2,7 +2,7 @@ env: dev
 
 log:
   file_path: /dev/stdout
-  format: string
+  format: json
   level: 4
 
 http:
@@ -14,3 +14,4 @@ metrics:
   gauge:
     - users_request
 
+custom:

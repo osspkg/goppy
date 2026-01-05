@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -8,11 +8,11 @@ package dialects
 import (
 	"go.osspkg.com/syncing"
 
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/common"
-	dialectpgsql "go.osspkg.com/goppy/v2/internal/gen/ormb/dialects/dialect-pgsql"
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/table"
-	"go.osspkg.com/goppy/v2/orm/clients/pgsql"
-	"go.osspkg.com/goppy/v2/orm/dialect"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
+	dialectpgsql "go.osspkg.com/goppy/v3/internal/gen/ormb/dialects/dialect-pgsql"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/table"
+	"go.osspkg.com/goppy/v3/orm/clients/pgsql"
+	"go.osspkg.com/goppy/v3/orm/dialect"
 )
 
 var (

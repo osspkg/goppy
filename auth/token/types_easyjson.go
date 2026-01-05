@@ -9,7 +9,7 @@ import (
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
 
-	algorithm "go.osspkg.com/goppy/v2/auth/token/algorithm"
+	algorithm "go.osspkg.com/goppy/v3/auth/token/algorithm"
 )
 
 // suppress unused package warning
@@ -20,7 +20,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV2AuthToken(in *jlexer.Lexer, out *Header) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3AuthToken(in *jlexer.Lexer, out *Header) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -92,7 +92,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV2AuthToken(in *jlexer.Lexer, out *He
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV2AuthToken(out *jwriter.Writer, in Header) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3AuthToken(out *jwriter.Writer, in Header) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -142,23 +142,23 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV2AuthToken(out *jwriter.Writer, in H
 // MarshalJSON supports json.Marshaler interface
 func (v Header) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV2AuthToken(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3AuthToken(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v Header) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV2AuthToken(w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3AuthToken(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *Header) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV2AuthToken(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3AuthToken(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *Header) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV2AuthToken(l, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3AuthToken(l, v)
 }
