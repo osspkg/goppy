@@ -1,4 +1,4 @@
-module go.osspkg.com/goppy/v2
+module go.osspkg.com/goppy/v3
 
 go 1.25.0
 
@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.9.1
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/miekg/dns v1.1.69
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.2
@@ -21,7 +21,6 @@ require (
 	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
-	go.osspkg.com/grape v1.3.0
 	go.osspkg.com/ioutils v0.7.4
 	go.osspkg.com/logx v0.6.0
 	go.osspkg.com/network v0.6.0

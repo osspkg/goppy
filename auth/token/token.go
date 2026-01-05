@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -15,10 +15,10 @@ import (
 	"go.osspkg.com/errors"
 	"go.osspkg.com/ioutils/cache"
 
-	"go.osspkg.com/goppy/v2/auth/token/algorithm"
-	"go.osspkg.com/goppy/v2/auth/token/internal/b64"
-	"go.osspkg.com/goppy/v2/auth/token/internal/byteops"
-	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/goppy/v3/auth/token/algorithm"
+	"go.osspkg.com/goppy/v3/auth/token/internal/b64"
+	"go.osspkg.com/goppy/v3/auth/token/internal/byteops"
+	"go.osspkg.com/goppy/v3/web"
 )
 
 var (

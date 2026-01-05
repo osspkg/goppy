@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -12,10 +12,9 @@ import (
 
 	"go.osspkg.com/xc"
 
-	"go.osspkg.com/goppy/v2"
-	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/ws"
-	"go.osspkg.com/goppy/v2/ws/event"
+	"go.osspkg.com/goppy/v3"
+	"go.osspkg.com/goppy/v3/ws"
+	"go.osspkg.com/goppy/v3/ws/event"
 )
 
 func main() {
@@ -24,19 +23,17 @@ func main() {
 		ws.WithClient(),
 	)
 	application.Plugins(
-		plugins.Kind{
-			Inject: NewController,
-			Resolve: func(c *Controller, ctx xc.Context, cli ws.Client) error {
-				cli.SetEventHandler(c.EventListener, 99, 1, 65000)
-				cli.AddOnCloseFunc(func(cid string) {
-					fmt.Println("server close connect")
-					ctx.Close()
-				})
-				go c.Ticker(cli.BroadcastEvent)
+		NewController,
+		func(c *Controller, ctx xc.Context, cli ws.Client) error {
+			cli.SetEventHandler(c.EventListener, 99, 1, 65000)
+			cli.AddOnCloseFunc(func(cid string) {
+				fmt.Println("server close connect")
+				ctx.Close()
+			})
+			go c.Ticker(cli.BroadcastEvent)
 
-				_, err := cli.Open("ws://127.0.0.1:10000/ws")
-				return err
-			},
+			_, err := cli.Open("ws://127.0.0.1:10000/ws")
+			return err
 		},
 	)
 	application.Run()

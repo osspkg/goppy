@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -13,9 +13,9 @@ import (
 	"go.osspkg.com/console"
 	"go.osspkg.com/ioutils/data"
 
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/common"
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/dialects"
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/visitor"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/dialects"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/visitor"
 )
 
 func GenerateSQL(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error {

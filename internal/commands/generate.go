@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -17,7 +17,7 @@ import (
 	"go.osspkg.com/console"
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v2/internal/global"
+	"go.osspkg.com/goppy/v3/internal/global"
 )
 
 func CmdGenerate() console.CommandGetter {
@@ -162,15 +162,15 @@ import (
 	pkg "{{.app_module}}/pkg"
 
 	"go.osspkg.com/goppy"
-	{{if .mod_metrics}}"go.osspkg.com/goppy/v2/metrics"
-{{end}}{{if .mod_geoip}}"go.osspkg.com/goppy/v2/geoip"
-{{end}}{{if or .mod_oauth .mod_auth_jwt}}"go.osspkg.com/goppy/v2/auth"
-{{end}}{{if .mod_db_mysql}}"go.osspkg.com/goppy/v2/ormmysql"
-{{end}}{{if .mod_db_sqlite}}"go.osspkg.com/goppy/v2/ormsqlite"
-{{end}}{{if .mod_db_postgre}}"go.osspkg.com/goppy/v2/ormpgsql"
-{{end}}{{if or .mod_web_server .mod_web_client}}"go.osspkg.com/goppy/v2/web"
-{{end}}{{if or .mod_websocket_server .mod_websocket_client}}"go.osspkg.com/goppy/v2/ws"
-{{end}}{{if or .mod_dns_server .mod_dns_client}}"go.osspkg.com/goppy/v2/xdns"
+	{{if .mod_metrics}}"go.osspkg.com/goppy/v3/metrics"
+{{end}}{{if .mod_geoip}}"go.osspkg.com/goppy/v3/geoip"
+{{end}}{{if or .mod_oauth .mod_auth_jwt}}"go.osspkg.com/goppy/v3/auth"
+{{end}}{{if .mod_db_mysql}}"go.osspkg.com/goppy/v3/ormmysql"
+{{end}}{{if .mod_db_sqlite}}"go.osspkg.com/goppy/v3/ormsqlite"
+{{end}}{{if .mod_db_postgre}}"go.osspkg.com/goppy/v3/ormpgsql"
+{{end}}{{if or .mod_web_server .mod_web_client}}"go.osspkg.com/goppy/v3/web"
+{{end}}{{if or .mod_websocket_server .mod_websocket_client}}"go.osspkg.com/goppy/v3/ws"
+{{end}}{{if or .mod_dns_server .mod_dns_client}}"go.osspkg.com/goppy/v3/xdns"
 {{end}}
 )
 
@@ -204,7 +204,7 @@ func main() {
 const tmplAppGo = `package app
 
 import (
-	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v3/plugins"
 )
 
 var Plugins = plugins.Inject()
@@ -214,7 +214,7 @@ var Plugins = plugins.Inject()
 const tmplPkgGo = `package pkg
 
 import (
-	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v3/plugins"
 )
 
 var Plugins = plugins.Inject()

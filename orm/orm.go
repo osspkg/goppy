@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -10,13 +10,12 @@ import (
 	"fmt"
 	"time"
 
-	"go.osspkg.com/do"
 	"go.osspkg.com/errors"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/routine/tick"
 	"go.osspkg.com/syncing"
 
-	"go.osspkg.com/goppy/v2/orm/dialect"
+	"go.osspkg.com/goppy/v3/orm/dialect"
 )
 
 var (
@@ -39,31 +38,22 @@ type (
 
 // New init database connections
 func New(ctx context.Context) ORM {
-	db := &_orm{
+	return &_orm{
 		pool:  syncing.NewMap[string, Stmt](10),
 		conns: syncing.NewMap[string, dialect.Connector](10),
 		ctx:   ctx,
 	}
+}
 
-	do.Async(func() {
-		tik := tick.Ticker{
-			Calls: []tick.Config{
-				{
-					Name:     "validate DB connects",
-					Interval: time.Second * 15,
-					Func: func(ctx context.Context, _ time.Time) error {
-						db.checkConnects(ctx)
-						return nil
-					},
-				},
-			},
-		}
-		tik.Run(ctx)
-	}, func(err error) {
-		logx.Error("Validate DB connects", "err", err)
+func (v *_orm) ApplyTickConfig(call func(tick.Config)) {
+	call(tick.Config{
+		Name:     "validate DB connects",
+		Interval: time.Second * 15,
+		Func: func(ctx context.Context, _ time.Time) error {
+			v.checkConnects(ctx)
+			return nil
+		},
 	})
-
-	return db
 }
 
 func (v *_orm) Close() {

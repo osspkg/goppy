@@ -7,7 +7,7 @@
 ## Installation
 
 ```bash
-go get -u go.osspkg.com/goppy/v2
+go get -u go.osspkg.com/goppy/v3
 ```
 
 ## Features
@@ -51,10 +51,10 @@ import (
 
 	"go.osspkg.com/logx"
 
-	"go.osspkg.com/goppy/v2"
-	"go.osspkg.com/goppy/v2/metrics"
-	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/goppy/v3"
+	"go.osspkg.com/goppy/v3/metrics"
+	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/web"
 )
 
 func main() {

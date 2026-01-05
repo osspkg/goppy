@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson336a8009DecodeGoOsspkgComGoppyV2Web(in *jlexer.Lexer, out *errMessage) {
+func easyjson336a8009DecodeGoOsspkgComGoppyV3Web(in *jlexer.Lexer, out *errMessage) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -74,7 +74,7 @@ func easyjson336a8009DecodeGoOsspkgComGoppyV2Web(in *jlexer.Lexer, out *errMessa
 		in.Consumed()
 	}
 }
-func easyjson336a8009EncodeGoOsspkgComGoppyV2Web(out *jwriter.Writer, in errMessage) {
+func easyjson336a8009EncodeGoOsspkgComGoppyV3Web(out *jwriter.Writer, in errMessage) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -114,23 +114,23 @@ func easyjson336a8009EncodeGoOsspkgComGoppyV2Web(out *jwriter.Writer, in errMess
 // MarshalJSON supports json.Marshaler interface
 func (v errMessage) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson336a8009EncodeGoOsspkgComGoppyV2Web(&w, v)
+	easyjson336a8009EncodeGoOsspkgComGoppyV3Web(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v errMessage) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson336a8009EncodeGoOsspkgComGoppyV2Web(w, v)
+	easyjson336a8009EncodeGoOsspkgComGoppyV3Web(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *errMessage) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson336a8009DecodeGoOsspkgComGoppyV2Web(&r, v)
+	easyjson336a8009DecodeGoOsspkgComGoppyV3Web(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *errMessage) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson336a8009DecodeGoOsspkgComGoppyV2Web(l, v)
+	easyjson336a8009DecodeGoOsspkgComGoppyV3Web(l, v)
 }

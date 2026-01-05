@@ -1,57 +1,50 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
 package goppy
 
 import (
-	"fmt"
-	"os"
-	"reflect"
+	"context"
 
 	"go.osspkg.com/config"
-	configEnv "go.osspkg.com/config/env"
-	"go.osspkg.com/console"
-	"go.osspkg.com/errors"
-	"go.osspkg.com/grape"
-	grapeConfig "go.osspkg.com/grape/config"
-	"go.osspkg.com/ioutils/codec"
+	cenv "go.osspkg.com/config/env"
+	"go.osspkg.com/events"
 	"go.osspkg.com/logx"
-	_ "go.uber.org/automaxprocs"
+	"go.osspkg.com/syncing"
+	"go.osspkg.com/xc"
+	"go.uber.org/automaxprocs/maxprocs"
 
-	"go.osspkg.com/goppy/v2/env"
-	"go.osspkg.com/goppy/v2/plugins"
+	"go.osspkg.com/goppy/v3/internal/appsteps"
+
+	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/dic"
+	"go.osspkg.com/goppy/v3/dic/broker"
+	"go.osspkg.com/goppy/v3/env"
+	"go.osspkg.com/goppy/v3/internal/appconfig"
+	"go.osspkg.com/goppy/v3/internal/applog"
+	"go.osspkg.com/goppy/v3/internal/appreflect"
+	"go.osspkg.com/goppy/v3/plugins"
 )
 
+func init() {
+	_, err := maxprocs.Set()
+	console.FatalIfErr(err, "set auto max process")
+}
+
 type (
-	_config struct {
-		Filename string
-		Data     string
-		Ext      string
-	}
-
 	_app struct {
-		info  *env.AppInfo
-		grape grape.Grape
-
-		commands map[string]any
-
-		plugins []any
-		configs []any
-
-		cfg _config
-
+		info      *env.AppInfo
+		container *dic.Container
+		console   *console.Console
+		configs   []any
 		resolvers []config.Resolver
-		args      *console.Args
 	}
 
 	Goppy interface {
-		Logger(l logx.Logger)
-		Plugins(args ...plugins.Kind)
-		Command(name string, call any)
-		ConfigResolvers(rc ...config.Resolver)
-		ConfigData(data, ext string)
+		Plugins(args ...any)
+		Command(cb func(console.CommandSetter))
 		Run()
 	}
 )
@@ -59,14 +52,6 @@ type (
 // New constructor for init Goppy
 func New(name, version, description string) Goppy {
 	return &_app{
-		grape: grape.New(name).ExitFunc(func(code int) {
-			os.Exit(code)
-		}),
-		commands:  make(map[string]any),
-		plugins:   make([]any, 0, 100),
-		configs:   make([]any, 0, 100),
-		resolvers: make([]config.Resolver, 0, 100),
-		args:      console.NewArgs().Parse(os.Args[1:]),
 		info: func() *env.AppInfo {
 			info := env.NewAppInfo()
 			info.AppName = env.AppName(name)
@@ -74,201 +59,142 @@ func New(name, version, description string) Goppy {
 			info.AppDescription = env.AppDescription(description)
 			return &info
 		}(),
-	}
-}
-
-func (v *_app) Logger(l logx.Logger) {
-	v.grape.Logger(l)
-}
-
-func (v *_app) ConfigResolvers(rc ...config.Resolver) {
-	v.resolvers = append(v.resolvers, rc...)
-}
-
-func (v *_app) ConfigData(data, ext string) {
-	v.cfg = _config{
-		Filename: "",
-		Data:     data,
-		Ext:      ext,
+		container: dic.New(),
+		console:   console.New(name, description),
+		configs:   make([]any, 0, 10),
+		resolvers: make([]config.Resolver, 0, 10),
 	}
 }
 
 // Plugins setting the list of plugins to initialize
-func (v *_app) Plugins(args ...plugins.Kind) {
+func (v *_app) Plugins(dependency ...any) {
+	args := plugins.Inject(dependency...)
+
 	for _, arg := range args {
 
-		for _, item := range reflectAnySlice(arg.Config) {
-			reflectResolve(item, plugins.AllowedKindConfig(), func(in any) {
+		for _, item := range appreflect.AnySlice(arg.Config) {
+			appreflect.Validate(item, plugins.AllowedKindConfig(), func(in any) error {
 				v.configs = append(v.configs, in)
+				return nil
 			})
 		}
 
-		for _, item := range reflectAnySlice(arg.Inject) {
-			reflectResolve(item, plugins.AllowedKindInject(), func(in any) {
-				v.plugins = append(v.plugins, in)
-			})
-		}
-
-		for _, item := range reflectAnySlice(arg.Resolve) {
-			reflectResolve(item, plugins.AllowedKindResolve(), func(in any) {
-				v.plugins = append(v.plugins, in)
+		for _, item := range appreflect.AnySlice(arg.Inject) {
+			appreflect.Validate(item, plugins.AllowedKindInject(), func(in any) error {
+				switch val := in.(type) {
+				case plugins.Broker:
+					return v.container.BrokerRegister(val)
+				case config.Resolver:
+					v.resolvers = append(v.resolvers, val)
+				default:
+					return v.container.Register(in)
+				}
+				return nil
 			})
 		}
 	}
 }
 
-func (v *_app) Command(name string, call any) {
-	v.commands[name] = call
+func (v *_app) Command(cb func(console.CommandSetter)) {
+	v.console.AddCommand(console.NewCommand(cb))
 }
+
+const (
+	configInited = "configInited"
+	logInited    = "logInited"
+	logDone      = "logDone"
+	appExit      = "*appExit"
+)
 
 // Run launching Goppy with initialization of all dependencies
 func (v *_app) Run() {
-	if len(v.resolvers) == 0 {
-		v.ConfigResolvers(configEnv.New())
+	ctx := xc.New()
+	go events.OnStopSignal(ctx.Close)
+	console.FatalIfErr(v.container.Register(
+		func() xc.Context { return ctx },
+	), "register base dependency")
+
+	steps := appsteps.New(ctx.Context(),
+		configInited, logInited, logDone, appExit,
+	)
+
+	wg := syncing.NewGroup(ctx.Context())
+	wg.OnPanic(func(e error) { logx.Error("Run background", "err", e) })
+
+	{
+		log := logx.Default()
+		conf := &applog.GroupConfig{}
+		v.configs = append(v.configs, conf)
+
+		wg.Background("log writer", func(_ context.Context) {
+			steps.Wait(configInited)
+			lw := applog.New(string(v.info.AppName), conf.Log, log)
+			steps.Done(logInited).Wait(appExit)
+			console.WarnIfErr(lw.Close(), "close log file")
+			steps.Done(logDone)
+		})
 	}
 
-	apps := v.grape.Modules(v.plugins...)
-	apps.Modules(v.info.AppName, v.info.AppVersion, v.info.AppDescription, *v.info)
-
-	if len(v.cfg.Data) > 0 {
-		apps.ConfigData(v.cfg.Data, v.cfg.Ext)
-	} else {
-		v.cfg.Filename = v.parseConfigFlag()
-		console.FatalIfErr(v.recoveryConfig(v.cfg.Filename), "config recovery")
-		apps.ConfigFile(v.cfg.Filename)
-	}
-	console.FatalIfErr(v.validateConfig(v.cfg), "config validate")
-
-	apps.ConfigModels(v.configs...)
-	apps.ConfigResolvers(v.resolvers...)
-
-	pid, err := v.parsePIDFileFlag()
-	console.FatalIfErr(err, "check pid file")
-	apps.PidFile(pid)
-
-	if params := v.args.Next(); len(params) > 0 {
-		if cmd, ok := v.commands[params[0]]; ok {
-			apps.Call(cmd)
-			return
-		}
-		console.Fatalf("<%s> command not found", params[0])
-	}
-	apps.Run()
-}
-
-func reflectAnySlice(arg any) []any {
-	refVal := reflect.ValueOf(arg)
-	if refVal.Kind() != reflect.Slice {
-		return []any{arg}
-	}
-
-	result := make([]any, 0, refVal.Len())
-	for i := 0; i < refVal.Len(); i++ {
-		result = append(result, refVal.Index(i).Interface())
-	}
-
-	return result
-}
-
-func reflectResolve(arg any, k plugins.AllowedKind, call func(any)) {
-	if arg == nil {
-		return
-	}
-	if err := k.Validate(arg); err != nil {
-		panic(err.Error())
-	}
-	call(arg)
-}
-
-func (v *_app) parseConfigFlag() string {
-	conf := v.args.Get("config")
-	if conf == nil || len(*conf) == 0 {
-		return ""
-	}
-	return *conf
-}
-
-func (v *_app) parsePIDFileFlag() (string, error) {
-	pid := v.args.Get("pid")
-	if pid == nil || len(*pid) == 0 {
-		return "", nil
-	}
-	file, err := os.Create(*pid)
-	if err != nil {
-		return "", err
-	}
-	if err = file.Close(); err != nil {
-		return "", err
-	}
-	return *pid, nil
-}
-
-func (v *_app) validateConfig(c _config) error {
-	rc := config.New(v.resolvers...)
-
-	switch true {
-	case len(c.Filename) > 0:
-		if err := rc.OpenFile(c.Filename); err != nil {
-			return err
-		}
-	case len(c.Data) > 0:
-		rc.OpenBlob(c.Data, c.Ext)
-	default:
-		return nil
-	}
-
-	if err := rc.Build(); err != nil {
-		return err
-	}
-
-	for _, cfg := range v.configs {
-		if err := rc.Decode(cfg); err != nil {
-			return fmt.Errorf("decode config %T error: %w", cfg, err)
-		}
-		vv, ok := cfg.(plugins.Validator)
-		if !ok {
-			continue
-		}
-		if err := vv.Validate(); err != nil {
-			return fmt.Errorf("validate config %T error: %w", cfg, err)
-		}
-	}
-	return nil
-}
-
-func (v *_app) recoveryConfig(filename string) error {
-	if len(filename) == 0 {
-		return nil
-	}
-	_, err := os.Stat(filename)
-	if err == nil {
-		return nil
-	}
-	if !errors.Is(err, os.ErrNotExist) {
-		return err
-	}
-
-	for _, cfg := range v.configs {
-		if vv, ok := cfg.(plugins.Defaulter); ok {
-			vv.Default()
-			continue
+	{
+		if len(v.resolvers) == 0 {
+			v.resolvers = append(v.resolvers, cenv.New())
 		}
 
-		if vv, ok := cfg.(plugins.Defaulter2); ok {
-			if err = vv.Default(); err != nil {
-				return err
-			}
-		}
+		console.FatalIfErr(v.container.BrokerRegister(
+			broker.WithTickerBroker(),
+			broker.WithServiceBroker(),
+		), "register default broker")
+
+		console.FatalIfErr(v.container.Register(
+			v.info.AppName,
+			v.info.AppVersion,
+			v.info.AppDescription,
+			*v.info,
+		), "register app info")
 	}
 
-	cfg := &grapeConfig.Config{
-		Env: "dev",
-		Log: grapeConfig.LogConfig{
-			Level:    4,
-			FilePath: "/dev/stdout",
-			Format:   "string",
-		},
+	{
+		v.console.AddGlobal(console.NewCommand(func(setter console.CommandSetter) {
+			setter.Flag(func(flagsSetter console.FlagsSetter) {
+				flagsSetter.StringVar("config", "", "Set config file path")
+				flagsSetter.StringVar("config-env", "", "Set config data from env")
+				flagsSetter.StringVar("config-ext", ".yaml", "Set config data format")
+				flagsSetter.Bool("config-recovery", "Recovery config if empty")
+			})
+			setter.ExecFunc(func(confFile, confEnv, confExt string, confRecovery bool) {
+				conf := appconfig.Config{
+					Filepath: confFile,
+					Data:     env.Get(confEnv, ""),
+					Ext:      confExt,
+				}
+				if len(confFile) > 0 && confRecovery {
+					console.FatalIfErr(appconfig.Recovery(confFile, v.configs), "config recovery")
+				}
+				console.FatalIfErr(appconfig.DecodeAndValidate(conf, v.resolvers, v.configs), "config validate")
+				console.FatalIfErr(v.container.Register(v.configs...), "register config")
+
+				steps.Done(configInited).Wait(logInited)
+			})
+		}))
+
+		v.console.RootCommand(console.NewCommand(func(setter console.CommandSetter) {
+			setter.Setup(string(v.info.AppName), string(v.info.AppDescription))
+			setter.Flag(func(flagsSetter console.FlagsSetter) {
+				flagsSetter.StringVar("pid", "", "Set PID file path")
+			})
+			setter.ExecFunc(func(pid string) {
+				if len(pid) > 0 {
+					console.FatalIfErr(appconfig.CreatePID(pid), "create pid file")
+				}
+
+				console.FatalIfErr(v.container.Start(ctx), "start dependency")
+				<-ctx.Done()
+				console.WarnIfErr(v.container.Stop(), "stop dependency")
+			})
+		}))
 	}
 
-	return codec.FileEncoder(filename).Encode(append(v.configs, cfg)...)
+	v.console.Exec()
+	steps.Done(appExit).Wait(logDone)
+	wg.Wait()
 }

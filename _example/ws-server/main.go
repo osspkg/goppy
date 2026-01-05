@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -13,11 +13,10 @@ import (
 
 	"go.osspkg.com/syncing"
 
-	"go.osspkg.com/goppy/v2"
-	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/web"
-	"go.osspkg.com/goppy/v2/ws"
-	"go.osspkg.com/goppy/v2/ws/event"
+	"go.osspkg.com/goppy/v3"
+	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/ws"
+	"go.osspkg.com/goppy/v3/ws/event"
 )
 
 func main() {
@@ -27,32 +26,30 @@ func main() {
 		ws.WithServer(),
 	)
 	app.Plugins(
-		plugins.Kind{
-			Inject: func(wss ws.Server) *Controller {
-				return NewController(wss)
-			},
-			Resolve: func(routes web.ServerPool, c *Controller, wss ws.Server) {
-				router, ok := routes.Main()
-				if !ok {
+		func(wss ws.Server) *Controller {
+			return NewController(wss)
+		},
+		func(routes web.ServerPool, c *Controller, wss ws.Server) {
+			router, ok := routes.Main()
+			if !ok {
+				return
+			}
+
+			wss.SetEventHandler(c.Event1, 1)
+			wss.SetEventHandler(c.MultiEvent, 2, 3)
+
+			router.Get("/ws", func(ctx web.Ctx) {
+				wss.Handling(ctx)
+			})
+
+			router.Get("/", func(ctx web.Ctx) {
+				b, err := os.ReadFile("./index.html")
+				if err != nil {
+					ctx.Error(http.StatusInternalServerError, err)
 					return
 				}
-
-				wss.SetEventHandler(c.Event1, 1)
-				wss.SetEventHandler(c.MultiEvent, 2, 3)
-
-				router.Get("/ws", func(ctx web.Ctx) {
-					wss.Handling(ctx)
-				})
-
-				router.Get("/", func(ctx web.Ctx) {
-					b, err := os.ReadFile("./index.html")
-					if err != nil {
-						ctx.Error(http.StatusInternalServerError, err)
-						return
-					}
-					ctx.Bytes(http.StatusOK, b)
-				})
-			},
+				ctx.Bytes(http.StatusOK, b)
+			})
 		},
 	)
 	app.Run()
