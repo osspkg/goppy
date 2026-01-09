@@ -10,6 +10,7 @@ import (
 	"log/syslog"
 	"net/url"
 	"os"
+	"strings"
 
 	"go.osspkg.com/console"
 	"go.osspkg.com/logx"
@@ -18,48 +19,49 @@ import (
 const formatSyslog = "syslog"
 
 type obj struct {
-	file    io.WriteCloser
-	handler logx.Logger
-	conf    Config
+	file io.WriteCloser
 }
 
-func New(tag string, conf Config, handler logx.Logger) io.Closer {
+func New(tag string, conf Config) io.Closer {
 	var err error
 
-	if conf.Format != formatSyslog && len(conf.FilePath) == 0 {
+	if len(conf.FilePath) == 0 {
 		conf.FilePath = "/dev/stdout"
 		conf.Level = logx.LevelError
 	}
 
-	log := &obj{
-		conf:    conf,
-		handler: handler,
-	}
+	log := &obj{}
 
 	switch conf.Format {
-	case formatSyslog:
+	case "string":
+		logx.SetDefault(logx.NewSLogStringAdapter())
+	default:
+		logx.SetDefault(logx.NewSLogJsonAdapter())
+	}
+
+	handler := logx.Default()
+
+	switch {
+	case strings.HasPrefix(conf.FilePath, formatSyslog):
 		network, addr := "", ""
-		if uri, err0 := url.Parse(conf.FilePath); err0 == nil {
-			network, addr = uri.Scheme, uri.Host
+
+		sysuri := strings.TrimPrefix(conf.FilePath, formatSyslog)
+		sysuri = strings.TrimPrefix(sysuri, "=")
+		if len(sysuri) > 0 {
+			if uri, err0 := url.Parse(sysuri); err0 == nil && uri.Scheme != "" && uri.Host != "" {
+				network, addr = uri.Scheme, uri.Host
+			}
 		}
-		log.file, err = syslog.Dial(network, addr, syslog.LOG_INFO, tag)
+
+		log.file, err = syslog.Dial(network, addr, syslog.LOG_INFO|syslog.LOG_LOCAL0, tag)
 	default:
 		log.file, err = os.OpenFile(conf.FilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	}
 
 	console.FatalIfErr(err, "open log file: %s %s", conf.Format, conf.FilePath)
 
-	log.handler.SetOutput(log.file)
-	log.handler.SetLevel(log.conf.Level)
-
-	switch log.conf.Format {
-	case "string", "syslog":
-		strFmt := logx.NewFormatString()
-		strFmt.SetDelimiter(' ')
-		log.handler.SetFormatter(strFmt)
-	case "json":
-		log.handler.SetFormatter(logx.NewFormatJSON())
-	}
+	handler.SetOutput(log.file)
+	handler.SetLevel(conf.Level)
 
 	return log
 }

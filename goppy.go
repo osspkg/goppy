@@ -122,13 +122,12 @@ func (v *_app) Run() {
 	wg.OnPanic(func(e error) { logx.Error("Run background", "err", e) })
 
 	{
-		log := logx.Default()
 		conf := &applog.GroupConfig{}
 		v.configs = append(v.configs, conf)
 
 		wg.Background("log writer", func(_ context.Context) {
 			steps.Wait(configInited)
-			lw := applog.New(string(v.info.AppName), conf.Log, log)
+			lw := applog.New(string(v.info.AppName), conf.Log)
 			steps.Done(logInited).Wait(appExit)
 			console.WarnIfErr(lw.Close(), "close log file")
 			steps.Done(logDone)

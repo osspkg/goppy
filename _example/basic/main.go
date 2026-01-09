@@ -10,14 +10,18 @@ import (
 	"fmt"
 	"os"
 
-	"go.osspkg.com/logx"
-
-	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3"
+	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/dic/broker"
 	"go.osspkg.com/goppy/v3/metrics"
 	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/xc"
 )
+
+type IStatus interface {
+	GetStatus() int
+}
 
 func main() {
 	// Specify the path to the config via the argument: `--config`.
@@ -41,6 +45,15 @@ func main() {
 			api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
 			api.Get("/user/{id}", c.User)
 		},
+		broker.WithUniversalBroker[IStatus](
+			func(_ xc.Context, status IStatus) error {
+				fmt.Println(">> UniversalBroker got status", status.GetStatus())
+				return nil
+			},
+			func(status IStatus) error {
+				return nil
+			},
+		),
 	)
 	app.Command(func(setter console.CommandSetter) {
 		setter.Setup("env", "show all envs")
@@ -69,6 +82,10 @@ func (v *Controller) User(ctx web.Ctx) {
 	id, _ := ctx.Param("id").Int() // nolint: errcheck
 	ctx.String(200, "user id: %d", id)
 	logx.Info("user - %d", id)
+}
+
+func (v *Controller) GetStatus() int {
+	return 200
 }
 
 type Model struct {

@@ -14,6 +14,8 @@
 - Application customization via plugins
 - Built-in dependency container
 - Data binding for JSON
+- Executing console commands
+- Automatic dependency resolution at startup
 
 ## Guide
 

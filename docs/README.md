@@ -19,20 +19,46 @@ go get -u go.osspkg.com/goppy/v3
 - Application customization via plugins
 - Built-in dependency container
 - Data binding for JSON
-- Command support
+- Executing console commands
+- Automatic dependency resolution at startup
 - Database support and automatic migration
 
 ## Quick Start
 
-Config:
+### Config:
 
+Write log to file:
 ```yaml
-env: dev
-
 log:
   file_path: /dev/stdout
-  format: string # json, string, syslog
+  format: string # json, string
   level: 4 # 0-Fatal, 1-Error, 2-Warning, 3-Info, 4-Debug
+```
+
+Write log to syslog:
+```yaml
+log:
+  file_path: syslog
+  format: string # json, string
+  level: 4 # 0-Fatal, 1-Error, 2-Warning, 3-Info, 4-Debug
+```
+
+Write log to remote syslog:
+```yaml
+log:
+  file_path: syslog=udp://syslog-server.example.com:514
+  format: string # json, string
+  level: 4 # 0-Fatal, 1-Error, 2-Warning, 3-Info, 4-Debug
+```
+
+## Example
+
+Config
+```yaml
+log:
+  file_path: /dev/stdout
+  format: string 
+  level: 4 
 
 http:
   - tag: main
@@ -82,9 +108,6 @@ func main() {
 			},
 		},
 	)
-	app.Command("env", func() {
-		fmt.Println(os.Environ())
-	})
 	app.Run()
 }
 
