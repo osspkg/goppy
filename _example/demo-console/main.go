@@ -17,19 +17,18 @@ func main() {
 		setter.ExecFunc(func() {
 
 			m := console.InteractiveMenu{
-				Title: "Выбирите вариант:",
+				Title: "Choose variant",
 				Items: []string{
-					"MySQL", "PostgreSQL", "SQLite",
+					"Kubernetes", "Docker", "Terraform", "Ansible",
+					"Prometheus", "Grafana", "Vault", "Consul",
+					"Nginx", "PostgreSQL", "Redis", "Kafka",
 				},
 				CallBack: func(args ...string) {
-					fmt.Println("Выбран:", args)
+					fmt.Println("Selected:", args)
 				},
 				MultiChoice: true,
+				MaxCols:     3,
 			}
-
-			//for i := 0; i < 100; i++ {
-			//	m.Items = append(m.Items, fmt.Sprintf("Item%d", i))
-			//}
 
 			m.Run()
 

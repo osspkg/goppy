@@ -10,8 +10,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"sync/atomic"
+	"unicode/utf8"
 
 	"go.osspkg.com/errors"
 )
@@ -51,7 +53,7 @@ func output(msg string, vars []string, def string) {
 	Rawf("%s%s%s: ", msg, v, def)
 }
 
-func ClearScreen() {
+func clearScreen() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	FatalIfErr(cmd.Run(), "failed to clear screen")
@@ -78,11 +80,30 @@ func enableInputBuffering() {
 	fmt.Print(cursorShow)
 }
 
+func getTerminalWidth() int {
+	cmd := exec.Command("stty", "-F", "/dev/tty", "size")
+	cmd.Stdin = os.Stdin
+	out, err := cmd.Output()
+	if err != nil {
+		return 80 // fallback
+	}
+	parts := strings.Fields(string(out))
+	if len(parts) < 2 {
+		return 80
+	}
+	width, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return 80
+	}
+	return width
+}
+
 type InteractiveMenu struct {
 	Title       string
 	Items       []string
 	CallBack    func(...string)
 	MultiChoice bool
+	MaxCols     int
 }
 
 func (m InteractiveMenu) Run() {
@@ -91,39 +112,63 @@ func (m InteractiveMenu) Run() {
 	}
 
 	checkTerminal()
-
+	clearScreen()
 	disableInputBuffering()
 	defer enableInputBuffering()
 
 	selected := make(map[int]bool, len(m.Items))
 	current := 0
 
-	fmt.Println()
-	defer fmt.Println()
+	maxLen := 0
+	for _, item := range m.Items {
+		rCount := utf8.RuneCountInString(item)
+		if rCount > maxLen {
+			maxLen = rCount
+		}
+	}
+	cellWidth := maxLen + 7
+	m.MaxCols = max(m.MaxCols, 1)
+	m.Title = strings.Trim(m.Title, ":\n\r")
 
 	for {
-		fmt.Printf("\r%s (press 'q' for exit):\n", strings.Trim(m.Title, ":\n\r"))
+		termWidth := getTerminalWidth()
+		cols := min(max(termWidth/cellWidth, 1), m.MaxCols)
+		rows := (len(m.Items) + cols - 1) / cols
 
-		for i, item := range m.Items {
-			color := colorReset
+		if m.MultiChoice {
+			fmt.Printf("\r%s (arrows to navigate, space to select, 'q' to exit):\n", m.Title)
+		} else {
+			fmt.Printf("\r%s (arrows to navigate, 'q' to exit):\n", m.Title)
+		}
 
-			marker := "[ ]"
-			if selected[i] {
-				color = colorCyan
-				marker = "[x]"
+		for r := 0; r < rows; r++ {
+			line := "\r"
+			for c := 0; c < cols; c++ {
+				i := r + c*rows
+				if i >= len(m.Items) {
+					continue
+				}
+
+				color := colorReset
+				marker := "[ ]"
+				if selected[i] {
+					color = colorCyan
+					marker = "[x]"
+				}
+				prefix := "  "
+				if i == current {
+					color = colorRed
+					prefix = "→ "
+				}
+				if !m.MultiChoice {
+					marker = ""
+				}
+
+				padding := cellWidth - (utf8.RuneCountInString(prefix) +
+					utf8.RuneCountInString(marker) + utf8.RuneCountInString(m.Items[i]))
+				line += color + prefix + marker + m.Items[i] + colorReset + strings.Repeat(" ", max(padding, 0))
 			}
-
-			prefix := "  "
-			if i == current {
-				color = colorRed
-				prefix = "→ "
-			}
-
-			if !m.MultiChoice {
-				marker = ""
-			}
-
-			fmt.Printf("\r  %s%s%s%s%s\n", color, prefix, marker, item, colorReset)
+			fmt.Println(line)
 		}
 
 		var buf [3]byte
@@ -150,13 +195,23 @@ func (m InteractiveMenu) Run() {
 			return
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 65: // Up
-			if current > 0 {
+			if current%rows > 0 {
 				current--
 			}
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 66: // Down
-			if current < len(m.Items)-1 {
+			if current%rows < rows-1 && current < len(m.Items)-1 {
 				current++
+			}
+
+		case buf[0] == 27 && buf[1] == 91 && buf[2] == 68: // Left
+			if current >= rows {
+				current -= rows
+			}
+
+		case buf[0] == 27 && buf[1] == 91 && buf[2] == 67: // Right
+			if current+rows < len(m.Items) {
+				current += rows
 			}
 
 		case m.MultiChoice && buf[0] == 32: // Space
@@ -165,7 +220,7 @@ func (m InteractiveMenu) Run() {
 		default:
 		}
 
-		for i := 0; i <= len(m.Items); i++ {
+		for i := 0; i <= rows; i++ {
 			fmt.Print(cursorUp + clearLine)
 		}
 	}
