@@ -24,6 +24,7 @@ const root = "ROOT"
 type Container struct {
 	status  syncing.Switch
 	brokers []plugins.Broker
+	bIndex  int
 	storage *storage
 	graph   *kahn.Graph
 }
@@ -163,7 +164,9 @@ func (v *Container) Start(ctx xc.Context) error {
 		return errors.Wrapf(err, "create objects")
 	}
 
-	for _, h := range v.brokers {
+	for i := 0; i < len(v.brokers); i++ {
+		h := v.brokers[i]
+
 		v.storage.Yield(h.Apply)
 
 		dbg(1, "run connector", h.Name())
@@ -171,6 +174,8 @@ func (v *Container) Start(ctx xc.Context) error {
 			dbg(2, "err", err)
 			return errors.Wrapf(err, "run handler on start")
 		}
+
+		v.bIndex = i
 	}
 
 	return nil
@@ -183,7 +188,9 @@ func (v *Container) Stop() error {
 
 	dbg(0, "Stop")
 
-	for _, h := range v.brokers {
+	for ; v.bIndex >= 0; v.bIndex-- {
+		h := v.brokers[v.bIndex]
+
 		if err := h.OnStop(); err != nil {
 			dbg(1, "brokers", "err", err)
 			return errors.Wrapf(err, "run handler on stop")

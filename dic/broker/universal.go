@@ -1,3 +1,8 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package broker
 
 import (
@@ -5,9 +10,10 @@ import (
 	"reflect"
 
 	"go.osspkg.com/errors"
-	"go.osspkg.com/goppy/v3/dic"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/xc"
+
+	"go.osspkg.com/goppy/v3/dic"
 )
 
 type UniversalBroker[T any] struct {

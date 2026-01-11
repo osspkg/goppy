@@ -9,6 +9,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"sync/atomic"
 
@@ -16,27 +17,28 @@ import (
 )
 
 const (
-	cRESET  = "\u001B[0m"
-	cBLACK  = "\u001B[30m"
-	cRED    = "\u001B[31m"
-	cGREEN  = "\u001B[32m"
-	cYELLOW = "\u001B[33m"
-	cBLUE   = "\u001B[34m"
-	cPURPLE = "\u001B[35m"
-	cCYAN   = "\u001B[36m"
+	colorReset  = "\u001B[0m"
+	colorBlack  = "\u001B[30m"
+	colorRed    = "\u001B[31m"
+	colorGreen  = "\u001B[32m"
+	colorYellow = "\u001B[33m"
+	colorBlue   = "\u001B[34m"
+	colorPurple = "\u001B[35m"
+	colorCyan   = "\u001B[36m"
 
-	eof = "\n"
+	newLine   = "\n"
+	clearLine = "\033[2K"
+
+	cursorUp   = "\033[A"
+	cursorDown = "\033[B"
+	cursorHide = "\033[?25l"
+	cursorShow = "\033[?25h"
 )
 
 var (
-	scan       *bufio.Scanner
 	yesNo             = []string{"y", "n"}
 	debugLevel uint32 = 0
 )
-
-func init() {
-	scan = bufio.NewScanner(os.Stdin)
-}
 
 func output(msg string, vars []string, def string) {
 	if len(def) > 0 {
@@ -49,41 +51,129 @@ func output(msg string, vars []string, def string) {
 	Rawf("%s%s%s: ", msg, v, def)
 }
 
-// Switch console multi input requests
-func Switch(msg string, vars [][]string, exit string, call func(s string)) {
-	fmt.Printf("%s\n", msg)
+func ClearScreen() {
+	cmd := exec.Command("clear")
+	cmd.Stdout = os.Stdout
+	FatalIfErr(cmd.Run(), "failed to clear screen")
+}
 
-	list := make(map[string]string, len(vars)*4)
-	i := 0
-	for _, blocks := range vars {
-		for _, name := range blocks {
-			i++
-			fmt.Printf("(%d) %s, ", i, name)
-			list[fmt.Sprintf("%d", i)] = name
-		}
-		fmt.Printf("\n")
+func checkTerminal() {
+	fileInfo, _ := os.Stdin.Stat()
+	if (fileInfo.Mode() & os.ModeCharDevice) == 0 {
+		Fatalf("%s is not a interactive terminal (TTY)", os.Args[0])
 	}
-	fmt.Printf("and (%s) Done: \n", exit)
+}
+
+func disableInputBuffering() {
+	fmt.Print(cursorHide)
+	FatalIfErr(errors.Wrap(
+		exec.Command("stty", "-F", "/dev/tty", "cbreak", "min", "1").Run(),
+		exec.Command("stty", "-F", "/dev/tty", "-echo").Run(),
+	), "failed to disable input buffering")
+}
+
+func enableInputBuffering() {
+	FatalIfErr(exec.Command("stty", "-F", "/dev/tty", "echo").Run(),
+		"failed to enable input buffering")
+	fmt.Print(cursorShow)
+}
+
+type InteractiveMenu struct {
+	Title       string
+	Items       []string
+	CallBack    func(...string)
+	MultiChoice bool
+}
+
+func (m InteractiveMenu) Run() {
+	if len(m.Items) == 0 || m.CallBack == nil {
+		return
+	}
+
+	checkTerminal()
+
+	disableInputBuffering()
+	defer enableInputBuffering()
+
+	selected := make(map[int]bool, len(m.Items))
+	current := 0
+
+	fmt.Println()
+	defer fmt.Println()
 
 	for {
-		if scan.Scan() {
-			r := scan.Text()
-			if r == exit {
-				fmt.Printf("\u001B[1A\u001B[K: Done\n\n")
+		fmt.Printf("\r%s (press 'q' for exit):\n", strings.Trim(m.Title, ":\n\r"))
+
+		for i, item := range m.Items {
+			color := colorReset
+
+			marker := "[ ]"
+			if selected[i] {
+				color = colorCyan
+				marker = "[x]"
+			}
+
+			prefix := "  "
+			if i == current {
+				color = colorRed
+				prefix = "→ "
+			}
+
+			if !m.MultiChoice {
+				marker = ""
+			}
+
+			fmt.Printf("\r  %s%s%s%s%s\n", color, prefix, marker, item, colorReset)
+		}
+
+		var buf [3]byte
+		_, err := os.Stdin.Read(buf[:])
+		FatalIfErr(err, "failed to read from stdin")
+
+		switch {
+		case buf[0] == 3 || buf[0] == 'q': // Ctrl+C
+			return
+
+		case buf[0] == 13 || buf[0] == 10: // Enter
+			if !m.MultiChoice {
+				m.CallBack(m.Items[current])
 				return
 			}
-			if name, ok := list[r]; ok {
-				call(name)
-				fmt.Printf("\033[1A\033[K + %s\n", name)
-				continue
+
+			result := make([]string, 0, len(m.Items))
+			for i, s := range m.Items {
+				if selected[i] {
+					result = append(result, s)
+				}
 			}
-			fmt.Printf("\u001B[1A\u001B[KBad answer! Try again: ")
+			m.CallBack(result...)
+			return
+
+		case buf[0] == 27 && buf[1] == 91 && buf[2] == 65: // Up
+			if current > 0 {
+				current--
+			}
+
+		case buf[0] == 27 && buf[1] == 91 && buf[2] == 66: // Down
+			if current < len(m.Items)-1 {
+				current++
+			}
+
+		case m.MultiChoice && buf[0] == 32: // Space
+			selected[current] = !selected[current]
+
+		default:
+		}
+
+		for i := 0; i <= len(m.Items); i++ {
+			fmt.Print(cursorUp + clearLine)
 		}
 	}
 }
 
-// Input console input request
-func Input(msg string, vars []string, def string) string {
+func Select(msg string, vars []string, def string) string {
+	scan := bufio.NewScanner(os.Stdin)
+
 	output(msg, vars, def)
 
 	for {
@@ -96,8 +186,8 @@ func Input(msg string, vars []string, def string) string {
 				return r
 			}
 			for _, v := range vars {
-				if v == r {
-					return r
+				if strings.ToLower(v) == strings.ToLower(r) {
+					return v
 				}
 			}
 			output("Bad answer! Try again", vars, def)
@@ -105,44 +195,38 @@ func Input(msg string, vars []string, def string) string {
 	}
 }
 
-// InputBool console bool input request
-func InputBool(msg string, def bool) bool {
+func SelectBool(msg string, def bool) bool {
 	v := "n"
 	if def {
 		v = "y"
 	}
-	v = Input(msg, yesNo, v)
+	v = Select(msg, yesNo, v)
 	return v == "y"
 }
 
 func writeWithColor(c, msg string, args []interface{}) {
-	if !strings.HasSuffix(msg, eof) {
-		msg += eof
+	if !strings.HasSuffix(msg, newLine) {
+		msg += newLine
 	}
-	fmt.Printf(c+msg+cRESET, args...)
+	fmt.Printf(c+msg+colorReset, args...)
 }
 
-// Rawf console message writer without level info
 func Rawf(msg string, args ...interface{}) {
-	writeWithColor(cRESET, msg, args)
+	writeWithColor(colorReset, msg, args)
 }
 
-// Infof console message writer for info level
 func Infof(msg string, args ...interface{}) {
-	writeWithColor(cRESET, "[INF] "+msg, args)
+	writeWithColor(colorReset, "[INF] "+msg, args)
 }
 
-// Warnf console message writer for warning level
 func Warnf(msg string, args ...interface{}) {
-	writeWithColor(cYELLOW, "[WAR] "+msg, args)
+	writeWithColor(colorYellow, "[WAR] "+msg, args)
 }
 
-// Errorf console message writer for error level
 func Errorf(msg string, args ...interface{}) {
-	writeWithColor(cRED, "[ERR] "+msg, args)
+	writeWithColor(colorRed, "[ERR] "+msg, args)
 }
 
-// ShowDebug init show debug
 func ShowDebug(ok bool) {
 	var v uint32 = 0
 	if ok {
@@ -151,14 +235,12 @@ func ShowDebug(ok bool) {
 	atomic.StoreUint32(&debugLevel, v)
 }
 
-// Debugf console message writer for debug level
 func Debugf(msg string, args ...interface{}) {
 	if atomic.LoadUint32(&debugLevel) > 0 {
-		writeWithColor(cBLUE, "[DEB] "+msg, args)
+		writeWithColor(colorBlue, "[DEB] "+msg, args)
 	}
 }
 
-// FatalIfErr console message writer if err is not nil
 func FatalIfErr(err error, msg string, args ...interface{}) {
 	if err != nil {
 		Fatalf(errors.Wrapf(err, msg, args...).Error())
@@ -171,8 +253,13 @@ func WarnIfErr(err error, msg string, args ...interface{}) {
 	}
 }
 
-// Fatalf console message writer with exit code 1
+func RawIfErr(err error, msg string, args ...interface{}) {
+	if err != nil {
+		Rawf(errors.Wrapf(err, msg, args...).Error())
+	}
+}
+
 func Fatalf(msg string, args ...interface{}) {
-	writeWithColor(cRED, "[ERR] "+msg, args)
+	writeWithColor(colorRed, "[ERR] "+msg, args)
 	os.Exit(1)
 }

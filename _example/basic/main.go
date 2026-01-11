@@ -10,13 +10,14 @@ import (
 	"fmt"
 	"os"
 
+	"go.osspkg.com/logx"
+	"go.osspkg.com/xc"
+
 	"go.osspkg.com/goppy/v3"
 	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/dic/broker"
 	"go.osspkg.com/goppy/v3/metrics"
 	"go.osspkg.com/goppy/v3/web"
-	"go.osspkg.com/logx"
-	"go.osspkg.com/xc"
 )
 
 type IStatus interface {
