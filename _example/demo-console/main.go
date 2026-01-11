@@ -26,8 +26,12 @@ func main() {
 				CallBack: func(args ...string) {
 					fmt.Println("Selected:", args)
 				},
-				MultiChoice: true,
-				MaxCols:     3,
+				//MultiChoice: true,
+				//MaxCols:     10,
+			}
+
+			for i := 0; i < 100; i++ {
+				m.Items = append(m.Items, fmt.Sprintf("%d", i))
 			}
 
 			m.Run()

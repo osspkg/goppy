@@ -53,17 +53,15 @@ func output(msg string, vars []string, def string) {
 	Rawf("%s%s%s: ", msg, v, def)
 }
 
-func clearScreen() {
+func ClearScreen() {
 	cmd := exec.Command("clear")
 	cmd.Stdout = os.Stdout
 	FatalIfErr(cmd.Run(), "failed to clear screen")
 }
 
-func checkTerminal() {
+func IsInteractiveTerminal() bool {
 	fileInfo, _ := os.Stdin.Stat()
-	if (fileInfo.Mode() & os.ModeCharDevice) == 0 {
-		Fatalf("%s is not a interactive terminal (TTY)", os.Args[0])
-	}
+	return (fileInfo.Mode() & os.ModeCharDevice) == 0
 }
 
 func disableInputBuffering() {
@@ -80,22 +78,20 @@ func enableInputBuffering() {
 	fmt.Print(cursorShow)
 }
 
-func getTerminalWidth() int {
+func getTerminalWidth() (int, int) {
 	cmd := exec.Command("stty", "-F", "/dev/tty", "size")
 	cmd.Stdin = os.Stdin
 	out, err := cmd.Output()
 	if err != nil {
-		return 80 // fallback
+		return 80, 24 // fallback
 	}
 	parts := strings.Fields(string(out))
 	if len(parts) < 2 {
-		return 80
+		return 80, 24
 	}
-	width, err := strconv.Atoi(parts[1])
-	if err != nil {
-		return 80
-	}
-	return width
+	h, _ := strconv.Atoi(parts[0])
+	w, _ := strconv.Atoi(parts[1])
+	return w, h
 }
 
 type InteractiveMenu struct {
@@ -106,45 +102,67 @@ type InteractiveMenu struct {
 	MaxCols     int
 }
 
+//nolint:gocyclo
 func (m InteractiveMenu) Run() {
 	if len(m.Items) == 0 || m.CallBack == nil {
 		return
 	}
 
-	checkTerminal()
-	clearScreen()
+	if !IsInteractiveTerminal() {
+		Fatalf("interactive terminal disabled")
+	}
+
+	ClearScreen()
 	disableInputBuffering()
 	defer enableInputBuffering()
 
 	selected := make(map[int]bool, len(m.Items))
 	current := 0
+	offsetRow := 0
 
-	maxLen := 0
+	maxRunes := 0
 	for _, item := range m.Items {
 		rCount := utf8.RuneCountInString(item)
-		if rCount > maxLen {
-			maxLen = rCount
+		if rCount > maxRunes {
+			maxRunes = rCount
 		}
 	}
-	cellWidth := maxLen + 7
+	cellWidth := maxRunes + 7
 	m.MaxCols = max(m.MaxCols, 1)
 	m.Title = strings.Trim(m.Title, ":\n\r")
 
 	for {
-		termWidth := getTerminalWidth()
-		cols := min(max(termWidth/cellWidth, 1), m.MaxCols)
-		rows := (len(m.Items) + cols - 1) / cols
-
 		if m.MultiChoice {
-			fmt.Printf("\r%s (arrows to navigate, space to select, 'q' to exit):\n", m.Title)
+			fmt.Printf("\r%s%s (arrows to navigate, space to select, 'q' to exit):%s\n", colorGreen, m.Title, colorReset)
 		} else {
-			fmt.Printf("\r%s (arrows to navigate, 'q' to exit):\n", m.Title)
+			fmt.Printf("\r%s%s (arrows to navigate, 'q' to exit):%s\n", colorGreen, m.Title, colorReset)
 		}
 
-		for r := 0; r < rows; r++ {
+		termWidth, termHeight := getTerminalWidth()
+		reservedRows := 4
+		visibleRows := termHeight - reservedRows
+		if visibleRows <= 0 {
+			visibleRows = 1
+		}
+
+		cols := min(max(termWidth/cellWidth, 1), m.MaxCols)
+		totalRows := (len(m.Items) + cols - 1) / cols
+		currentRowInGrid := current % totalRows
+		if currentRowInGrid < offsetRow {
+			offsetRow = currentRowInGrid
+		} else if currentRowInGrid >= offsetRow+visibleRows {
+			offsetRow = currentRowInGrid - visibleRows + 1
+		}
+		rowsToRender := visibleRows
+		if totalRows < visibleRows {
+			rowsToRender = totalRows
+		}
+
+		for r := 0; r < rowsToRender; r++ {
+			actualRow := r + offsetRow
 			line := "\r"
 			for c := 0; c < cols; c++ {
-				i := r + c*rows
+				i := actualRow + c*totalRows
 				if i >= len(m.Items) {
 					continue
 				}
@@ -169,6 +187,11 @@ func (m InteractiveMenu) Run() {
 				line += color + prefix + marker + m.Items[i] + colorReset + strings.Repeat(" ", max(padding, 0))
 			}
 			fmt.Println(line)
+		}
+		if m.MultiChoice {
+			fmt.Printf("\r%sSelected: %d/%d %s\n", colorGreen, len(selected), len(m.Items), colorReset)
+		} else {
+			fmt.Printf("\r%sTotal %d %s\n", colorGreen, len(m.Items), colorReset)
 		}
 
 		var buf [3]byte
@@ -195,23 +218,23 @@ func (m InteractiveMenu) Run() {
 			return
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 65: // Up
-			if current%rows > 0 {
+			if current%totalRows > 0 {
 				current--
 			}
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 66: // Down
-			if current%rows < rows-1 && current < len(m.Items)-1 {
+			if current%totalRows < totalRows-1 && current < len(m.Items)-1 {
 				current++
 			}
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 68: // Left
-			if current >= rows {
-				current -= rows
+			if current >= totalRows {
+				current -= totalRows
 			}
 
 		case buf[0] == 27 && buf[1] == 91 && buf[2] == 67: // Right
-			if current+rows < len(m.Items) {
-				current += rows
+			if current+totalRows < len(m.Items) {
+				current += totalRows
 			}
 
 		case m.MultiChoice && buf[0] == 32: // Space
@@ -220,7 +243,7 @@ func (m InteractiveMenu) Run() {
 		default:
 		}
 
-		for i := 0; i <= rows; i++ {
+		for i := 0; i <= rowsToRender+1; i++ {
 			fmt.Print(cursorUp + clearLine)
 		}
 	}
@@ -241,7 +264,7 @@ func Select(msg string, vars []string, def string) string {
 				return r
 			}
 			for _, v := range vars {
-				if strings.ToLower(v) == strings.ToLower(r) {
+				if strings.EqualFold(v, r) {
 					return v
 				}
 			}
