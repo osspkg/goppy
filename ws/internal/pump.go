@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -30,13 +30,18 @@ func IsClosingError(err error) bool {
 		return false
 	}
 
-	if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived) ||
-		strings.Contains(err.Error(), "use of closed network connection") ||
-		errors.Is(err, websocket.ErrCloseSent) {
+	switch {
+	case errors.Is(err, websocket.ErrCloseSent):
 		return true
+	case websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived):
+		return true
+	case strings.Contains(err.Error(), "connection reset by peer"):
+		return true
+	case strings.Contains(err.Error(), "use of closed network connection"):
+		return true
+	default:
+		return false
 	}
-
-	return false
 }
 
 func PumpRead(cc connect) {

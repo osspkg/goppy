@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *entity) {
+func easyjsonF642ad3eDecodeGoOsspkgComGoppyV3WsEvent(in *jlexer.Lexer, out *entity) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -70,7 +70,7 @@ func easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(in *jlexer.Lexer, out *enti
 		in.Consumed()
 	}
 }
-func easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(out *jwriter.Writer, in entity) {
+func easyjsonF642ad3eEncodeGoOsspkgComGoppyV3WsEvent(out *jwriter.Writer, in entity) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -95,23 +95,23 @@ func easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(out *jwriter.Writer, in ent
 // MarshalJSON supports json.Marshaler interface
 func (v entity) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(&w, v)
+	easyjsonF642ad3eEncodeGoOsspkgComGoppyV3WsEvent(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v entity) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonF642ad3eEncodeGoOsspkgComGoppyV2WsEvent(w, v)
+	easyjsonF642ad3eEncodeGoOsspkgComGoppyV3WsEvent(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *entity) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(&r, v)
+	easyjsonF642ad3eDecodeGoOsspkgComGoppyV3WsEvent(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *entity) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonF642ad3eDecodeGoOsspkgComGoppyV2WsEvent(l, v)
+	easyjsonF642ad3eDecodeGoOsspkgComGoppyV3WsEvent(l, v)
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
@@ -13,8 +13,8 @@ import (
 	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/data"
 
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/common"
-	"go.osspkg.com/goppy/v2/internal/gen/ormb/table"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb/table"
 )
 
 const sqlComma = "`"
@@ -60,7 +60,7 @@ func (c Code) header(w io.Writer, ci common.CodeInfo) {
 	common.Writelnf(w, `package %s`, ci.PkgName)
 	common.Writeln(w, `import (`)
 	common.Writeln(w, `"context"`)
-	common.Writeln(w, `"go.osspkg.com/goppy/v2/orm"`)
+	common.Writeln(w, `"go.osspkg.com/goppy/v3/orm"`)
 	for _, imp := range ci.Imports {
 		common.Writelnf(w, `%s "%s"`, imp.Name, imp.Pkg)
 	}

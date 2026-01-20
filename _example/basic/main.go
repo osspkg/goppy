@@ -1,22 +1,29 @@
 /*
- *  Copyright (c) 2022-2025 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	"go.osspkg.com/goppy/v3"
+	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/dic/broker"
+	"go.osspkg.com/goppy/v3/metrics"
+	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/web"
 	"go.osspkg.com/logx"
-
-	"go.osspkg.com/goppy/v2"
-	"go.osspkg.com/goppy/v2/metrics"
-	"go.osspkg.com/goppy/v2/plugins"
-	"go.osspkg.com/goppy/v2/web"
+	"go.osspkg.com/xc"
 )
+
+type IStatus interface {
+	GetStatus() int
+}
 
 func main() {
 	// Specify the path to the config via the argument: `--config`.
@@ -27,24 +34,48 @@ func main() {
 		web.WithServer(),
 	)
 	app.Plugins(
-		plugins.Kind{
-			Inject: NewController,
-			Resolve: func(routes web.ServerPool, c *Controller) {
-				router, ok := routes.Main()
-				if !ok {
-					return
-				}
+		NewController,
+		func(routes web.ServerPool, c *Controller) {
+			router, ok := routes.Main()
+			if !ok {
+				return
+			}
 
-				router.Use(web.ThrottlingMiddleware(100))
-				router.Get("/users", c.Users)
+			router.Use(web.ThrottlingMiddleware(100))
+			router.Get("/users", c.Users)
 
-				api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
-				api.Get("/user/{id}", c.User)
-			},
+			api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
+			api.Get("/user/{id}", c.User)
 		},
+		broker.WithUniversalBroker[IStatus](
+			func(_ xc.Context, status IStatus) error {
+				fmt.Println(">> UniversalBroker got status", status.GetStatus())
+				return nil
+			},
+			func(status IStatus) error {
+				return nil
+			},
+		),
 	)
-	app.Command("env", func() {
-		fmt.Println(os.Environ())
+	app.Command(func(ctx context.Context, _ plugins.DIResolver, setter console.CommandSetter) {
+		setter.Setup("env", "show all envs")
+		setter.ExecFunc(func() {
+			fmt.Println(os.Environ())
+		})
+	})
+	app.Command(func(ctx context.Context, r plugins.DIResolver, setter console.CommandSetter) {
+		setter.Setup("ctrl", "call ctrl")
+		setter.ExecFunc(func() {
+			logx.SetLevel(0)
+
+			console.FatalIfErr(r.Resolve(func(c *Controller) {
+				fmt.Println(c.GetStatus())
+			}), "can't find controller")
+
+			console.FatalIfErr(r.Resolve(func(c *Controller) {
+				fmt.Println(c.GetStatus())
+			}), "can't find controller")
+		})
 	})
 	app.Run()
 }
@@ -67,6 +98,10 @@ func (v *Controller) User(ctx web.Ctx) {
 	id, _ := ctx.Param("id").Int() // nolint: errcheck
 	ctx.String(200, "user id: %d", id)
 	logx.Info("user - %d", id)
+}
+
+func (v *Controller) GetStatus() int {
+	return 200
 }
 
 type Model struct {
