@@ -7,17 +7,17 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.2
 	github.com/mailru/easyjson v0.9.1
-	github.com/mattn/go-sqlite3 v1.14.33
-	github.com/miekg/dns v1.1.70
+	github.com/mattn/go-sqlite3 v1.14.34
+	github.com/miekg/dns v1.1.72
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.2
 	github.com/prometheus/client_model v0.6.2
 	go.osspkg.com/algorithms v1.6.1
+	go.osspkg.com/bb v1.0.0
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/config v0.2.0
-	go.osspkg.com/console v0.3.3
 	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
@@ -31,10 +31,10 @@ require (
 	go.osspkg.com/validate v0.1.0
 	go.osspkg.com/xc v0.4.0
 	go.uber.org/automaxprocs v1.6.0
-	golang.org/x/crypto v0.47.0
-	golang.org/x/exp v0.0.0-20260112195511-716be5621a96
-	golang.org/x/mod v0.32.0
-	golang.org/x/oauth2 v0.34.0
+	golang.org/x/crypto v0.48.0
+	golang.org/x/exp v0.0.0-20260218203240-3dfff04db8fa
+	golang.org/x/mod v0.33.0
+	golang.org/x/oauth2 v0.35.0
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -79,12 +79,13 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/quic-go/quic-go v0.50.1 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
+	go.osspkg.com/gogen v0.1.0 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
-	golang.org/x/net v0.49.0 // indirect
+	golang.org/x/net v0.50.0 // indirect
 	golang.org/x/sync v0.19.0 // indirect
-	golang.org/x/sys v0.40.0 // indirect
-	golang.org/x/text v0.33.0 // indirect
-	golang.org/x/tools v0.41.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
+	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

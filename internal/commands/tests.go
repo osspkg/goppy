@@ -8,7 +8,7 @@ package commands
 import (
 	"os"
 
-	"go.osspkg.com/console"
+	"go.osspkg.com/goppy/v3/console"
 
 	"go.osspkg.com/goppy/v3/internal/global"
 )

@@ -325,6 +325,12 @@ func FatalIfErr(err error, msg string, args ...interface{}) {
 	}
 }
 
+func FatalIfTrue(condition bool, msg string, args ...interface{}) {
+	if condition {
+		Fatalf(fmt.Sprintf(msg, args...))
+	}
+}
+
 func WarnIfErr(err error, msg string, args ...interface{}) {
 	if err != nil {
 		Warnf(errors.Wrapf(err, msg, args...).Error())
