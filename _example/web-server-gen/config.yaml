@@ -1,0 +1,17 @@
+env: dev
+
+log:
+  file_path: /dev/stdout
+  format: json
+  level: 4
+
+http:
+  - tag: main
+    addr: 0.0.0.0:10000
+
+metrics:
+  addr: 0.0.0.0:12000
+  gauge:
+    - users_request
+
+custom:

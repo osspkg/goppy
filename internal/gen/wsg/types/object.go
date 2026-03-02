@@ -5,7 +5,22 @@
 
 package types
 
+import (
+	"go.osspkg.com/syncing"
+)
+
+type File struct {
+	FilePath string
+	PkgName  string
+	PkgPath  string
+	GoMod    string
+	Imports  *syncing.Map[string, string]
+	Objects  []Object
+}
+
 type Object struct {
+	Alias   string
+	Pkg     string
 	Name    string
 	Methods []Method
 	Tags    Tags

@@ -68,7 +68,7 @@ func CmdLicense() console.CommandGetter {
 			goFiles, err := fs.SearchFilesByExt(currDir, ".go")
 			console.FatalIfErr(err, "Get go files")
 			for _, file := range goFiles {
-				if strings.HasSuffix(file, "_easyjson.go") || strings.Contains(file, "/vendor/") {
+				if global.NeedSkipFile(file) {
 					continue
 				}
 				if _, ok := ignoreFiles[strings.TrimLeft(strings.TrimPrefix(file, currDir), "/")]; ok {

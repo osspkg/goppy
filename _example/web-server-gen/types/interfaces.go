@@ -3,17 +3,15 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package web_server_gen
+package types
 
 import "context"
 
 // Api
 // @wsg description="Методы апи"
 // @wsg module=json-rpc,http
-/*
-@wsg module=json-rpc,http2
-@wsg module=json-rpc,http3
-*/
+// @wsg web-pool=main,admin
+// @wsg route-prefix=/api/v1
 type Api interface {
 	// Root
 	// @wsg in.userID=cookie:x-user-id

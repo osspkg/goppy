@@ -10,9 +10,11 @@ import (
 	"fmt"
 	"go/ast"
 	"io"
+	"path/filepath"
 	"strings"
 
 	"go.osspkg.com/bb"
+	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/syncing"
 
@@ -26,14 +28,27 @@ const tag = "@wsg"
 type Visitor struct {
 	FilePath string
 	PkgName  string
+	PkgPath  string
+	GoMod    string
 	Imports  *syncing.Map[string, string]
 	Objects  []types.Object
+}
+
+func (v *Visitor) ToFile() types.File {
+	return types.File{
+		FilePath: v.FilePath,
+		PkgName:  v.PkgName,
+		PkgPath:  v.PkgPath,
+		GoMod:    v.GoMod,
+		Imports:  v.Imports,
+		Objects:  v.Objects,
+	}
 }
 
 func (v *Visitor) Debug() {
 	fmt.Println("=============================================================")
 	fmt.Println("FilePath:", strings.TrimPrefix(v.FilePath, fs.CurrentDir()))
-	fmt.Println("PkgName:", v.PkgName)
+	fmt.Println("PkgName:", v.PkgName, "PkgPath:", v.PkgPath)
 	fmt.Println("Import:")
 	for alias, path := range v.Imports.Yield() {
 		fmt.Println("  ", alias, path)
@@ -56,14 +71,14 @@ func (v *Visitor) Debug() {
 			fmt.Println("    in:")
 			for _, value := range method.InParams {
 				fmt.Println("      ",
-					"name:", value.Name, ", type:", value.Name,
+					"name:", value.Name, ", type:", value.Type,
 					", pkg:", value.Pkg, ", omit:", value.Omitempty)
 			}
 
 			fmt.Println("    out:")
 			for _, value := range method.OutParams {
 				fmt.Println("      ",
-					"name:", value.Name, ", type:", value.Name,
+					"name:", value.Name, ", type:", value.Type,
 					", pkg:", value.Pkg, ", omit:", value.Omitempty)
 			}
 		}
@@ -98,8 +113,9 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 
 func (v *Visitor) astFile(node *ast.File) ast.Visitor {
 	v.PkgName = node.Name.String()
+	v.PkgPath = v.GoMod + filepath.Dir(v.FilePath)
 
-	console.Debugf("Parsed PkgName: %s", v.PkgName)
+	console.Debugf("Parsed PkgName: %s -> %s", v.PkgName, v.PkgPath)
 
 	return v
 }
@@ -139,6 +155,8 @@ func (v *Visitor) parseComment(comment string, tags *types.Tags) {
 	console.Debugf("-- parse comment: %s", comment)
 
 	buf := bb.FromBytes([]byte(comment))
+	_, err := buf.Seek(0, io.SeekStart)
+	console.FatalIfErr(err, "parse comment")
 
 	for {
 		key, err := buf.ReadString('=')
@@ -175,7 +193,12 @@ func (v *Visitor) parseComment(comment string, tags *types.Tags) {
 		}
 		console.FatalIfErr(err, "parse comment")
 
-		(*tags)[key] = append((*tags)[key], value)
+		(*tags)[key] = append((*tags)[key], do.Convert[string, string](
+			strings.Split(value, ","),
+			func(value string, index int) string {
+				return strings.TrimSpace(value)
+			},
+		)...)
 	}
 }
 
@@ -228,8 +251,10 @@ func (v *Visitor) astTypeSpec(node *ast.TypeSpec) {
 	}
 
 	obj := types.Object{
-		Name: node.Name.String(),
-		Tags: make(types.Tags, 10),
+		Pkg:   v.PkgPath,
+		Alias: v.PkgName,
+		Name:  node.Name.String(),
+		Tags:  make(types.Tags, 10),
 	}
 
 	console.Debugf("* Parse interface: %s", obj.Name)
@@ -247,11 +272,17 @@ func (v *Visitor) astTypeSpec(node *ast.TypeSpec) {
 func getParam(param *ast.Field) types.Param {
 	paramType := getTypeName(param.Type)
 	paramPkg := func() string {
-		if !strings.Contains(paramType, ".") {
+		list := strings.Split(paramType, ".")
+		switch len(list) {
+		case 1:
+			return ""
+		case 2:
+			paramType = list[1]
+			return strings.Trim(list[0], "*[].")
+		default:
+			console.Fatalf("invalid type: %s", paramType)
 			return ""
 		}
-		pkg := strings.Split(paramType, ".")[0]
-		return strings.Trim(pkg, "*[].")
 	}()
 
 	console.Debugf("---- parse arg: Name: %s, Type: %s, Pkg: %s",
@@ -265,6 +296,19 @@ func getParam(param *ast.Field) types.Param {
 			strings.HasPrefix(paramType, "[]"),
 	}
 }
+
+/*
+TODO: change to
+import "go/printer"
+import "strings"
+import "bytes"
+
+func exprToString(fset *token.FileSet, expr ast.Expr) string {
+    var buf bytes.Buffer
+    printer.Fprint(&buf, fset, expr)
+    return buf.String()
+}
+*/
 
 func getTypeName(expr ast.Expr) string {
 	switch t := expr.(type) {

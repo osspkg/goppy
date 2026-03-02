@@ -21,6 +21,7 @@ require (
 	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
+	go.osspkg.com/gogen v0.1.1-0.20260301133223-79de3fce706d
 	go.osspkg.com/ioutils v0.7.4
 	go.osspkg.com/logx v0.6.1
 	go.osspkg.com/network v0.6.0
@@ -79,7 +80,6 @@ require (
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/quic-go/quic-go v0.50.1 // indirect
 	go.etcd.io/bbolt v1.4.3 // indirect
-	go.osspkg.com/gogen v0.1.0 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.2 // indirect
 	golang.org/x/net v0.50.0 // indirect
@@ -89,3 +89,5 @@ require (
 	golang.org/x/tools v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace go.osspkg.com/gogen => ../gogen
