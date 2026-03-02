@@ -9,7 +9,6 @@ package web
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -41,12 +40,12 @@ type (
 
 		BindRaw() (*data.Buffer, error)
 		BindBytes(in *[]byte) error
-		BindJSON(in json.Unmarshaler) error
+		BindJSON(in any) error
 		BindXML(in any) error
 
 		Bytes(code int, b []byte)
 		String(code int, b string, args ...any)
-		JSON(code int, in json.Marshaler)
+		JSON(code int, in any)
 		Stream(code int, in []byte, filename string)
 		StreamFile(code int, in io.Reader, filename string)
 
@@ -223,7 +222,7 @@ func (v *_ctx) BindRaw() (*data.Buffer, error) {
 	return buf, nil
 }
 
-func (v *_ctx) BindJSON(in json.Unmarshaler) error {
+func (v *_ctx) BindJSON(in any) error {
 	return encoders.JSONDecode(v.r, in)
 }
 
@@ -280,7 +279,7 @@ func (v *_ctx) String(code int, b string, args ...any) {
 }
 
 // JSON recording the response in json format
-func (v *_ctx) JSON(code int, in json.Marshaler) {
+func (v *_ctx) JSON(code int, in any) {
 	encoders.JSONEncode(v.w, code, in)
 }
 
