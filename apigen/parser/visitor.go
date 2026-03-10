@@ -3,38 +3,74 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package visitor
+package parser
 
 import (
-	"errors"
 	"fmt"
 	"go/ast"
+	"go/parser"
+	"go/token"
 	"io"
 	"path/filepath"
 	"strings"
 
 	"go.osspkg.com/bb"
 	"go.osspkg.com/do"
+	"go.osspkg.com/errors"
+	"go.osspkg.com/goppy/v3/apigen/types"
+	"go.osspkg.com/goppy/v3/apigen/util"
+	"go.osspkg.com/goppy/v3/internal/global"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/syncing"
-
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
-	"go.osspkg.com/goppy/v3/internal/gen/wsg/types"
 )
 
-const tag = "@wsg"
+type (
+	visitor struct {
+		TAG string
 
-type Visitor struct {
-	FilePath string
-	PkgName  string
-	PkgPath  string
-	GoMod    string
-	Imports  *syncing.Map[string, string]
-	Objects  []types.Object
+		FilePath string
+		PkgName  string
+		PkgPath  string
+		GoMod    string
+		Imports  *syncing.Map[string, string]
+		Objects  []types.Object
+	}
+
+	Parser interface {
+		ToFile() types.File
+		DumpStdout()
+	}
+)
+
+func New(tag, filePath string) (Parser, error) {
+	gomod, root, err := global.DetectGoMod(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	fset := token.NewFileSet()
+	f, err := parser.ParseFile(fset, filePath, nil, parser.ParseComments)
+	if err != nil {
+		return nil, err
+	}
+
+	if ast.IsGenerated(f) {
+		return nil, ErrIsGenerated
+	}
+
+	vis := &visitor{
+		TAG:      tag,
+		Imports:  syncing.NewMap[string, string](10),
+		FilePath: strings.TrimPrefix(filePath, root),
+		GoMod:    gomod,
+	}
+
+	ast.Walk(vis, f)
+
+	return vis, nil
 }
 
-func (v *Visitor) ToFile() types.File {
+func (v *visitor) ToFile() types.File {
 	return types.File{
 		FilePath: v.FilePath,
 		PkgName:  v.PkgName,
@@ -45,7 +81,7 @@ func (v *Visitor) ToFile() types.File {
 	}
 }
 
-func (v *Visitor) Debug() {
+func (v *visitor) DumpStdout() {
 	fmt.Println("=============================================================")
 	fmt.Println("FilePath:", strings.TrimPrefix(v.FilePath, fs.CurrentDir()))
 	fmt.Println("PkgName:", v.PkgName, "PkgPath:", v.PkgPath)
@@ -86,7 +122,7 @@ func (v *Visitor) Debug() {
 	fmt.Println("=============================================================")
 }
 
-func (v *Visitor) Visit(node ast.Node) ast.Visitor {
+func (v *visitor) Visit(node ast.Node) ast.Visitor {
 	switch nodeType := node.(type) {
 	case *ast.File:
 		return v.astFile(nodeType)
@@ -111,66 +147,60 @@ func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	}
 }
 
-func (v *Visitor) astFile(node *ast.File) ast.Visitor {
+func (v *visitor) astFile(node *ast.File) ast.Visitor {
 	v.PkgName = node.Name.String()
 	v.PkgPath = v.GoMod + filepath.Dir(v.FilePath)
-
-	console.Debugf("Parsed PkgName: %s -> %s", v.PkgName, v.PkgPath)
 
 	return v
 }
 
-func (v *Visitor) astImportSpec(node *ast.ImportSpec) ast.Visitor {
+func (v *visitor) astImportSpec(node *ast.ImportSpec) ast.Visitor {
 	path := strings.Trim(node.Path.Value, `"`)
-	name := common.SplitLast(path, "/")
+	name := util.SplitLast(path, "/")
 
 	if node.Name != nil {
 		name = node.Name.String()
 	}
-
-	console.Debugf("Import: name='%s' path='%s'", name, path)
 
 	v.Imports.Set(name, path)
 
 	return v
 }
 
-func (v *Visitor) parseDoc(comment *ast.CommentGroup, tags *types.Tags) {
+func (v *visitor) parseDoc(comment *ast.CommentGroup, tags *types.Tags) {
 	if comment == nil {
 		return
 	}
 	for _, doc := range comment.List {
-		i := strings.Index(doc.Text, tag)
+		i := strings.Index(doc.Text, v.TAG)
 		if i < 0 {
 			continue
 		}
-		v.parseComment(doc.Text[i+len(tag):], tags)
+		v.parseComment(doc.Text[i+len(v.TAG):], tags)
 	}
 }
 
-func (v *Visitor) parseComment(comment string, tags *types.Tags) {
+func (v *visitor) parseComment(comment string, tags *types.Tags) {
 	comment = strings.TrimPrefix(comment, "//")
 	comment = strings.TrimSpace(comment)
 
-	console.Debugf("-- parse comment: %s", comment)
-
 	buf := bb.FromBytes([]byte(comment))
 	_, err := buf.Seek(0, io.SeekStart)
-	console.FatalIfErr(err, "parse comment")
+	panicIfError(err, "parse comment")
 
 	for {
 		key, err := buf.ReadString('=')
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		console.FatalIfErr(err, "parse comment")
+		panicIfError(err, "parse comment")
 		key = strings.Trim(strings.TrimSpace(key), "=")
 
 		r, _, err := buf.ReadRune()
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		console.FatalIfErr(err, "parse comment")
+		panicIfError(err, "parse comment")
 
 		var value string
 		switch r {
@@ -184,14 +214,14 @@ func (v *Visitor) parseComment(comment string, tags *types.Tags) {
 			value, err = buf.ReadString('`')
 			value = strings.Trim(strings.TrimSpace(value), "`")
 		default:
-			console.FatalIfErr(buf.UnreadRune(), "parse comment")
+			panicIfError(buf.UnreadRune(), "parse comment")
 			value, err = buf.ReadString(' ')
 		}
 
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		console.FatalIfErr(err, "parse comment")
+		panicIfError(err, "parse comment")
 
 		(*tags)[key] = append((*tags)[key], do.Convert[string, string](
 			strings.Split(value, ","),
@@ -202,7 +232,7 @@ func (v *Visitor) parseComment(comment string, tags *types.Tags) {
 	}
 }
 
-func (v *Visitor) parseMethods(fields *ast.FieldList) (result []types.Method) {
+func (v *visitor) parseMethods(fields *ast.FieldList) (result []types.Method) {
 	for _, field := range fields.List {
 		if !field.Names[0].IsExported() {
 			continue
@@ -212,8 +242,6 @@ func (v *Visitor) parseMethods(fields *ast.FieldList) (result []types.Method) {
 		if !ok {
 			continue
 		}
-
-		console.Debugf("** Parse method: %v", field.Names[0].String())
 
 		method := types.Method{
 			Name:      field.Names[0].String(),
@@ -244,7 +272,7 @@ func (v *Visitor) parseMethods(fields *ast.FieldList) (result []types.Method) {
 	return
 }
 
-func (v *Visitor) astTypeSpec(node *ast.TypeSpec) {
+func (v *visitor) astTypeSpec(node *ast.TypeSpec) {
 	faceNode, ok := node.Type.(*ast.InterfaceType)
 	if !ok {
 		return
@@ -256,8 +284,6 @@ func (v *Visitor) astTypeSpec(node *ast.TypeSpec) {
 		Name:  node.Name.String(),
 		Tags:  make(types.Tags, 10),
 	}
-
-	console.Debugf("* Parse interface: %s", obj.Name)
 
 	v.parseDoc(node.Doc, &obj.Tags)
 	//v.parseDoc(node.Comment, &obj.Tags)
@@ -280,13 +306,10 @@ func getParam(param *ast.Field) types.Param {
 			paramType = list[1]
 			return strings.Trim(list[0], "*[].")
 		default:
-			console.Fatalf("invalid type: %s", paramType)
+			panicIfError(fmt.Errorf("invalid type: %s", paramType), "get param")
 			return ""
 		}
 	}()
-
-	console.Debugf("---- parse arg: Name: %s, Type: %s, Pkg: %s",
-		param.Names[0].String(), paramType, paramPkg)
 
 	return types.Param{
 		Name: param.Names[0].String(),
@@ -323,4 +346,12 @@ func getTypeName(expr ast.Expr) string {
 	default:
 		return ""
 	}
+}
+
+func panicIfError(err error, msg string, args ...interface{}) {
+	if err == nil {
+		return
+	}
+	err = errors.Wrapf(err, msg, args...)
+	panic(err.Error())
 }

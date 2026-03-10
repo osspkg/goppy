@@ -9,7 +9,6 @@ import "context"
 
 // Api
 // @wsg description="Методы апи"
-// @wsg module=json-rpc,http
 // @wsg web-pool=main,admin
 // @wsg route-prefix=/api/v1
 type Api interface {

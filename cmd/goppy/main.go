@@ -9,7 +9,6 @@ import (
 	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/commands"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb"
-	"go.osspkg.com/goppy/v3/internal/gen/wsg"
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -27,8 +26,8 @@ func main() {
 		commands.CmdSetupLib(),
 		commands.CmdSetupApp(),
 		commands.CmdGoSite(),
+		commands.CmdWSG(),
 		ormb.Command(),
-		wsg.Command(),
 	)
 
 	app.Exec()

@@ -59,3 +59,8 @@ func CRC32(s string) string {
 
 	return fmt.Sprintf("%08X", crc32.Checksum([]byte(s), crc32q))
 }
+
+func SplitLast(s, sep string) string {
+	result := strings.Split(s, sep)
+	return result[len(result)-1]
+}
