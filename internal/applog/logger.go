@@ -12,8 +12,9 @@ import (
 	"os"
 	"strings"
 
-	"go.osspkg.com/console"
 	"go.osspkg.com/logx"
+
+	"go.osspkg.com/goppy/v3/console"
 )
 
 const formatSyslog = "syslog"

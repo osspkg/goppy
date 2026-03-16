@@ -27,7 +27,7 @@ func JSONEncode(w http.ResponseWriter, code int, obj any) {
 	}
 }
 
-func JSONDecode(r *http.Request, obj json.Unmarshaler) error {
+func JSONDecode(r *http.Request, obj any) error {
 	b, err := ioutils.ReadAll(r.Body)
 	if err != nil {
 		return err

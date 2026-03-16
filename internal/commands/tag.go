@@ -12,10 +12,11 @@ import (
 	"strings"
 
 	"go.osspkg.com/algorithms/graph/kahn"
-	"go.osspkg.com/console"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/validate"
 	"golang.org/x/mod/modfile"
+
+	"go.osspkg.com/goppy/v3/console"
 
 	"go.osspkg.com/goppy/v3/internal/global"
 )

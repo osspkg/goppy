@@ -6,11 +6,9 @@
 package main
 
 import (
-	"go.osspkg.com/console"
-
-	"go.osspkg.com/goppy/v3/internal/gen/ormb"
-
+	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/commands"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb"
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -28,10 +26,8 @@ func main() {
 		commands.CmdSetupLib(),
 		commands.CmdSetupApp(),
 		commands.CmdGoSite(),
+		commands.CmdWSG(),
 		ormb.Command(),
-
-		//gen.Command(),
-		// commands.CmdGenerate(),
 	)
 
 	app.Exec()

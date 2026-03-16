@@ -6,13 +6,16 @@
 package global
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"go.osspkg.com/errors"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/validate"
+	"golang.org/x/mod/modfile"
 )
 
 var rexModule = regexp.MustCompile(`(?mU)module (.*)\n`)
@@ -72,4 +75,41 @@ func ReadModule(filepath string) (*Module, error) {
 		Name: module,
 		File: filepath,
 	}, nil
+}
+
+func DetectGoMod(curPath string) (mod string, root string, err error) {
+	root = filepath.Dir(curPath)
+	for {
+
+		mods, e := fs.SearchFilesByExt(root, ".mod")
+		if e != nil {
+			return "", "", e
+		}
+
+		if len(mods) != 0 {
+			for _, s := range mods {
+				b, e := os.ReadFile(s)
+				if e != nil {
+					return "", "", e
+				}
+
+				f, e := modfile.Parse("go.mod", b, nil)
+				if e != nil {
+					return "", "", e
+				}
+				mod = f.Module.Mod.Path
+				return
+			}
+		}
+
+		root, err = filepath.Abs(root + "/..")
+		if err != nil {
+			return
+		}
+
+		if root == "/" {
+			err = fmt.Errorf("failed to detect go.mod")
+			return
+		}
+	}
 }

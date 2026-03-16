@@ -1,0 +1,69 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
+package types
+
+import (
+	"fmt"
+
+	"go.osspkg.com/syncing"
+)
+
+const (
+	globalMod = "g"
+	faceMod   = "f"
+	methodMod = "m"
+	paramMod  = "p"
+)
+
+var (
+	_storage = syncing.NewMap[string, any](10)
+)
+
+func Register[T any](module T) {
+	addr := ""
+
+	switch vv := any(module).(type) {
+	case GlobalModule:
+		addr = globalMod + "/" + vv.Name()
+	case FaceModule:
+		addr = faceMod + "/" + vv.Name()
+	case MethodModule:
+		addr = methodMod + "/" + vv.Name()
+	case ParamModule:
+		addr = paramMod + "/" + vv.Name()
+	default:
+		panic("unknown type")
+	}
+
+	_storage.Set(addr, module)
+}
+
+func Resolve[T any](name string) (T, bool) {
+	addr := ""
+	nt := new(T)
+
+	switch any(nt).(type) {
+	case *GlobalModule:
+		addr = globalMod + "/" + name
+	case *FaceModule:
+		addr = faceMod + "/" + name
+	case *MethodModule:
+		addr = methodMod + "/" + name
+	case *ParamModule:
+		addr = paramMod + "/" + name
+	default:
+		panic(fmt.Sprintf("unknown type: %T", *nt))
+	}
+
+	raw, ok := _storage.Get(addr)
+	if !ok {
+		var zeroValue T
+		return zeroValue, false
+	}
+
+	module, ok := raw.(T)
+	return module, ok
+}

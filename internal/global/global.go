@@ -11,9 +11,10 @@ import (
 	"os"
 	"regexp"
 
-	"go.osspkg.com/console"
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/ioutils/shell"
+
+	"go.osspkg.com/goppy/v3/console"
 )
 
 const (

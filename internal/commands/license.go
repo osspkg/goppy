@@ -12,10 +12,11 @@ import (
 	"strings"
 	"time"
 
-	"go.osspkg.com/console"
 	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v3/console"
 
 	"go.osspkg.com/goppy/v3/internal/global"
 )
@@ -67,7 +68,7 @@ func CmdLicense() console.CommandGetter {
 			goFiles, err := fs.SearchFilesByExt(currDir, ".go")
 			console.FatalIfErr(err, "Get go files")
 			for _, file := range goFiles {
-				if strings.HasSuffix(file, "_easyjson.go") || strings.Contains(file, "/vendor/") {
+				if global.NeedSkipFile(file) {
 					continue
 				}
 				if _, ok := ignoreFiles[strings.TrimLeft(strings.TrimPrefix(file, currDir), "/")]; ok {

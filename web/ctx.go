@@ -9,6 +9,7 @@ package web
 
 import (
 	"context"
+	"encoding"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,6 +17,8 @@ import (
 	"net/url"
 	"slices"
 	"strconv"
+	"strings"
+	"time"
 
 	"go.osspkg.com/ioutils"
 	"go.osspkg.com/ioutils/data"
@@ -41,12 +44,12 @@ type (
 
 		BindRaw() (*data.Buffer, error)
 		BindBytes(in *[]byte) error
-		BindJSON(in json.Unmarshaler) error
+		BindJSON(in any) error
 		BindXML(in any) error
 
 		Bytes(code int, b []byte)
 		String(code int, b string, args ...any)
-		JSON(code int, in json.Marshaler)
+		JSON(code int, in any)
 		Stream(code int, in []byte, filename string)
 		StreamFile(code int, in io.Reader, filename string)
 
@@ -223,7 +226,7 @@ func (v *_ctx) BindRaw() (*data.Buffer, error) {
 	return buf, nil
 }
 
-func (v *_ctx) BindJSON(in json.Unmarshaler) error {
+func (v *_ctx) BindJSON(in any) error {
 	return encoders.JSONDecode(v.r, in)
 }
 
@@ -280,7 +283,7 @@ func (v *_ctx) String(code int, b string, args ...any) {
 }
 
 // JSON recording the response in json format
-func (v *_ctx) JSON(code int, in json.Marshaler) {
+func (v *_ctx) JSON(code int, in any) {
 	encoders.JSONEncode(v.w, code, in)
 }
 
@@ -342,4 +345,114 @@ func (v *_ctx) URL() *url.URL {
 // Redirect redirecting to another URL
 func (v *_ctx) Redirect(uri string) {
 	http.Redirect(v.w, v.r, uri, http.StatusMovedPermanently)
+}
+
+/**********************************************************************************************************************/
+
+type UnStringer interface {
+	UnString(string)
+}
+
+func StrTo[T any](s string) (T, error) {
+	var v T
+	if len(s) == 0 {
+		return v, nil
+	}
+
+	var err error
+
+	switch p := any(&v).(type) {
+	case *string:
+		*p = s
+	case *int:
+		var val int64
+		val, err = strconv.ParseInt(s, 10, strconv.IntSize)
+		*p = int(val)
+	case *int8:
+		var val int64
+		val, err = strconv.ParseInt(s, 10, 8)
+		*p = int8(val)
+	case *int16:
+		var val int64
+		val, err = strconv.ParseInt(s, 10, 16)
+		*p = int16(val)
+	case *int32:
+		var val int64
+		val, err = strconv.ParseInt(s, 10, 32)
+		*p = int32(val)
+	case *int64:
+		*p, err = strconv.ParseInt(s, 10, 64)
+	case *uint:
+		var val uint64
+		val, err = strconv.ParseUint(s, 10, strconv.IntSize)
+		*p = uint(val)
+	case *uint8:
+		var val uint64
+		val, err = strconv.ParseUint(s, 10, 8)
+		*p = uint8(val)
+	case *uint16:
+		var val uint64
+		val, err = strconv.ParseUint(s, 10, 16)
+		*p = uint16(val)
+	case *uint32:
+		var val uint64
+		val, err = strconv.ParseUint(s, 10, 32)
+		*p = uint32(val)
+	case *uint64:
+		*p, err = strconv.ParseUint(s, 10, 64)
+	case *float32:
+		var val float64
+		val, err = strconv.ParseFloat(s, 32)
+		*p = float32(val)
+	case *float64:
+		*p, err = strconv.ParseFloat(s, 64)
+	case *bool:
+		*p, err = strconv.ParseBool(s)
+	case *time.Duration:
+		*p, err = time.ParseDuration(s)
+	default:
+		if us, ok := any(&v).(UnStringer); ok {
+			us.UnString(s)
+		} else if bu, ok := any(&v).(encoding.BinaryUnmarshaler); ok {
+			err = bu.UnmarshalBinary([]byte(s))
+		} else if tu, ok := any(&v).(encoding.TextUnmarshaler); ok {
+			err = tu.UnmarshalText([]byte(s))
+		} else if ju, ok := any(&v).(json.Unmarshaler); ok {
+			err = ju.UnmarshalJSON([]byte(s))
+		} else {
+			err = fmt.Errorf("parser: unsupported type %T", v)
+		}
+	}
+
+	return v, err
+}
+
+func StrToSlice[T any](s, sep string) ([]T, error) {
+	if s == "" {
+		return nil, nil
+	}
+
+	count := strings.Count(s, sep) + 1
+	result := make([]T, 0, count)
+
+	for {
+		idx := strings.Index(s, sep)
+		if idx < 0 {
+			val, err := StrTo[T](strings.TrimSpace(s))
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, val)
+			break
+		}
+
+		val, err := StrTo[T](strings.TrimSpace(s[:idx]))
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, val)
+		s = s[idx+len(sep):]
+	}
+
+	return result, nil
 }
