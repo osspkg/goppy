@@ -1,13 +1,19 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package mod_json_rpc
 
 import (
 	"strings"
 
-	. "go.osspkg.com/gogen/golang"
+	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
 	"go.osspkg.com/gogen/types"
+	"go.osspkg.com/syncing"
+
 	at "go.osspkg.com/goppy/v3/apigen/types"
 	"go.osspkg.com/goppy/v3/apigen/util"
-	"go.osspkg.com/syncing"
 )
 
 func (v Module) buildTransport(w at.Writer, m at.GlobalMeta, files []at.File) error {
@@ -19,7 +25,7 @@ func (v Module) buildTransport(w at.Writer, m at.GlobalMeta, files []at.File) er
 	list.Set("context", "context")
 	list.Set("strings", "strings")
 	list.Set("errors", "errors")
-	list.Set("stdjson", "encoding/json")
+	//list.Set("stdjson", "encoding/json")
 	list.Set("syncing", "go.osspkg.com/syncing")
 	list.Set("pool", "go.osspkg.com/ioutils/pool")
 	list.Set("web", "go.osspkg.com/goppy/v3/web")
@@ -127,7 +133,7 @@ func (v Module) buildUp(m at.GlobalMeta, files []at.File) types.Token {
 				v.buildMethods(files),
 			),
 			ID("wg").Op(".").ID("Wait").Call(),
-			ID("ctx").Op(".").ID("JSON").Bracket(
+			ID("webCtx").Op(".").ID("JSON").Bracket(
 				Raw("200"), ID(modelBulkBaseRes).Bracket(
 					ID("res").Op(".").ID("Extract").Bracket(),
 				),
@@ -135,7 +141,7 @@ func (v Module) buildUp(m at.GlobalMeta, files []at.File) types.Token {
 		),
 	)
 
-	var poolTags []types.Token
+	var poolTags []types.Token //nolint:prealloc
 	for _, s := range m.Pool {
 		poolTags = append(poolTags, Text(s))
 	}
@@ -169,7 +175,7 @@ func (v Module) buildMethods(files []at.File) *Tokens {
 								),
 
 								Var().ID("err").Error(),
-								Var().ID("result").Pkg("stdjson").ID("Marshaler"),
+								Var().ID("result").Any(),
 								List(ID("ctx"), ID("cancel")).Op(":=").Pkg("context").ID("WithTimeout").Call(ID(
 									"ctx"), Raw("5").Op("*").Pkg("time").ID("Second")),
 								Defer().ID("cancel").Call(),

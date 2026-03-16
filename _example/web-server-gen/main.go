@@ -7,18 +7,11 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
-
-	"go.osspkg.com/logx"
-	"go.osspkg.com/xc"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/dic/broker"
-	"go.osspkg.com/goppy/v3/metrics"
-	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/_example/web-server-gen/transport"
+	"go.osspkg.com/goppy/v3/_example/web-server-gen/types"
 	"go.osspkg.com/goppy/v3/web"
 )
 
@@ -31,48 +24,10 @@ func main() {
 	)
 	app.Plugins(
 		NewController,
-		func(routes web.ServerPool, c *Controller) {
-			router, ok := routes.Main()
-			if !ok {
-				return
-			}
-
-			router.Use(web.ThrottlingMiddleware(100))
-			router.Get("/users", c.Users)
-
-			api := router.Collection("/api/v1", web.ThrottlingMiddleware(100))
-			api.Get("/user/{id}", c.User)
+		func(routes web.ServerPool, c *Controller) *transport.JSONRPCHandler {
+			return transport.NewJSONRPCHandler(routes, c, c, c)
 		},
-		broker.WithUniversalBroker[IStatus](
-			func(_ xc.Context, status IStatus) error {
-				fmt.Println(">> UniversalBroker got status", status.GetStatus())
-				return nil
-			},
-			func(status IStatus) error {
-				return nil
-			},
-		),
 	)
-	app.Command(func(ctx context.Context, _ plugins.DIResolver, setter console.CommandSetter) {
-		setter.Setup("env", "show all envs")
-		setter.ExecFunc(func() {
-			fmt.Println(os.Environ())
-		})
-	})
-	app.Command(func(ctx context.Context, r plugins.DIResolver, setter console.CommandSetter) {
-		setter.Setup("ctrl", "call ctrl")
-		setter.ExecFunc(func() {
-			logx.SetLevel(0)
-
-			console.FatalIfErr(r.Resolve(func(c *Controller) {
-				fmt.Println(c.GetStatus())
-			}), "can't find controller")
-
-			console.FatalIfErr(r.Resolve(func(c *Controller) {
-				fmt.Println(c.GetStatus())
-			}), "can't find controller")
-		})
-	})
 	app.Run()
 }
 
@@ -82,28 +37,35 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (v *Controller) Users(ctx web.Ctx) {
-	metrics.Gauge("users_request").Inc()
-	data := Model{
-		data: []int64{1, 2, 3, 4},
+func (c Controller) Name(ctx context.Context, userID int64) (name string, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Controller) ByID(ctx context.Context, ID int64) (text bool, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Controller) List(ctx context.Context, userID int64) (text []types.Text, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (c Controller) Root(ctx context.Context, userID int64, userName string) (status bool, err error) {
+	switch userID {
+	case 0:
+		return false, fmt.Errorf("userID 0")
+	default:
+		return true, nil
 	}
-	ctx.JSON(200, data)
 }
 
-func (v *Controller) User(ctx web.Ctx) {
-	id, _ := ctx.Param("id").Int() // nolint: errcheck
-	ctx.String(200, "user id: %d", id)
-	logx.Info("user - %d", id)
-}
-
-func (v *Controller) GetStatus() int {
-	return 200
-}
-
-type Model struct {
-	data []int64
-}
-
-func (m Model) MarshalJSON() ([]byte, error) {
-	return json.Marshal(m.data)
+func (c Controller) Auth(ctx context.Context, userID int64, userName string) (status bool, err error) {
+	switch userID {
+	case 0:
+		return false, fmt.Errorf("userID 0")
+	default:
+		return true, nil
+	}
 }

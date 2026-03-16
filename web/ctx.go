@@ -355,6 +355,10 @@ type UnStringer interface {
 
 func StrTo[T any](s string) (T, error) {
 	var v T
+	if len(s) == 0 {
+		return v, nil
+	}
+
 	var err error
 
 	switch p := any(&v).(type) {

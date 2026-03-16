@@ -17,11 +17,12 @@ import (
 	"go.osspkg.com/bb"
 	"go.osspkg.com/do"
 	"go.osspkg.com/errors"
+	"go.osspkg.com/ioutils/fs"
+	"go.osspkg.com/syncing"
+
 	"go.osspkg.com/goppy/v3/apigen/types"
 	"go.osspkg.com/goppy/v3/apigen/util"
 	"go.osspkg.com/goppy/v3/internal/global"
-	"go.osspkg.com/ioutils/fs"
-	"go.osspkg.com/syncing"
 )
 
 type (
@@ -346,7 +347,7 @@ func exprToString(fset *token.FileSet, expr ast.Expr) string {
 func getTypeName(expr ast.Expr) string {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return fmt.Sprintf("%s", t.Name)
+		return t.Name
 	case *ast.SelectorExpr:
 		return fmt.Sprintf("%s.%s", getTypeName(t.X), t.Sel.Name)
 	case *ast.StarExpr:

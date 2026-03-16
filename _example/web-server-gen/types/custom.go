@@ -5,4 +5,12 @@
 
 package types
 
-//go:generate goppy wsg --mod=json-rpc,rest --pool=main,admin --out=./../transport
+import (
+	"context"
+	"fmt"
+)
+
+func StdOut(ctx context.Context, arg []Text) error {
+	fmt.Println(arg)
+	return nil
+}

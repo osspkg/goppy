@@ -1,14 +1,20 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package mod_json_rpc
 
 import (
 	"fmt"
 
 	"go.osspkg.com/do"
-	. "go.osspkg.com/gogen/golang"
+	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
 	"go.osspkg.com/gogen/types"
+	"go.osspkg.com/syncing"
+
 	at "go.osspkg.com/goppy/v3/apigen/types"
 	"go.osspkg.com/goppy/v3/apigen/util"
-	"go.osspkg.com/syncing"
 )
 
 func (v Module) buildTransportModels(w at.Writer, m at.GlobalMeta, files []at.File) error {

@@ -1,14 +1,20 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package mod_json_rpc
 
 import (
 	"fmt"
 
 	"go.osspkg.com/do"
-	. "go.osspkg.com/gogen/golang"
+	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
 	"go.osspkg.com/gogen/types"
+	"go.osspkg.com/syncing"
+
 	at "go.osspkg.com/goppy/v3/apigen/types"
 	"go.osspkg.com/goppy/v3/apigen/util"
-	"go.osspkg.com/syncing"
 )
 
 func (v Module) buildTransportHandlers(w at.Writer, m at.GlobalMeta, files []at.File) error {
@@ -58,7 +64,15 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, file at.File) []types
 				ID("err").Op(":=").Pkg("stdjson").ID("Unmarshal").Bracket(
 					ID("param"), Op("&").ID("req"),
 				),
-				If().ID("err").Op("!=").Nil().Block(Return().List(Nil(), ID("err"))),
+				If().ID("err").Op("!=").Nil().Block(
+					ID("err").Op("=").Pkg("fmt").ID("Errorf").Bracket(
+						Text("invalid request: %w"),
+						ID("err"),
+					),
+					Return().List(
+						Nil(),
+						ID("err"),
+					)),
 				Var().ID("res").ID(fmt.Sprintf(modelNameRes, object.Name+method.Name)),
 			)
 
@@ -126,7 +140,6 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, file at.File) []types
 			outParamArgs := make(map[string]string)
 			for _, p := range method.OutParams {
 				vals, ok := method.Tags["out."+p.Name]
-				fmt.Println(vals, ok, p.Name)
 				if !ok {
 					continue
 				}
@@ -167,7 +180,7 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, file at.File) []types
 			)
 			for _, p := range method.OutParams {
 
-				switch {
+				switch { //nolint:staticcheck
 				case p.Type == "error":
 					handleOut = append(handleOut, ID("err"))
 				default:
@@ -187,7 +200,13 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, file at.File) []types
 
 			handleSrc = append(handleSrc,
 				List(handleOut...).Op("=").ID("v").Op(".").ID("handle"+object.Name).Op(".").ID(method.Name).Call(handleIn...),
-				If().ID("err").Op("!=").Nil().Block(Return().List(Nil(), ID("err"))),
+				If().ID("err").Op("!=").Nil().Block(
+					//ID("err").Op("=").Pkg("fmt").ID("Errorf").Bracket(
+					//	Text("encode request: %w"),
+					//	ID("err"),
+					//),
+					Return().List(Nil(), ID("err")),
+				),
 				Return().List(ID("res"), Nil()),
 			)
 

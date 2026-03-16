@@ -1,3 +1,8 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
 package builder
 
 import (
@@ -10,6 +15,7 @@ import (
 	"go.osspkg.com/bb"
 	"go.osspkg.com/gogen/golang"
 	"go.osspkg.com/gogen/types"
+
 	at "go.osspkg.com/goppy/v3/apigen/types"
 	"go.osspkg.com/goppy/v3/console"
 )
@@ -63,7 +69,7 @@ func (b *Builder) WriteFile(fileName string, tok types.Token) error {
 	fullPath := b.Out + "/" + fileName
 	dir := filepath.Dir(fullPath)
 	if err := os.MkdirAll(dir, 0766); err != nil {
-		return fmt.Errorf("mkdir %q: %v", dir, err)
+		return fmt.Errorf("mkdir %q: %w", dir, err)
 	}
 
 	console.Debugf("Writing file %s", fullPath)
@@ -84,7 +90,7 @@ func (b *Builder) Build() error {
 
 		err := mod.Build(b, at.GlobalMeta{PkgName: pkgName, Pool: b.Pool}, files)
 		if err != nil {
-			return fmt.Errorf("build module %q: %v", name, err)
+			return fmt.Errorf("build module %q: %w", name, err)
 		}
 	}
 

@@ -18,7 +18,8 @@ type Api interface {
 
 	// Auth
 	// @wsg in.userID=header:x-user-id
-	// @wsg out.status=header:x-user-id
+	// @wsg out.status=header:x-user-id,cookie:uid
+	// @wsg out.status=cookie:uid
 	Auth(
 		ctx context.Context,
 		userID int64,
