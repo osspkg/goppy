@@ -1,3 +1,3 @@
 package types
 
-//go:generate goppy wsg --iface=Api --mod=json-rpc,rest --out=./../transport
+//go:generate goppy wsg --mod=json-rpc,rest --pool=main,admin --out=./../transport

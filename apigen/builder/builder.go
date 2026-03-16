@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
+	"strings"
 
 	"go.osspkg.com/bb"
 	"go.osspkg.com/gogen/golang"
@@ -15,17 +17,19 @@ import (
 type Builder struct {
 	Out   string
 	Mods  []string
+	Pool  []string
 	IFace map[string]struct{}
 	Files []at.File
 }
 
-func (b *Builder) filterObjects(objs []at.Object) []at.Object {
+func (b *Builder) filterObjects(objs []at.Face) []at.Face {
 	if len(b.IFace) == 0 {
 		return objs
 	}
-	result := make([]at.Object, 0, len(objs))
+
+	result := make([]at.Face, 0, len(objs))
 	for _, obj := range objs {
-		if _, ok := b.IFace[obj.Name]; ok {
+		if _, ok := b.IFace[strings.ToLower(obj.Name)]; ok {
 			result = append(result, obj)
 		}
 	}
@@ -37,11 +41,15 @@ func (b *Builder) getWorkFiles() []at.File {
 	workFiles := make([]at.File, 0, len(b.Files))
 
 	for _, file := range b.Files {
-		file.Objects = b.filterObjects(file.Objects)
-		if len(file.Objects) > 0 {
+		file.Faces = b.filterObjects(file.Faces)
+		if len(file.Faces) > 0 {
 			workFiles = append(workFiles, file)
 		}
 	}
+
+	slices.SortFunc(workFiles, func(a, b at.File) int {
+		return strings.Compare(a.FilePath, b.FilePath)
+	})
 
 	return workFiles
 }
@@ -74,7 +82,7 @@ func (b *Builder) Build() error {
 			continue
 		}
 
-		err := mod.Build(b, at.GlobalMeta{PkgName: pkgName}, files)
+		err := mod.Build(b, at.GlobalMeta{PkgName: pkgName, Pool: b.Pool}, files)
 		if err != nil {
 			return fmt.Errorf("build module %q: %v", name, err)
 		}

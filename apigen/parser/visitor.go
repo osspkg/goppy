@@ -33,7 +33,7 @@ type (
 		PkgPath  string
 		GoMod    string
 		Imports  *syncing.Map[string, string]
-		Objects  []types.Object
+		Objects  []types.Face
 	}
 
 	Parser interface {
@@ -77,7 +77,7 @@ func (v *visitor) ToFile() types.File {
 		PkgPath:  v.PkgPath,
 		GoMod:    v.GoMod,
 		Imports:  v.Imports,
-		Objects:  v.Objects,
+		Faces:    v.Objects,
 	}
 }
 
@@ -108,14 +108,16 @@ func (v *visitor) DumpStdout() {
 			for _, value := range method.InParams {
 				fmt.Println("      ",
 					"name:", value.Name, ", type:", value.Type,
-					", pkg:", value.Pkg, ", omit:", value.Omitempty)
+					", pkg:", value.Pkg, ", omit:", value.Omitempty,
+					", ptr:", value.Ptr, ", slice:", value.Slice)
 			}
 
 			fmt.Println("    out:")
 			for _, value := range method.OutParams {
 				fmt.Println("      ",
 					"name:", value.Name, ", type:", value.Type,
-					", pkg:", value.Pkg, ", omit:", value.Omitempty)
+					", pkg:", value.Pkg, ", omit:", value.Omitempty,
+					", ptr:", value.Ptr, ", slice:", value.Slice)
 			}
 		}
 	}
@@ -150,6 +152,8 @@ func (v *visitor) Visit(node ast.Node) ast.Visitor {
 func (v *visitor) astFile(node *ast.File) ast.Visitor {
 	v.PkgName = node.Name.String()
 	v.PkgPath = v.GoMod + filepath.Dir(v.FilePath)
+
+	v.Imports.Set(v.PkgName, v.PkgPath)
 
 	return v
 }
@@ -186,21 +190,21 @@ func (v *visitor) parseComment(comment string, tags *types.Tags) {
 
 	buf := bb.FromBytes([]byte(comment))
 	_, err := buf.Seek(0, io.SeekStart)
-	panicIfError(err, "parse comment")
+	util.PanicIfError(err, "parse comment")
 
 	for {
 		key, err := buf.ReadString('=')
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		panicIfError(err, "parse comment")
+		util.PanicIfError(err, "parse comment")
 		key = strings.Trim(strings.TrimSpace(key), "=")
 
 		r, _, err := buf.ReadRune()
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		panicIfError(err, "parse comment")
+		util.PanicIfError(err, "parse comment")
 
 		var value string
 		switch r {
@@ -214,14 +218,14 @@ func (v *visitor) parseComment(comment string, tags *types.Tags) {
 			value, err = buf.ReadString('`')
 			value = strings.Trim(strings.TrimSpace(value), "`")
 		default:
-			panicIfError(buf.UnreadRune(), "parse comment")
+			util.PanicIfError(buf.UnreadRune(), "parse comment")
 			value, err = buf.ReadString(' ')
 		}
 
 		if errors.Is(err, io.EOF) {
 			break
 		}
-		panicIfError(err, "parse comment")
+		util.PanicIfError(err, "parse comment")
 
 		(*tags)[key] = append((*tags)[key], do.Convert[string, string](
 			strings.Split(value, ","),
@@ -255,13 +259,23 @@ func (v *visitor) parseMethods(fields *ast.FieldList) (result []types.Method) {
 
 		if funcType.Params != nil {
 			for _, param := range funcType.Params.List {
-				method.InParams = append(method.InParams, getParam(param))
+				rp := getParam(param)
+				if !isBaseType(rp.Type) && len(rp.Pkg) == 0 {
+					rp.Pkg = v.PkgName
+				}
+
+				method.InParams = append(method.InParams, rp)
 			}
 		}
 
 		if funcType.Results != nil {
 			for _, param := range funcType.Results.List {
-				method.OutParams = append(method.OutParams, getParam(param))
+				rp := getParam(param)
+				if !isBaseType(rp.Type) && len(rp.Pkg) == 0 {
+					rp.Pkg = v.PkgName
+				}
+
+				method.OutParams = append(method.OutParams, rp)
 			}
 		}
 
@@ -278,7 +292,7 @@ func (v *visitor) astTypeSpec(node *ast.TypeSpec) {
 		return
 	}
 
-	obj := types.Object{
+	obj := types.Face{
 		Pkg:   v.PkgPath,
 		Alias: v.PkgName,
 		Name:  node.Name.String(),
@@ -295,29 +309,25 @@ func (v *visitor) astTypeSpec(node *ast.TypeSpec) {
 	return
 }
 
-func getParam(param *ast.Field) types.Param {
-	paramType := getTypeName(param.Type)
-	paramPkg := func() string {
-		list := strings.Split(paramType, ".")
-		switch len(list) {
-		case 1:
-			return ""
-		case 2:
-			paramType = list[1]
-			return strings.Trim(list[0], "*[].")
-		default:
-			panicIfError(fmt.Errorf("invalid type: %s", paramType), "get param")
-			return ""
-		}
-	}()
+func getParam(param *ast.Field) (p types.Param) {
+	p.Name = param.Names[0].String()
+	p.Type = getTypeName(param.Type)
+	p.Slice = strings.HasPrefix(p.Type, "[]")
+	p.Ptr = strings.HasPrefix(p.Type, "*")
+	p.Omitempty = p.Ptr || p.Slice
 
-	return types.Param{
-		Name: param.Names[0].String(),
-		Type: paramType,
-		Pkg:  paramPkg,
-		Omitempty: strings.HasPrefix(paramType, "*") ||
-			strings.HasPrefix(paramType, "[]"),
+	list := strings.Split(p.Type, ".")
+	switch len(list) {
+	case 1:
+		p.Type = strings.Trim(list[0], "*[].")
+	case 2:
+		p.Type = list[1]
+		p.Pkg = strings.Trim(list[0], "*[].")
+	default:
+		util.PanicIfError(fmt.Errorf("invalid type: %s", p.Type), "get param")
 	}
+
+	return
 }
 
 /*
@@ -336,7 +346,7 @@ func exprToString(fset *token.FileSet, expr ast.Expr) string {
 func getTypeName(expr ast.Expr) string {
 	switch t := expr.(type) {
 	case *ast.Ident:
-		return t.Name
+		return fmt.Sprintf("%s", t.Name)
 	case *ast.SelectorExpr:
 		return fmt.Sprintf("%s.%s", getTypeName(t.X), t.Sel.Name)
 	case *ast.StarExpr:
@@ -348,10 +358,18 @@ func getTypeName(expr ast.Expr) string {
 	}
 }
 
-func panicIfError(err error, msg string, args ...interface{}) {
-	if err == nil {
-		return
+func isBaseType(arg string) bool {
+	switch arg {
+	case "bool", "string", "byte", "struct", "struct{}",
+		"any", "interface", "interface{}",
+		"complex64", "complex128",
+		"error", "uintptr",
+		"float32", "float64",
+		"int", "int8", "int16", "int32", "int64",
+		"uint", "uint8", "uint16", "uint32", "uint64",
+		"map":
+		return true
+	default:
+		return false
 	}
-	err = errors.Wrapf(err, msg, args...)
-	panic(err.Error())
 }

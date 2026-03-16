@@ -9,26 +9,57 @@ type GlobalModule interface {
 
 type FaceModule interface {
 	Name() string
-	Build(w Writer, m FaceMeta, value File) error
+	Build(w Writer, m FaceMeta, value Face) error
 }
 
 type MethodModule interface {
 	Name() string
-	Build(w Writer, m MethodMeta, value Method) error
+	Build(w Joiner, m MethodMeta, value Method) error
+}
+
+type ParamModule interface {
+	Name() string
+	Build(w Joiner, m ParamMeta, value Param) error
 }
 
 type Writer interface {
 	WriteFile(fileName string, tok types.Token) error
 }
 
+type Joiner interface {
+	Join(toks ...types.Token)
+}
+
+type ImportSetter interface {
+	Set(string, string)
+}
+
 type GlobalMeta struct {
 	PkgName string
+	Pool    []string
 }
 
 type FaceMeta struct {
 	PkgName string
+	Import  ImportSetter
 }
 
 type MethodMeta struct {
 	PkgName string
+	Import  ImportSetter
+}
+
+type ParamType uint8
+
+const (
+	ParamIn  ParamType = 0
+	ParamOut ParamType = 1
+)
+
+type ParamMeta struct {
+	Type     ParamType
+	CodeName string
+	Import   ImportSetter
+	Value    string
+	Args     Args
 }

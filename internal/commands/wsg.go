@@ -25,8 +25,9 @@ func CmdWSG() console.CommandGetter {
 			flagsSetter.String("out", "output file specified")
 			flagsSetter.StringVar("iface", "", "interface names (optional)")
 			flagsSetter.StringVar("mod", "json-rpc", "generation modules (optional)")
+			flagsSetter.StringVar("pool", "main", "web server pool list (optional)")
 		})
-		setter.ExecFunc(func(out, _iface, _mod string) {
+		setter.ExecFunc(func(out, _iface, _mod, _pool string) {
 			console.ShowDebug(true)
 			console.Infof("--- GENERATE ---")
 
@@ -45,14 +46,30 @@ func CmdWSG() console.CommandGetter {
 				return !strings.HasPrefix(value, out)
 			})
 
-			build := &builder.Builder{
-				Out: out,
-				IFace: do.Entries[string, string, struct{}](strings.Split(_iface, ","), func(s string) (string, struct{}) {
+			mods := do.Treat[string](strings.Split(_mod, ","), func(value string, index int) string {
+				return strings.ToLower(strings.TrimSpace(value))
+			})
+
+			pool := do.Treat[string](strings.Split(_pool, ","), func(value string, index int) string {
+				return strings.ToLower(strings.TrimSpace(value))
+			})
+
+			face := do.Entries[string, string, struct{}](
+				do.Filter[string](strings.Split(_iface, ","),
+					func(value string, index int) bool {
+						return len(value) > 0
+					},
+				),
+				func(s string) (string, struct{}) {
 					return strings.ToLower(strings.TrimSpace(s)), struct{}{}
-				}),
-				Mods: do.Treat[string](strings.Split(_mod, ","), func(value string, index int) string {
-					return strings.ToLower(strings.TrimSpace(value))
-				}),
+				},
+			)
+
+			build := &builder.Builder{
+				Out:   out,
+				IFace: face,
+				Mods:  mods,
+				Pool:  pool,
 			}
 
 			for _, filePath := range files {

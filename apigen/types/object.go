@@ -15,10 +15,10 @@ type File struct {
 	PkgPath  string
 	GoMod    string
 	Imports  *syncing.Map[string, string]
-	Objects  []Object
+	Faces    []Face
 }
 
-type Object struct {
+type Face struct {
 	Alias   string
 	Pkg     string
 	Name    string
@@ -37,6 +37,8 @@ type Param struct {
 	Name      string
 	Type      string
 	Pkg       string
+	Ptr       bool
+	Slice     bool
 	Omitempty bool
 }
 
@@ -46,3 +48,13 @@ type KV struct {
 }
 
 type Tags map[string][]string
+
+type Args map[string]string
+
+func (a Args) Get(key, def string) string {
+	v, ok := a[key]
+	if !ok {
+		return def
+	}
+	return v
+}

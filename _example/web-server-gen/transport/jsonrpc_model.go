@@ -2,52 +2,52 @@
 package transport
 
 //go:generate easyjson
-import stdjson "encoding/json"
+import types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
 
 //easyjson:json
-type baseRequest struct {
-	Id     string             `json:"id"`
-	Method string             `json:"method"`
-	Params stdjson.RawMessage `json:"params"`
+type jsonrpcApiRootModelRequest struct {
+	UserName string `json:"userName"`
 }
 
 //easyjson:json
-type bulkRequest []baseRequest
-
-//easyjson:json
-type baseResponse struct {
-	Id     string       `json:"id"`
-	Result any          `json:"result,omitempty"`
-	Error  *errResponse `json:"error,omitempty"`
+type jsonrpcApiRootModelResponse struct {
+	Status bool `json:"status"`
 }
 
 //easyjson:json
-type bulkResponse []baseResponse
+type jsonrpcApiAuthModelRequest struct {
+	UserName string `json:"userName"`
+}
 
 //easyjson:json
-type errResponse struct {
-	Message string            `json:"message"`
-	Code    int64             `json:"code"`
-	Ctx     map[string]string `json:"ctx,omitempty"`
-}
-type TError interface {
-	GetCode() int64
-	GetMessage() string
-	GetContext() map[string]string
+type jsonrpcApiAuthModelResponse struct{}
+
+//easyjson:json
+type jsonrpcUserNameModelRequest struct {
+	UserID int64 `json:"userID"`
 }
 
-func toJSONRPCError(e error) *errResponse {
-	if e == nil {
-		return nil
-	}
-	err := &errResponse{}
-	te, ok := e.(TError)
-	if ok {
-		err.Code = te.GetCode()
-		err.Message = te.GetMessage()
-		err.Ctx = te.GetContext()
-	} else {
-		err.Message = e.Error()
-	}
-	return err
+//easyjson:json
+type jsonrpcUserNameModelResponse struct {
+	Name string `json:"name"`
+}
+
+//easyjson:json
+type jsonrpcPostByIDModelRequest struct {
+	ID int64 `json:"ID"`
+}
+
+//easyjson:json
+type jsonrpcPostByIDModelResponse struct {
+	Text bool `json:"text"`
+}
+
+//easyjson:json
+type jsonrpcPostListModelRequest struct {
+	UserID int64 `json:"userID"`
+}
+
+//easyjson:json
+type jsonrpcPostListModelResponse struct {
+	Text []types.Text `json:"text,omitempty"`
 }

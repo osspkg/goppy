@@ -7,9 +7,10 @@ import (
 )
 
 const (
-	globalMod = "gg"
-	faceMod   = "fg"
-	methodMod = "mg"
+	globalMod = "g"
+	faceMod   = "f"
+	methodMod = "m"
+	paramMod  = "p"
 )
 
 var (
@@ -26,6 +27,8 @@ func Register[T any](module T) {
 		addr = faceMod + "/" + vv.Name()
 	case MethodModule:
 		addr = methodMod + "/" + vv.Name()
+	case ParamModule:
+		addr = paramMod + "/" + vv.Name()
 	default:
 		panic("unknown type")
 	}
@@ -44,6 +47,8 @@ func Resolve[T any](name string) (T, bool) {
 		addr = faceMod + "/" + name
 	case *MethodModule:
 		addr = methodMod + "/" + name
+	case *ParamModule:
+		addr = paramMod + "/" + name
 	default:
 		panic(fmt.Sprintf("unknown type: %T", *nt))
 	}

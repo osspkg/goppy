@@ -7,10 +7,6 @@ package types
 
 import "context"
 
-// Api
-// @wsg description="Методы апи"
-// @wsg web-pool=main,admin
-// @wsg route-prefix=/api/v1
 type Api interface {
 	// Root
 	// @wsg in.userID=cookie:x-user-id
@@ -21,11 +17,18 @@ type Api interface {
 	) (status bool, err error)
 
 	// Auth
-	// @wsg in.userID=cookie:x-user-id
-	// @wsg module=authz
+	// @wsg in.userID=header:x-user-id
+	// @wsg out.status=header:x-user-id
 	Auth(
 		ctx context.Context,
 		userID int64,
 		userName string,
 	) (status bool, err error)
+}
+
+type User interface {
+	Name(
+		ctx context.Context,
+		userID int64,
+	) (name string, err error)
 }
