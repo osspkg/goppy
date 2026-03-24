@@ -9,7 +9,7 @@ import "context"
 
 type Api interface {
 	// Root
-	// @wsg in.userID=cookie:x-user-id
+	// @tb in.userID=cookie:x-user-id
 	Root(
 		ctx context.Context,
 		userID int64,
@@ -17,9 +17,9 @@ type Api interface {
 	) (status bool, err error)
 
 	// Auth
-	// @wsg in.userID=header:x-user-id
-	// @wsg out.status=header:x-user-id,cookie:uid
-	// @wsg out.status=cookie:uid
+	// @tb in.userID=header:x-user-id
+	// @tb out.status=header:x-user-id,cookie:uid
+	// @tb out.status=cookie:uid
 	Auth(
 		ctx context.Context,
 		userID int64,

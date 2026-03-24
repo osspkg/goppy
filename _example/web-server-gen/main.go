@@ -8,11 +8,15 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
+	"go.osspkg.com/logx"
 
 	"go.osspkg.com/goppy/v3"
 	"go.osspkg.com/goppy/v3/_example/web-server-gen/transport"
 	"go.osspkg.com/goppy/v3/_example/web-server-gen/types"
 	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/web/jsonrpc"
 )
 
 func main() {
@@ -21,11 +25,22 @@ func main() {
 	app := goppy.New("app_name", "v1.0.0", "app description")
 	app.Plugins(
 		web.WithServer(),
+		jsonrpc.WithTransport(
+			jsonrpc.Path("/rpc"),
+			jsonrpc.Timeout(5*time.Second),
+			jsonrpc.ErrHandler(func(method string, err error) error {
+				logx.Error("json-rpc call failed", "method", method, "err", err)
+				return fmt.Errorf("json-rpc call failed: %w", err)
+			}),
+		),
 	)
 	app.Plugins(
 		NewController,
-		func(routes web.ServerPool, c *Controller) *transport.JSONRPCHandler {
-			return transport.NewJSONRPCHandler(routes, c, c, c)
+		func(t jsonrpc.Transport, c *Controller) error {
+			t.Inject(transport.NewJSONRPCApiTransport(c, []string{"main"}))
+			t.Inject(transport.NewJSONRPCUserTransport(c, []string{"main"}))
+			t.Inject(transport.NewJSONRPCPostTransport(c, []string{"main"}))
+			return nil
 		},
 	)
 	app.Run()
