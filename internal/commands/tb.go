@@ -19,16 +19,15 @@ import (
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
-func CmdWSG() console.CommandGetter {
+func CmdTB() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
-		setter.Setup("wsg", "generate web server api")
+		setter.Setup("tb", "api transport builder")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
 			flagsSetter.String("out", "output file specified")
 			flagsSetter.StringVar("iface", "", "interface names (optional)")
 			flagsSetter.StringVar("mod", "json-rpc", "generation modules (optional)")
-			flagsSetter.StringVar("pool", "main", "web server pool list (optional)")
 		})
-		setter.ExecFunc(func(out, _iface, _mod, _pool string) {
+		setter.ExecFunc(func(out, _iface, _mod string) {
 			console.ShowDebug(true)
 			console.Infof("--- GENERATE ---")
 
@@ -51,10 +50,6 @@ func CmdWSG() console.CommandGetter {
 				return strings.ToLower(strings.TrimSpace(value))
 			})
 
-			pool := do.Treat[string](strings.Split(_pool, ","), func(value string, index int) string {
-				return strings.ToLower(strings.TrimSpace(value))
-			})
-
 			face := do.Entries[string, string, struct{}](
 				do.Filter[string](strings.Split(_iface, ","),
 					func(value string, index int) bool {
@@ -70,7 +65,6 @@ func CmdWSG() console.CommandGetter {
 				Out:   out,
 				IFace: face,
 				Mods:  mods,
-				Pool:  pool,
 			}
 
 			for _, filePath := range files {
@@ -80,7 +74,7 @@ func CmdWSG() console.CommandGetter {
 
 				console.Debugf("> PARSE FILE: %s", filePath)
 
-				vv, e := parser.New("@wsg", filePath)
+				vv, e := parser.New("@tb", filePath)
 				if e != nil {
 					if errors.Is(e, parser.ErrIsGenerated) {
 						continue

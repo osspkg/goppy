@@ -23,7 +23,6 @@ import (
 type Builder struct {
 	Out   string
 	Mods  []string
-	Pool  []string
 	IFace map[string]struct{}
 	Files []at.File
 }
@@ -88,7 +87,7 @@ func (b *Builder) Build() error {
 			continue
 		}
 
-		err := mod.Build(b, at.GlobalMeta{PkgName: pkgName, Pool: b.Pool}, files)
+		err := mod.Build(b, at.GlobalMeta{PkgName: pkgName}, files)
 		if err != nil {
 			return fmt.Errorf("build module %q: %w", name, err)
 		}

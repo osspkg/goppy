@@ -56,7 +56,7 @@ func (u *UniversalBroker[T]) Apply(arg any) {
 func (u *UniversalBroker[T]) OnStart(ctx xc.Context) error {
 	logx.Info("Universal Broker", "do", "start", "type", getTypeName[T](), "count", len(u.objects))
 
-	if len(u.objects) == 0 {
+	if u.onStartCallback == nil || len(u.objects) == 0 {
 		return nil
 	}
 
@@ -73,7 +73,7 @@ func (u *UniversalBroker[T]) OnStart(ctx xc.Context) error {
 func (u *UniversalBroker[T]) OnStop() error {
 	logx.Info("Universal Broker", "do", "stop", "type", getTypeName[T](), "count", len(u.objects))
 
-	if len(u.objects) == 0 {
+	if u.onStopCallback == nil || len(u.objects) == 0 {
 		return nil
 	}
 

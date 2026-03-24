@@ -7,20 +7,46 @@
 package transport
 
 import (
-	nethttp "net/http"
+	context "context"
+	time "time"
+
+	fmt "fmt"
 
 	web "go.osspkg.com/goppy/v3/web"
 
-	time "time"
+	jsonrpc "go.osspkg.com/goppy/v3/web/jsonrpc"
 
-	context "context"
+	nethttp "net/http"
 
 	stdjson "encoding/json"
 
-	fmt "fmt"
+	types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
 )
 
-func (v *JSONRPCHandler) callApiRoot(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
+type JSONRPCApiTransport struct {
+	handle types.Api
+	tags   []string
+}
+
+func NewJSONRPCApiTransport(handle types.Api, tags []string) *JSONRPCApiTransport {
+	return &JSONRPCApiTransport{
+		handle: handle,
+		tags:   tags,
+	}
+}
+
+func (v *JSONRPCApiTransport) RouteTags() []string {
+	return v.tags
+}
+
+func (v *JSONRPCApiTransport) JSONRPCApiHandlers() map[string]jsonrpc.THandleFunc {
+	return map[string]jsonrpc.THandleFunc{
+		"api.root": v.CallRoot,
+		"api.auth": v.CallAuth,
+	}
+}
+
+func (v *JSONRPCApiTransport) CallRoot(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
 	var req jsonrpcApiRootModelRequest
 	err := stdjson.Unmarshal(param, &req)
 	if err != nil {
@@ -36,13 +62,13 @@ func (v *JSONRPCHandler) callApiRoot(ctx context.Context, webCtx web.Ctx, param 
 		return nil, err
 	}
 
-	res.Status, err = v.handleApi.Root(ctx, inUserID, req.UserName)
+	res.Status, err = v.handle.Root(ctx, inUserID, req.UserName)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
-func (v *JSONRPCHandler) callApiAuth(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
+func (v *JSONRPCApiTransport) CallAuth(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
 	var req jsonrpcApiAuthModelRequest
 	err := stdjson.Unmarshal(param, &req)
 	if err != nil {
@@ -99,49 +125,7 @@ func (v *JSONRPCHandler) callApiAuth(ctx context.Context, webCtx web.Ctx, param 
 		})
 
 	}()
-	outStatus, err = v.handleApi.Auth(ctx, inUserID, req.UserName)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-func (v *JSONRPCHandler) callUserName(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
-	var req jsonrpcUserNameModelRequest
-	err := stdjson.Unmarshal(param, &req)
-	if err != nil {
-		err = fmt.Errorf("invalid request: %w", err)
-		return nil, err
-	}
-	var res jsonrpcUserNameModelResponse
-	res.Name, err = v.handleUser.Name(ctx, req.UserID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-func (v *JSONRPCHandler) callPostByID(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
-	var req jsonrpcPostByIDModelRequest
-	err := stdjson.Unmarshal(param, &req)
-	if err != nil {
-		err = fmt.Errorf("invalid request: %w", err)
-		return nil, err
-	}
-	var res jsonrpcPostByIDModelResponse
-	res.Text, err = v.handlePost.ByID(ctx, req.ID)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-func (v *JSONRPCHandler) callPostList(ctx context.Context, webCtx web.Ctx, param stdjson.RawMessage) (any, error) {
-	var req jsonrpcPostListModelRequest
-	err := stdjson.Unmarshal(param, &req)
-	if err != nil {
-		err = fmt.Errorf("invalid request: %w", err)
-		return nil, err
-	}
-	var res jsonrpcPostListModelResponse
-	res.Text, err = v.handlePost.List(ctx, req.UserID)
+	outStatus, err = v.handle.Auth(ctx, inUserID, req.UserName)
 	if err != nil {
 		return nil, err
 	}

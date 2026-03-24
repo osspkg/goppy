@@ -41,7 +41,6 @@ type ImportSetter interface {
 
 type GlobalMeta struct {
 	PkgName string
-	Pool    []string
 }
 
 type FaceMeta struct {

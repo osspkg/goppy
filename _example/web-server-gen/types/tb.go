@@ -5,12 +5,4 @@
 
 package types
 
-import (
-	"context"
-	"fmt"
-)
-
-func StdOut(ctx context.Context, arg []Text) error {
-	fmt.Println(arg)
-	return nil
-}
+//go:generate goppy tb --mod=json-rpc,rest --iface=Api,User,Post --out=./../transport

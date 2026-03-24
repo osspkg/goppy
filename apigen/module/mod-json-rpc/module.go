@@ -21,9 +21,7 @@ func (Module) Name() string {
 
 func (v Module) Build(w at.Writer, m at.GlobalMeta, files []at.File) error {
 	return errors.Queue(
-		func() error { return v.buildBaseRPCModel(w, m) },
 		func() error { return v.buildTransportModels(w, m, files) },
-		func() error { return v.buildTransport(w, m, files) },
 		func() error { return v.buildTransportHandlers(w, m, files) },
 	)
 }
