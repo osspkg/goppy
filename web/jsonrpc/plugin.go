@@ -13,7 +13,7 @@ import (
 func WithTransport(opts ...Option) plugins.Kind {
 	return plugins.Kind{
 		Inject: func(r web.ServerPool) Transport {
-			return newTransport(r, opts...)
+			return newService(r, opts...)
 		},
 	}
 }

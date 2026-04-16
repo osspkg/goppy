@@ -43,6 +43,12 @@ func WithDefaultHeaders(h map[string]string) HTTPOption {
 	}
 }
 
+func WithContextHeaderValue(header string, key any) HTTPOption {
+	return func(c *httpCli) {
+		c.contextHeaders[header] = key
+	}
+}
+
 func WithComparisonType(types ...comparison.Type) HTTPOption {
 	return func(c *httpCli) {
 		c.types = types

@@ -11,25 +11,24 @@ import (
 	"go.osspkg.com/goppy/v3/web/encoders"
 )
 
-type FORMDATA struct{}
+type FORMDATA struct {
+	MaxMemory int64
+}
 
 func (v FORMDATA) Encode(w io.Writer, in any) (string, error) {
-	fd, ok := in.(*encoders.FormData)
+	fd, ok := in.(encoders.FormDataMarshaler)
 	if !ok {
 		return "", NoCast
 	}
 
-	if err := fd.Encode(); err != nil {
-		return "", err
-	}
-
-	if _, err := io.Copy(w, fd.Reader()); err != nil {
-		return "", err
-	}
-
-	return fd.ContentType(), nil
+	return fd.MarshalFormData(w)
 }
 
 func (v FORMDATA) Decode(r io.Reader, out any) error {
-	return NoCast
+	fd, ok := out.(encoders.FormDataUnmarshaler)
+	if !ok {
+		return NoCast
+	}
+
+	return fd.UnmarshalFormData(r, v.MaxMemory)
 }

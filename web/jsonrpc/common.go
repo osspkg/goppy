@@ -13,14 +13,17 @@ import (
 )
 
 var (
-	poolResponse = pool.New[*syncing.Slice[response]](func() *syncing.Slice[response] {
-		return syncing.NewSlice[response](uint(2))
-	})
+	ErrUnsupportedMethod = errors.New("unsupported method")
+	ErrNoResponse        = errors.New("no response")
+)
 
-	poolRequest = pool.New[*bulkRequest](func() *bulkRequest {
-		br := make(bulkRequest, 0, 2)
+var (
+	poolRequestRaw = pool.New[*bulkRequestRaw](func() *bulkRequestRaw {
+		br := make(bulkRequestRaw, 0, 2)
 		return &br
 	})
 
-	ErrUnsupportedMethod = errors.New("unsupported method")
+	poolResponseAny = pool.New[*syncing.Slice[responseAny]](func() *syncing.Slice[responseAny] {
+		return syncing.NewSlice[responseAny](uint(2))
+	})
 )

@@ -13,6 +13,7 @@ import (
 
 	"github.com/google/uuid"
 	"go.osspkg.com/casecheck"
+	"gopkg.in/yaml.v3"
 
 	"go.osspkg.com/goppy/v3/auth/token"
 )
@@ -43,6 +44,10 @@ func TestUnit_JWT(t *testing.T) {
 	casecheck.NoError(t, conf.Default())
 	casecheck.NoError(t, conf.Validate())
 
+	b, err := yaml.Marshal(conf)
+	casecheck.NoError(t, err)
+	t.Log(string(b))
+
 	jwt, err := token.New(conf.JWT)
 	casecheck.NoError(t, err)
 	casecheck.NotNil(t, jwt)
@@ -54,12 +59,13 @@ func TestUnit_JWT(t *testing.T) {
 		},
 	}
 
-	tokId, tokData, err := jwt.CreateJWT(req, "test:user", time.Hour)
+	tokId, tokData, err := jwt.Create(req, "test:user", time.Hour)
+	t.Log(tokId, string(tokData))
 	casecheck.NoError(t, err)
 	casecheck.NotNil(t, tokData)
 	casecheck.NotEqual(t, tokId, uuid.Nil)
 
-	h, p, err := jwt.VerifyJWT(tokData)
+	h, p, err := jwt.Verify(tokData)
 	casecheck.NoError(t, err)
 	casecheck.NotNil(t, h)
 	casecheck.NotNil(t, p)

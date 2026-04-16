@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
+	"go.osspkg.com/goppy/v3/auth/bearerauth"
 	"go.osspkg.com/goppy/v3/web"
 )
 
@@ -29,12 +29,11 @@ func GuardMiddlewareCustom[T json.Unmarshaler](
 				return
 			}
 
-			val := ""
+			var val string
 
 			if key := srv.HeaderName(); len(key) > 0 {
-				val = wc.Header().Get(key)
-				if len(val) > 7 && strings.HasPrefix(val, "Bearer ") {
-					val = val[6:]
+				if v, err := bearerauth.Decode(wc.Header()); err == nil {
+					val = v
 				}
 			}
 
@@ -51,7 +50,7 @@ func GuardMiddlewareCustom[T json.Unmarshaler](
 				return
 			}
 
-			head, payload, err := srv.VerifyJWT([]byte(val))
+			head, payload, err := srv.Verify([]byte(val))
 			if err != nil {
 				if fail != nil {
 					fail(wc, fmt.Errorf("failed to verify token: %w", err))

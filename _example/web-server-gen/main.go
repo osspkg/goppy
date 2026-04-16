@@ -37,9 +37,9 @@ func main() {
 	app.Plugins(
 		NewController,
 		func(t jsonrpc.Transport, c *Controller) error {
-			t.Inject(transport.NewJSONRPCApiTransport(c, []string{"main"}))
-			t.Inject(transport.NewJSONRPCUserTransport(c, []string{"main"}))
-			t.Inject(transport.NewJSONRPCPostTransport(c, []string{"main"}))
+			t.Add(transport.NewJSONRPCApiTransport(c, []string{"main"}))
+			t.Add(transport.NewJSONRPCUserTransport(c, []string{"main"}))
+			t.Add(transport.NewJSONRPCPostTransport(c, []string{"main"}))
 			return nil
 		},
 	)

@@ -4,7 +4,6 @@ package jsonrpc
 
 import (
 	json "encoding/json"
-
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -18,7 +17,104 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(in *jlexer.Lexer, out *response) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(in *jlexer.Lexer, out *responseRaw) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		switch key {
+		case "id":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Id = string(in.String())
+			}
+		case "result":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				if data := in.Raw(); in.Ok() {
+					in.AddError((out.Result).UnmarshalJSON(data))
+				}
+			}
+		case "error":
+			if in.IsNull() {
+				in.Skip()
+				out.Error = nil
+			} else {
+				if out.Error == nil {
+					out.Error = new(errResponse)
+				}
+				if in.IsNull() {
+					in.Skip()
+				} else {
+					(*out.Error).UnmarshalEasyJSON(in)
+				}
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(out *jwriter.Writer, in responseRaw) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Id))
+	}
+	if len(in.Result) != 0 {
+		const prefix string = ",\"result\":"
+		out.RawString(prefix)
+		out.Raw((in.Result).MarshalJSON())
+	}
+	if in.Error != nil {
+		const prefix string = ",\"error\":"
+		out.RawString(prefix)
+		(*in.Error).MarshalEasyJSON(out)
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v responseRaw) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v responseRaw) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *responseRaw) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *responseRaw) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(l, v)
+}
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(in *jlexer.Lexer, out *responseAny) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -70,7 +166,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(in *jlexer.Lexer, out *r
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(out *jwriter.Writer, in response) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(out *jwriter.Writer, in responseAny) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -99,29 +195,29 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(out *jwriter.Writer, in 
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v response) MarshalJSON() ([]byte, error) {
+func (v responseAny) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v response) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc(w, v)
+func (v responseAny) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *response) UnmarshalJSON(data []byte) error {
+func (v *responseAny) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *response) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc(l, v)
+func (v *responseAny) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(l, v)
 }
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(in *jlexer.Lexer, out *request) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(in *jlexer.Lexer, out *requestRaw) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -165,7 +261,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(out *jwriter.Writer, in request) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(out *jwriter.Writer, in requestRaw) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -188,29 +284,124 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(out *jwriter.Writer, in
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v request) MarshalJSON() ([]byte, error) {
+func (v requestRaw) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v request) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc1(w, v)
+func (v requestRaw) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *request) UnmarshalJSON(data []byte) error {
+func (v *requestRaw) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *request) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc1(l, v)
+func (v *requestRaw) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(l, v)
 }
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(in *jlexer.Lexer, out *errResponse) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(in *jlexer.Lexer, out *requestAny) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		if isTopLevel {
+			in.Consumed()
+		}
+		in.Skip()
+		return
+	}
+	in.Delim('{')
+	for !in.IsDelim('}') {
+		key := in.UnsafeFieldName(false)
+		in.WantColon()
+		switch key {
+		case "id":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Id = string(in.String())
+			}
+		case "method":
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				out.Method = string(in.String())
+			}
+		case "params":
+			if m, ok := out.Params.(easyjson.Unmarshaler); ok {
+				m.UnmarshalEasyJSON(in)
+			} else if m, ok := out.Params.(json.Unmarshaler); ok {
+				_ = m.UnmarshalJSON(in.Raw())
+			} else {
+				out.Params = in.Interface()
+			}
+		default:
+			in.SkipRecursive()
+		}
+		in.WantComma()
+	}
+	in.Delim('}')
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(out *jwriter.Writer, in requestAny) {
+	out.RawByte('{')
+	first := true
+	_ = first
+	{
+		const prefix string = ",\"id\":"
+		out.RawString(prefix[1:])
+		out.String(string(in.Id))
+	}
+	{
+		const prefix string = ",\"method\":"
+		out.RawString(prefix)
+		out.String(string(in.Method))
+	}
+	{
+		const prefix string = ",\"params\":"
+		out.RawString(prefix)
+		if m, ok := in.Params.(easyjson.Marshaler); ok {
+			m.MarshalEasyJSON(out)
+		} else if m, ok := in.Params.(json.Marshaler); ok {
+			out.Raw(m.MarshalJSON())
+		} else {
+			out.Raw(json.Marshal(in.Params))
+		}
+	}
+	out.RawByte('}')
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v requestAny) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v requestAny) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *requestAny) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *requestAny) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(l, v)
+}
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(in *jlexer.Lexer, out *errResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -270,7 +461,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(out *jwriter.Writer, in errResponse) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(out *jwriter.Writer, in errResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -309,27 +500,27 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(out *jwriter.Writer, in
 // MarshalJSON supports json.Marshaler interface
 func (v errResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v errResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc2(w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *errResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *errResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc2(l, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(l, v)
 }
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(in *jlexer.Lexer, out *bulkResponse) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc5(in *jlexer.Lexer, out *bulkResponseRaw) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -338,15 +529,15 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(in *jlexer.Lexer, out *
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(bulkResponse, 0, 1)
+				*out = make(bulkResponseRaw, 0, 1)
 			} else {
-				*out = bulkResponse{}
+				*out = bulkResponseRaw{}
 			}
 		} else {
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v3 response
+			var v3 responseRaw
 			if in.IsNull() {
 				in.Skip()
 			} else {
@@ -361,7 +552,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(out *jwriter.Writer, in bulkResponse) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc5(out *jwriter.Writer, in bulkResponseRaw) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -377,29 +568,29 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(out *jwriter.Writer, in
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v bulkResponse) MarshalJSON() ([]byte, error) {
+func (v bulkResponseRaw) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v bulkResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc3(w, v)
+func (v bulkResponseRaw) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *bulkResponse) UnmarshalJSON(data []byte) error {
+func (v *bulkResponseRaw) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *bulkResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc3(l, v)
+func (v *bulkResponseRaw) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc5(l, v)
 }
-func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(in *jlexer.Lexer, out *bulkRequest) {
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc6(in *jlexer.Lexer, out *bulkResponseAny) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		in.Skip()
@@ -408,15 +599,15 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(in *jlexer.Lexer, out *
 		in.Delim('[')
 		if *out == nil {
 			if !in.IsDelim(']') {
-				*out = make(bulkRequest, 0, 1)
+				*out = make(bulkResponseAny, 0, 1)
 			} else {
-				*out = bulkRequest{}
+				*out = bulkResponseAny{}
 			}
 		} else {
 			*out = (*out)[:0]
 		}
 		for !in.IsDelim(']') {
-			var v6 request
+			var v6 responseAny
 			if in.IsNull() {
 				in.Skip()
 			} else {
@@ -431,7 +622,7 @@ func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(in *jlexer.Lexer, out *
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(out *jwriter.Writer, in bulkRequest) {
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc6(out *jwriter.Writer, in bulkResponseAny) {
 	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
 		out.RawString("null")
 	} else {
@@ -447,25 +638,165 @@ func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(out *jwriter.Writer, in
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v bulkRequest) MarshalJSON() ([]byte, error) {
+func (v bulkResponseAny) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(&w, v)
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v bulkRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc4(w, v)
+func (v bulkResponseAny) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *bulkRequest) UnmarshalJSON(data []byte) error {
+func (v *bulkResponseAny) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(&r, v)
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *bulkRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc4(l, v)
+func (v *bulkResponseAny) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc6(l, v)
+}
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc7(in *jlexer.Lexer, out *bulkRequestRaw) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(bulkRequestRaw, 0, 1)
+			} else {
+				*out = bulkRequestRaw{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v9 requestRaw
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				(v9).UnmarshalEasyJSON(in)
+			}
+			*out = append(*out, v9)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc7(out *jwriter.Writer, in bulkRequestRaw) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v10, v11 := range in {
+			if v10 > 0 {
+				out.RawByte(',')
+			}
+			(v11).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v bulkRequestRaw) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc7(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v bulkRequestRaw) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc7(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *bulkRequestRaw) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc7(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *bulkRequestRaw) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc7(l, v)
+}
+func easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc8(in *jlexer.Lexer, out *bulkRequestAny) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+		*out = nil
+	} else {
+		in.Delim('[')
+		if *out == nil {
+			if !in.IsDelim(']') {
+				*out = make(bulkRequestAny, 0, 1)
+			} else {
+				*out = bulkRequestAny{}
+			}
+		} else {
+			*out = (*out)[:0]
+		}
+		for !in.IsDelim(']') {
+			var v12 requestAny
+			if in.IsNull() {
+				in.Skip()
+			} else {
+				(v12).UnmarshalEasyJSON(in)
+			}
+			*out = append(*out, v12)
+			in.WantComma()
+		}
+		in.Delim(']')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc8(out *jwriter.Writer, in bulkRequestAny) {
+	if in == nil && (out.Flags&jwriter.NilSliceAsEmpty) == 0 {
+		out.RawString("null")
+	} else {
+		out.RawByte('[')
+		for v13, v14 := range in {
+			if v13 > 0 {
+				out.RawByte(',')
+			}
+			(v14).MarshalEasyJSON(out)
+		}
+		out.RawByte(']')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v bulkRequestAny) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc8(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v bulkRequestAny) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGoOsspkgComGoppyV3WebJsonrpc8(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *bulkRequestAny) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc8(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *bulkRequestAny) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGoOsspkgComGoppyV3WebJsonrpc8(l, v)
 }

@@ -31,6 +31,7 @@ type httpCli struct {
 	nativeClient *http.Client
 
 	defaultHeaders http.Header
+	contextHeaders map[string]any
 	signStore      cache.Cache[string, signature.Signature]
 
 	types []comparison.Type
@@ -53,6 +54,7 @@ func NewHTTPClient(opts ...HTTPOption) HTTPClient {
 			},
 		},
 		defaultHeaders: http.Header{},
+		contextHeaders: make(map[string]any, 10),
 		signStore:      cache.New[string, signature.Signature](),
 	}
 
@@ -60,7 +62,7 @@ func NewHTTPClient(opts ...HTTPOption) HTTPClient {
 	WithComparisonType(
 		comparison.JSON{},
 		comparison.XML{},
-		comparison.FORMDATA{},
+		comparison.FORMDATA{MaxMemory: 5 * 1024 * 1024},
 		comparison.BYTES{},
 	)(cli)
 
@@ -126,6 +128,11 @@ func (cli *httpCli) Send(ctx context.Context, method, url string, in, out any) (
 	}
 	if len(contentType) > 0 {
 		req.Header.Set("Content-Type", contentType)
+	}
+	for head, key := range cli.contextHeaders {
+		if val, ok := ctx.Value(key).(string); ok {
+			req.Header.Set(head, val)
+		}
 	}
 
 	if sign, ok := cli.signStore.Get(host); ok && sign != nil {

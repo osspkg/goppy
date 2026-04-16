@@ -8,23 +8,26 @@ package signature
 import (
 	"fmt"
 	"regexp"
+
+	"go.osspkg.com/random"
 )
 
 const (
-	headerName  = `Signature`
-	valueRegexp = `keyId=\"(.*)\",algorithm=\"(.*)\",signature=\"(.*)\"`
-	valueTmpl   = `keyId="%s",algorithm="%s",signature="%s"`
+	name  = `Signature`
+	value = `id=\"(.*)\" alg=\"(.*)\" sig=\"(.*)\",nonce=\"(.*)\"`
+	tmpl  = `id="%s" alg="%s" sig="%s" nonce="%s"`
 )
 
 var (
-	rex = regexp.MustCompile(valueRegexp)
+	rex = regexp.MustCompile(value)
 )
 
 type (
 	Data struct {
-		ID  string
-		Alg string
-		Sig string
+		ID    string
+		Alg   string
+		Sig   string
+		Nonce string
 	}
 
 	Writer interface {
@@ -38,30 +41,32 @@ type (
 
 // Decode getting signature from header
 func Decode(r Reader) (*Data, error) {
-	val := r.Get(headerName)
+	val := r.Get(name)
 	if len(val) == 0 {
-		return nil, fmt.Errorf("header `%s` not found", headerName)
+		return nil, fmt.Errorf("header `%s` not found", name)
 	}
 
 	submatch := rex.FindSubmatch([]byte(val))
-	if len(submatch) != 4 {
-		return nil, fmt.Errorf("invalid format header `%s`", headerName)
+	if len(submatch) != 5 {
+		return nil, fmt.Errorf("invalid format header `%s`", name)
 	}
 
 	return &Data{
-		ID:  string(submatch[1]),
-		Alg: string(submatch[2]),
-		Sig: string(submatch[3]),
+		ID:    string(submatch[1]),
+		Alg:   string(submatch[2]),
+		Sig:   string(submatch[3]),
+		Nonce: string(submatch[4]),
 	}, nil
 }
 
 // Encode make and setting signature to header
 func Encode(w Writer, s Signature, body []byte) error {
-	sig, err := s.Create(body)
+	nonce := random.CryptoBase64(32)
+	sig, err := s.Create(body, nonce)
 	if err != nil {
 		return fmt.Errorf("create signature: %w", err)
 	}
 
-	w.Set(headerName, fmt.Sprintf(valueTmpl, s.ID(), s.Algorithm(), sig))
+	w.Set(name, fmt.Sprintf(tmpl, s.ID(), s.Algorithm(), sig, nonce))
 	return nil
 }

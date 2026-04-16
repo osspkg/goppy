@@ -12,13 +12,6 @@ import (
 	"go.osspkg.com/config"
 	cenv "go.osspkg.com/config/env"
 	"go.osspkg.com/events"
-	"go.osspkg.com/logx"
-	"go.osspkg.com/syncing"
-	"go.osspkg.com/xc"
-	"go.uber.org/automaxprocs/maxprocs"
-
-	"go.osspkg.com/goppy/v3/internal/appsteps"
-
 	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/dic"
 	"go.osspkg.com/goppy/v3/dic/broker"
@@ -26,7 +19,12 @@ import (
 	"go.osspkg.com/goppy/v3/internal/appconfig"
 	"go.osspkg.com/goppy/v3/internal/applog"
 	"go.osspkg.com/goppy/v3/internal/appreflect"
+	"go.osspkg.com/goppy/v3/internal/appsteps"
 	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/logx"
+	"go.osspkg.com/syncing"
+	"go.osspkg.com/xc"
+	"go.uber.org/automaxprocs/maxprocs"
 )
 
 func init() {

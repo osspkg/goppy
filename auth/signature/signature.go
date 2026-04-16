@@ -12,8 +12,9 @@ import (
 	_ "crypto/sha1"   //nolint:gosec
 	_ "crypto/sha256" //nolint:gosec
 	_ "crypto/sha512" //nolint:gosec
-	"encoding/hex"
+	"encoding/base64"
 	"fmt"
+	"io"
 
 	_ "golang.org/x/crypto/blake2b"   //nolint:gosec
 	_ "golang.org/x/crypto/blake2s"   //nolint:gosec
@@ -36,8 +37,8 @@ type (
 	Signature interface {
 		ID() string
 		Algorithm() string
-		Create(message []byte) (string, error)
-		Verify(message []byte, sig string) bool
+		Create(message []byte, nonce string) (string, error)
+		Verify(message []byte, nonce string, sig string) bool
 	}
 )
 
@@ -51,12 +52,15 @@ func (s *sign) Algorithm() string {
 	return s.alg
 }
 
-func (s *sign) createSig(message []byte) ([]byte, error) {
+func (s *sign) build(message []byte, nonce string) ([]byte, error) {
 	if !s.hash.Available() {
 		return nil, fmt.Errorf("hash `%s` is unavailable", s.hash.String())
 	}
 
 	w := hmac.New(s.hash.New, s.secret)
+	if _, err := io.WriteString(w, nonce); err != nil {
+		return nil, fmt.Errorf("failed to write nonce: %w", err)
+	}
 	if _, err := w.Write(message); err != nil {
 		return nil, fmt.Errorf("failed to write message: %w", err)
 	}
@@ -64,22 +68,22 @@ func (s *sign) createSig(message []byte) ([]byte, error) {
 }
 
 // Create getting hash as string
-func (s *sign) Create(message []byte) (string, error) {
-	h, err := s.createSig(message)
+func (s *sign) Create(message []byte, nonce string) (string, error) {
+	h, err := s.build(message, nonce)
 	if err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(h), nil
+	return base64.StdEncoding.EncodeToString(h), nil
 }
 
 // Verify signature
-func (s *sign) Verify(message []byte, sig string) bool {
-	sigBytes, err := hex.DecodeString(sig)
+func (s *sign) Verify(message []byte, nonce string, sig string) bool {
+	sigBytes, err := base64.StdEncoding.DecodeString(sig)
 	if err != nil {
 		return false
 	}
 
-	h, err := s.createSig(message)
+	h, err := s.build(message, nonce)
 	if err != nil {
 		return false
 	}
@@ -87,27 +91,32 @@ func (s *sign) Verify(message []byte, sig string) bool {
 	return hmac.Equal(h, sigBytes)
 }
 
-// NewSHA1 create sign sha1
+// NewSHA1 create sign SHA1
 func NewSHA1(id, secret string) Signature {
 	return NewCustomSignature(id, secret, "hmac-sha1", crypto.SHA1)
 }
 
-// NewSHA256 create sign sha256
+// NewSHA256 create sign SHA256
 func NewSHA256(id, secret string) Signature {
 	return NewCustomSignature(id, secret, "hmac-sha256", crypto.SHA256)
 }
 
-// NewSHA512 create sign sha512
+// NewSHA512 create sign SHA512
 func NewSHA512(id, secret string) Signature {
 	return NewCustomSignature(id, secret, "hmac-sha512", crypto.SHA512)
 }
 
+// NewSHA384 create sign SHA3_384
+func NewSHA384(id, secret string) Signature {
+	return NewCustomSignature(id, secret, "hmac-sha384", crypto.SHA3_384)
+}
+
 // NewCustomSignature create sign with custom hash function
-func NewCustomSignature(id, secret, alg string, chash crypto.Hash) Signature {
+func NewCustomSignature(id, secret, alg string, hashFunc crypto.Hash) Signature {
 	return &sign{
 		id:     id,
 		alg:    alg,
 		secret: []byte(secret),
-		hash:   chash,
+		hash:   hashFunc,
 	}
 }

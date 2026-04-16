@@ -17,9 +17,9 @@ import (
 	"go.osspkg.com/casecheck"
 	"go.osspkg.com/errors"
 
+	"go.osspkg.com/goppy/v2/web/encoders"
 	"go.osspkg.com/goppy/v3/auth/signature"
 	"go.osspkg.com/goppy/v3/web/client"
-	"go.osspkg.com/goppy/v3/web/encoders"
 )
 
 type mockModelName struct {

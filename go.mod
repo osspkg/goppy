@@ -7,9 +7,9 @@ require (
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
-	github.com/lib/pq v1.11.2
+	github.com/lib/pq v1.12.0
 	github.com/mailru/easyjson v0.9.2
-	github.com/mattn/go-sqlite3 v1.14.34
+	github.com/mattn/go-sqlite3 v1.14.37
 	github.com/miekg/dns v1.1.72
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.2
@@ -17,6 +17,7 @@ require (
 	go.osspkg.com/algorithms v1.6.1
 	go.osspkg.com/bb v1.0.0
 	go.osspkg.com/casecheck v0.3.0
+	go.osspkg.com/cast v0.0.0-20260330033934-90d4d7b6ee08
 	go.osspkg.com/config v0.2.0
 	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
@@ -37,6 +38,7 @@ require (
 	golang.org/x/mod v0.34.0
 	golang.org/x/oauth2 v0.36.0
 	google.golang.org/protobuf v1.36.11
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -87,5 +89,6 @@ require (
 	golang.org/x/sys v0.42.0 // indirect
 	golang.org/x/text v0.35.0 // indirect
 	golang.org/x/tools v0.43.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace go.osspkg.com/cast => ../go-cast
