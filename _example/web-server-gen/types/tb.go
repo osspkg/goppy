@@ -5,4 +5,5 @@
 
 package types
 
-//go:generate goppy tb --mod=json-rpc,rest --iface=Api,User,Post --out=./../transport
+//go:generate goppy tb --mod=json-rpc-server --iface=Api,User,Post --out=./../transport
+//go:generate goppy tb --mod=json-rpc-client --out=./../client

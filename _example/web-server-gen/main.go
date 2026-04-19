@@ -52,7 +52,7 @@ func NewController() *Controller {
 	return &Controller{}
 }
 
-func (c Controller) Name(ctx context.Context, userID int64) (name string, err error) {
+func (c Controller) NameV1(ctx context.Context, userID int64) (name string, err error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -67,7 +67,7 @@ func (c Controller) List(ctx context.Context, userID int64) (text []types.Text, 
 	panic("implement me")
 }
 
-func (c Controller) Root(ctx context.Context, userID int64, userName string) (status bool, err error) {
+func (c Controller) RootV1(ctx context.Context, userID int64, userName string) (status bool, err error) {
 	switch userID {
 	case 0:
 		return false, fmt.Errorf("userID 0")
@@ -76,7 +76,7 @@ func (c Controller) Root(ctx context.Context, userID int64, userName string) (st
 	}
 }
 
-func (c Controller) Auth(ctx context.Context, userID int64, userName string) (status bool, err error) {
+func (c Controller) AuthV1(ctx context.Context, userID int64, userName string) (status bool, err error) {
 	switch userID {
 	case 0:
 		return false, fmt.Errorf("userID 0")

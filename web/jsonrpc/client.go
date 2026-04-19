@@ -12,6 +12,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+
 	"go.osspkg.com/goppy/v3/web/client"
 	"go.osspkg.com/goppy/v3/web/client/comparison"
 )
@@ -82,15 +83,17 @@ func (c *Client) BulkCall(ctx context.Context, bulk ...*Chunk) error {
 		return nil
 	}
 
-	req := make(bulkRequestAny, 0, len(bulk))
-	res := make(bulkResponseRaw, 0, len(bulk))
+	req := poolRequestAny.Get()
+	defer poolRequestAny.Put(req)
+	res := poolResponseRaw.Get()
+	defer poolResponseRaw.Put(res)
 
 	ids := make(map[string]*Chunk, len(bulk))
 
 	for _, ch := range bulk {
 		id := c.opts.genID()
 		ids[id] = ch
-		req = append(req, requestAny{
+		*req = append(*req, requestAny{
 			Id:     id,
 			Method: ch.Method,
 			Params: ch.Params,
@@ -101,7 +104,7 @@ func (c *Client) BulkCall(ctx context.Context, bulk ...*Chunk) error {
 		return err
 	}
 
-	for _, re := range res {
+	for _, re := range *res {
 		if ch, ok := ids[re.Id]; ok {
 			delete(ids, re.Id)
 

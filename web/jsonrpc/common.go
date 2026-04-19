@@ -23,7 +23,17 @@ var (
 		return &br
 	})
 
-	poolResponseAny = pool.New[*syncing.Slice[responseAny]](func() *syncing.Slice[responseAny] {
+	poolRequestAny = pool.New[*bulkRequestAny](func() *bulkRequestAny {
+		br := make(bulkRequestAny, 0, 2)
+		return &br
+	})
+
+	poolResponseRaw = pool.New[*bulkResponseRaw](func() *bulkResponseRaw {
+		br := make(bulkResponseRaw, 0, 2)
+		return &br
+	})
+
+	poolResponseAnySync = pool.New[*syncing.Slice[responseAny]](func() *syncing.Slice[responseAny] {
 		return syncing.NewSlice[responseAny](uint(2))
 	})
 )

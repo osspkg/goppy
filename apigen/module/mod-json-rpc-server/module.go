@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package mod_json_rpc
+package mod_json_rpc_server
 
 import (
 	"go.osspkg.com/errors"
@@ -16,7 +16,7 @@ type Module struct {
 }
 
 func (Module) Name() string {
-	return "json-rpc"
+	return "json-rpc-server"
 }
 
 func (v Module) Build(w at.Writer, m at.GlobalMeta, files []at.File) error {

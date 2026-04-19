@@ -20,7 +20,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(in *jlexer.Lexer, out *jsonrpcUserNameModelResponse) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(in *jlexer.Lexer, out *jsonrpcUserNameV1ModelResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -50,7 +50,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(in *jl
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(out *jwriter.Writer, in jsonrpcUserNameModelResponse) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(out *jwriter.Writer, in jsonrpcUserNameV1ModelResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -63,29 +63,29 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(out *j
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcUserNameModelResponse) MarshalJSON() ([]byte, error) {
+func (v jsonrpcUserNameV1ModelResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcUserNameModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(w, v)
+func (v jsonrpcUserNameV1ModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcUserNameModelResponse) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcUserNameV1ModelResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcUserNameModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(l, v)
+func (v *jsonrpcUserNameV1ModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(in *jlexer.Lexer, out *jsonrpcUserNameModelRequest) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(in *jlexer.Lexer, out *jsonrpcUserNameV1ModelRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -115,7 +115,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(out *jwriter.Writer, in jsonrpcUserNameModelRequest) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(out *jwriter.Writer, in jsonrpcUserNameV1ModelRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -128,29 +128,29 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(out *
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcUserNameModelRequest) MarshalJSON() ([]byte, error) {
+func (v jsonrpcUserNameV1ModelRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcUserNameModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(w, v)
+func (v jsonrpcUserNameV1ModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcUserNameModelRequest) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcUserNameV1ModelRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcUserNameModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(l, v)
+func (v *jsonrpcUserNameV1ModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport1(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(in *jlexer.Lexer, out *jsonrpcPostListModelResponse) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(in *jlexer.Lexer, out *jsonrpcPostListModelResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -181,7 +181,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(in *j
 				}
 				for !in.IsDelim(']') {
 					var v1 types.Text
-					easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(in, &v1)
+					easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(in, &v1)
 					out.Text = append(out.Text, v1)
 					in.WantComma()
 				}
@@ -197,7 +197,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(out *jwriter.Writer, in jsonrpcPostListModelResponse) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(out *jwriter.Writer, in jsonrpcPostListModelResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -211,7 +211,7 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(out *
 				if v2 > 0 {
 					out.RawByte(',')
 				}
-				easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(out, v3)
+				easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(out, v3)
 			}
 			out.RawByte(']')
 		}
@@ -222,27 +222,27 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(out *
 // MarshalJSON supports json.Marshaler interface
 func (v jsonrpcPostListModelResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v jsonrpcPostListModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *jsonrpcPostListModelResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *jsonrpcPostListModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(l, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport2(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(in *jlexer.Lexer, out *types.Text) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(in *jlexer.Lexer, out *types.Text) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -278,7 +278,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(in *jlexer
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(out *jwriter.Writer, in types.Text) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(out *jwriter.Writer, in types.Text) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -294,7 +294,7 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTypes(out *jwrit
 	}
 	out.RawByte('}')
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(in *jlexer.Lexer, out *jsonrpcPostListModelRequest) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(in *jlexer.Lexer, out *jsonrpcPostListModelRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -324,7 +324,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(out *jwriter.Writer, in jsonrpcPostListModelRequest) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(out *jwriter.Writer, in jsonrpcPostListModelRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -339,27 +339,27 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(out *
 // MarshalJSON supports json.Marshaler interface
 func (v jsonrpcPostListModelRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v jsonrpcPostListModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *jsonrpcPostListModelRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *jsonrpcPostListModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(l, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport3(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(in *jlexer.Lexer, out *jsonrpcPostByIDModelResponse) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(in *jlexer.Lexer, out *jsonrpcPostByIDModelResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -389,7 +389,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(out *jwriter.Writer, in jsonrpcPostByIDModelResponse) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(out *jwriter.Writer, in jsonrpcPostByIDModelResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -404,27 +404,27 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(out *
 // MarshalJSON supports json.Marshaler interface
 func (v jsonrpcPostByIDModelResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v jsonrpcPostByIDModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *jsonrpcPostByIDModelResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *jsonrpcPostByIDModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(l, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport4(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(in *jlexer.Lexer, out *jsonrpcPostByIDModelRequest) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(in *jlexer.Lexer, out *jsonrpcPostByIDModelRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -454,7 +454,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(out *jwriter.Writer, in jsonrpcPostByIDModelRequest) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(out *jwriter.Writer, in jsonrpcPostByIDModelRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -469,27 +469,27 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(out *
 // MarshalJSON supports json.Marshaler interface
 func (v jsonrpcPostByIDModelRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
 func (v jsonrpcPostByIDModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
 func (v *jsonrpcPostByIDModelRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *jsonrpcPostByIDModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(l, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport5(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(in *jlexer.Lexer, out *jsonrpcApiRootModelResponse) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(in *jlexer.Lexer, out *jsonrpcApiRootV1ModelResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -519,7 +519,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(out *jwriter.Writer, in jsonrpcApiRootModelResponse) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(out *jwriter.Writer, in jsonrpcApiRootV1ModelResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -532,29 +532,29 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(out *
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcApiRootModelResponse) MarshalJSON() ([]byte, error) {
+func (v jsonrpcApiRootV1ModelResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcApiRootModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(w, v)
+func (v jsonrpcApiRootV1ModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcApiRootModelResponse) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcApiRootV1ModelResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcApiRootModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(l, v)
+func (v *jsonrpcApiRootV1ModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport6(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(in *jlexer.Lexer, out *jsonrpcApiRootModelRequest) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(in *jlexer.Lexer, out *jsonrpcApiRootV1ModelRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -584,7 +584,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(out *jwriter.Writer, in jsonrpcApiRootModelRequest) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(out *jwriter.Writer, in jsonrpcApiRootV1ModelRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -597,29 +597,29 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(out *
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcApiRootModelRequest) MarshalJSON() ([]byte, error) {
+func (v jsonrpcApiRootV1ModelRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcApiRootModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(w, v)
+func (v jsonrpcApiRootV1ModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcApiRootModelRequest) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcApiRootV1ModelRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcApiRootModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(l, v)
+func (v *jsonrpcApiRootV1ModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport7(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(in *jlexer.Lexer, out *jsonrpcApiAuthModelResponse) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(in *jlexer.Lexer, out *jsonrpcApiAuthV1ModelResponse) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -643,7 +643,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(out *jwriter.Writer, in jsonrpcApiAuthModelResponse) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(out *jwriter.Writer, in jsonrpcApiAuthV1ModelResponse) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -651,29 +651,29 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(out *
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcApiAuthModelResponse) MarshalJSON() ([]byte, error) {
+func (v jsonrpcApiAuthV1ModelResponse) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcApiAuthModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(w, v)
+func (v jsonrpcApiAuthV1ModelResponse) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcApiAuthModelResponse) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcApiAuthV1ModelResponse) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcApiAuthModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(l, v)
+func (v *jsonrpcApiAuthV1ModelResponse) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport8(l, v)
 }
-func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(in *jlexer.Lexer, out *jsonrpcApiAuthModelRequest) {
+func easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(in *jlexer.Lexer, out *jsonrpcApiAuthV1ModelRequest) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -703,7 +703,7 @@ func easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(in *j
 		in.Consumed()
 	}
 }
-func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(out *jwriter.Writer, in jsonrpcApiAuthModelRequest) {
+func easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(out *jwriter.Writer, in jsonrpcApiAuthV1ModelRequest) {
 	out.RawByte('{')
 	first := true
 	_ = first
@@ -716,25 +716,25 @@ func easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(out *
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v jsonrpcApiAuthModelRequest) MarshalJSON() ([]byte, error) {
+func (v jsonrpcApiAuthV1ModelRequest) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(&w, v)
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v jsonrpcApiAuthModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjsonE35df14fEncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(w, v)
+func (v jsonrpcApiAuthV1ModelRequest) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson3ef10231EncodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *jsonrpcApiAuthModelRequest) UnmarshalJSON(data []byte) error {
+func (v *jsonrpcApiAuthV1ModelRequest) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(&r, v)
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *jsonrpcApiAuthModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjsonE35df14fDecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(l, v)
+func (v *jsonrpcApiAuthV1ModelRequest) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson3ef10231DecodeGoOsspkgComGoppyV3ExampleWebServerGenTransport9(l, v)
 }

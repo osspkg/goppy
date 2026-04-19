@@ -6,18 +6,16 @@
 package builder
 
 import (
-	modjsonrpc "go.osspkg.com/goppy/v3/apigen/module/mod-json-rpc"
+	modjsonrpcclient "go.osspkg.com/goppy/v3/apigen/module/mod-json-rpc-client"
+	modjsonrpcserver "go.osspkg.com/goppy/v3/apigen/module/mod-json-rpc-server"
 	modparamcookie "go.osspkg.com/goppy/v3/apigen/module/mod-param-cookie"
 	modparamheader "go.osspkg.com/goppy/v3/apigen/module/mod-param-header"
 	"go.osspkg.com/goppy/v3/apigen/types"
 )
 
 func init() {
-	types.Register[types.GlobalModule](modjsonrpc.Module{FilePrefix: "jsonrpc"})
+	types.Register[types.GlobalModule](modjsonrpcserver.Module{FilePrefix: "jsonrpc_server"})
+	types.Register[types.GlobalModule](modjsonrpcclient.Module{FilePrefix: "jsonrpc_client"})
 	types.Register[types.ParamModule](modparamcookie.Module{})
 	types.Register[types.ParamModule](modparamheader.Module{})
 }
-
-const (
-	TagModule = "module"
-)

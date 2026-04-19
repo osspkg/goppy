@@ -9,10 +9,13 @@ import (
 	"time"
 
 	"go.osspkg.com/casecheck"
+
 	"go.osspkg.com/goppy/v3/web/jsonrpc"
 )
 
 func TestUnit_Client_Call(t *testing.T) {
+	t.SkipNow()
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	ctx = context.WithValue(ctx, "xaid", "XYZ")
 

@@ -98,8 +98,8 @@ func (v *service) Handle(resolve *syncing.Map[string, THandleFunc]) func(wc web.
 			return
 		}
 
-		res := poolResponseAny.Get()
-		defer poolResponseAny.Put(res)
+		res := poolResponseAnySync.Get()
+		defer poolResponseAnySync.Put(res)
 
 		ctx, cancel := context.WithTimeout(wc.Context(), v.opt.timeout)
 		defer cancel()

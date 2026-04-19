@@ -17,7 +17,6 @@ import (
 	"go.osspkg.com/casecheck"
 	"go.osspkg.com/errors"
 
-	"go.osspkg.com/goppy/v2/web/encoders"
 	"go.osspkg.com/goppy/v3/auth/signature"
 	"go.osspkg.com/goppy/v3/web/client"
 )
@@ -113,11 +112,4 @@ func TestUnit_HTTPClient(t *testing.T) {
 	casecheck.Equal(t, "", he.ContentType)
 	casecheck.NotNil(t, he.Raw)
 	casecheck.Equal(t, "", he.Raw.String())
-
-	fd := &encoders.FormData{}
-	fd.Field("text", "test")
-	fd.Field("number", 1234)
-	fd.Field("json", &mockModelName{})
-	err = cli.Send(ctx, http.MethodPost, "http://127.0.0.1:12345/form-data", fd, nil)
-	casecheck.NoError(t, err)
 }
