@@ -7,22 +7,26 @@ package token
 
 import (
 	"encoding/base64"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	"go.osspkg.com/do"
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v3/auth/token/algorithm"
 )
 
 const (
-	SourceFile   = "file"
-	SourceBase64 = "base64"
-	SourceRaw    = "raw"
+	SourceFile = "file"
+	SourceRaw  = "raw"
+	SourceEnv  = "env"
+
+	FormatRaw    = "raw"
+	FormatBase64 = "base64"
+	FormatHex    = "hex"
 )
 
 type (
@@ -33,7 +37,7 @@ type (
 	Config struct {
 		Option ConfigOption `yaml:"option"`
 		Sign   ConfigSign   `yaml:"sign"`
-		JWKS   []ConfigJWKS `yaml:"jwks"`
+		//JWKS   []ConfigJWKS `yaml:"jwks"`
 	}
 
 	ConfigSign struct {
@@ -64,24 +68,27 @@ type (
 	}
 )
 
-type KeyLink string
+type (
+	KeyLink    string
+	SourceData struct {
+		Source string
+		Format string
+	}
+)
 
-func (v KeyLink) getSources() map[string]struct{} {
+func (v KeyLink) getSource() (SourceData, error) {
 	index := strings.Index(string(v), ":")
 	if index == -1 {
-		return nil
+		return SourceData{}, fmt.Errorf("invalid key link: %s", v)
 	}
 	sources := strings.Split(string(v[:index]), ",")
-	if len(sources) == 0 {
-		return nil
+	if len(sources) != 2 {
+		return SourceData{}, fmt.Errorf("invalid key link: %s", v)
 	}
-	result := do.Entries[string, string, struct{}](sources, func(s string) (string, struct{}) {
-		return strings.TrimSpace(strings.ToLower(s)), struct{}{}
-	})
-	if _, ok := result[SourceFile]; !ok {
-		result[SourceRaw] = struct{}{}
-	}
-	return result
+	return SourceData{
+		Source: strings.TrimSpace(strings.ToLower(sources[0])),
+		Format: strings.TrimSpace(strings.ToLower(sources[1])),
+	}, nil
 }
 
 func (v KeyLink) getValue() string {
@@ -98,31 +105,49 @@ func (v KeyLink) getValue() string {
 func (v KeyLink) getBytes() ([]byte, error) {
 	var result []byte
 
-	sources := v.getSources()
+	src, err := v.getSource()
+	if err != nil {
+		return nil, err
+	}
+
 	val := v.getValue()
 
-	if _, ok := sources[SourceRaw]; ok {
+	switch src.Source {
+	case SourceRaw:
 		result = []byte(val)
-	}
-
-	if _, ok := sources[SourceFile]; ok {
-		if !fs.FileExist(val) {
-			return result, fmt.Errorf("`%s` not found", val)
+	case SourceEnv:
+		data, ok := os.LookupEnv(val)
+		if !ok {
+			return nil, fmt.Errorf("environment `%s` not found", val)
 		}
-
-		b, err := os.ReadFile(val)
-		if err != nil {
+		result = []byte(data)
+	case SourceFile:
+		if !fs.FileExist(val) {
+			return result, fmt.Errorf("file `%s` not found", val)
+		}
+		if result, err = os.ReadFile(val); err != nil {
 			return nil, fmt.Errorf("failed to read file `%s`: %w", val, err)
 		}
-		result = b
+	default:
+		return nil, fmt.Errorf("unsupported source `%s`: %s", src.Source, v)
 	}
 
-	if _, ok := sources[SourceBase64]; ok {
+	switch src.Format {
+	case FormatRaw:
+	case FormatBase64:
 		b, err := base64.StdEncoding.AppendDecode(nil, result)
 		if err != nil {
 			return nil, fmt.Errorf("failed to base64 decode `%s`: %w", val, err)
 		}
 		result = b
+	case FormatHex:
+		b, err := hex.AppendDecode(nil, result)
+		if err != nil {
+			return nil, fmt.Errorf("failed to base64 decode `%s`: %w", val, err)
+		}
+		result = b
+	default:
+		return nil, fmt.Errorf("unsupported format `%s`: %s", src.Format, v)
 	}
 
 	return result, nil
@@ -150,40 +175,54 @@ func (v ConfigKey) Validate() error {
 		return fmt.Errorf("cert is required")
 	}
 
-	keySources := v.Key.getSources()
-	if len(keySources) == 0 {
+	keySources, err := v.Key.getSource()
+	if err != nil {
 		return fmt.Errorf("key must have source")
 	}
 
-	certSources := v.Cert.getSources()
-	if len(certSources) == 0 {
+	certSources, err := v.Cert.getSource()
+	if err != nil {
 		return fmt.Errorf("cert must have source")
 	}
 
-	for source := range keySources {
-		switch source {
-		case SourceFile, SourceBase64, SourceRaw:
-			continue
-		default:
-			return fmt.Errorf(
-				"invalid key source: %s (use %s)",
-				source,
-				strings.Join([]string{SourceFile, SourceBase64, SourceRaw}, ","),
-			)
-		}
+	switch keySources.Source {
+	case SourceFile, SourceEnv, SourceRaw:
+	default:
+		return fmt.Errorf(
+			"invalid key source: %s (use %s)",
+			keySources.Source,
+			strings.Join([]string{SourceFile, SourceEnv, SourceRaw}, ","),
+		)
 	}
 
-	for source := range certSources {
-		switch source {
-		case SourceFile, SourceBase64, SourceRaw:
-			continue
-		default:
-			return fmt.Errorf(
-				"invalid cert source: %s (use %s)",
-				source,
-				strings.Join([]string{SourceFile, SourceBase64, SourceRaw}, ","),
-			)
-		}
+	switch keySources.Format {
+	case FormatBase64, FormatHex, FormatRaw:
+	default:
+		return fmt.Errorf(
+			"invalid key format: %s (use %s)",
+			keySources.Source,
+			strings.Join([]string{FormatBase64, FormatHex, FormatRaw}, ","),
+		)
+	}
+
+	switch certSources.Source {
+	case SourceFile, SourceEnv, SourceRaw:
+	default:
+		return fmt.Errorf(
+			"invalid cert source: %s (use %s)",
+			certSources.Source,
+			strings.Join([]string{SourceFile, SourceEnv, SourceRaw}, ","),
+		)
+	}
+
+	switch certSources.Format {
+	case FormatBase64, FormatHex, FormatRaw:
+	default:
+		return fmt.Errorf(
+			"invalid cert format: %s (use %s)",
+			certSources.Source,
+			strings.Join([]string{FormatBase64, FormatHex, FormatRaw}, ","),
+		)
 	}
 
 	return nil
@@ -206,14 +245,14 @@ func (v *ConfigGroup) Default() error {
 		Type:   TypeJWT,
 	}
 
-	v.JWT.JWKS = append(v.JWT.JWKS, ConfigJWKS{
-		Issuer:   "example:id",
-		Uri:      "https://id.example.com/.well-known/jwks.json",
-		Interval: time.Hour,
-		Headers: map[string]string{
-			"X-Auth-Id": "example",
-		},
-	})
+	//v.JWT.JWKS = append(v.JWT.JWKS, ConfigJWKS{
+	//	Issuer:   "example:id",
+	//	Uri:      "https://id.example.com/.well-known/jwks.json",
+	//	Interval: time.Hour,
+	//	Headers: map[string]string{
+	//		"X-Auth-Id": "example",
+	//	},
+	//})
 
 	name := algorithm.EdDSA
 	algObj, err := algorithm.Get(name)
@@ -235,8 +274,8 @@ func (v *ConfigGroup) Default() error {
 		v.JWT.Sign.Keys = append(v.JWT.Sign.Keys, ConfigKey{
 			ID:   keyId,
 			Algo: name,
-			Key:  KeyLink(SourceRaw + "," + SourceBase64 + ":" + keyStr.Private),
-			Cert: KeyLink(SourceRaw + "," + SourceBase64 + ":" + keyStr.Public),
+			Key:  KeyLink(SourceRaw + "," + FormatBase64 + ":" + keyStr.Private),
+			Cert: KeyLink(SourceRaw + "," + FormatBase64 + ":" + keyStr.Public),
 		})
 	}
 
@@ -264,15 +303,15 @@ func (v Config) Validate() error {
 		}
 	}
 
-	for i, jwk := range v.JWKS {
-		if jwk.Issuer == "" {
-			return fmt.Errorf("jwt config: jwks[%d] issuer is empty", i)
-		}
-
-		if jwk.Uri == "" {
-			return fmt.Errorf("jwt config: jwks[%d] uri is empty", i)
-		}
-	}
+	//for i, jwk := range v.JWKS {
+	//	if jwk.Issuer == "" {
+	//		return fmt.Errorf("jwt config: jwks[%d] issuer is empty", i)
+	//	}
+	//
+	//	if jwk.Uri == "" {
+	//		return fmt.Errorf("jwt config: jwks[%d] uri is empty", i)
+	//	}
+	//}
 
 	return nil
 }

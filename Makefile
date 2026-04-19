@@ -34,5 +34,7 @@ ci: pre-commit
 tidy:
 	go mod tidy -v
 
-example_gogen: install
-	cd ./_example/go-gen && go generate ./...
+example-tb: install
+	cd ./_example/web-server-gen && \
+		go generate -run goppy ./... && \
+		go generate -run easyjson ./...

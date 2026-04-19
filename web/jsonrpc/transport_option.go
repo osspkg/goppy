@@ -17,10 +17,7 @@ type options struct {
 
 func Timeout(arg time.Duration) Option {
 	return func(o *options) {
-		if arg <= time.Second {
-			arg = time.Second
-		}
-		o.timeout = arg
+		o.timeout = max(arg, time.Second)
 	}
 }
 

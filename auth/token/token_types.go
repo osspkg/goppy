@@ -9,5 +9,5 @@ type Type string
 
 const (
 	TypeJWT Type = "jwt"
-	TypeJWE Type = "jwe"
+	//TypeJWE Type = "jwe"
 )

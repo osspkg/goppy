@@ -7,15 +7,13 @@ package comparison
 
 import (
 	"io"
+
+	"go.osspkg.com/errors"
 )
+
+var NoCast = errors.New("no cast type")
 
 type Type interface {
 	Encode(w io.Writer, in any) (contentType string, err error)
 	Decode(r io.Reader, out any) (err error)
 }
-
-var NoCast = &noCastErr{}
-
-type noCastErr struct{}
-
-func (noCastErr) Error() string { return "no cast type" }

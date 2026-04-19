@@ -17,7 +17,7 @@ import (
 )
 
 type Transport interface {
-	Inject(r TApi)
+	Add(r TApi)
 }
 
 type service struct {
@@ -26,7 +26,7 @@ type service struct {
 	routes   web.ServerPool
 }
 
-func newTransport(routes web.ServerPool, opts ...Option) Transport {
+func newService(routes web.ServerPool, opts ...Option) Transport {
 	obj := &service{
 		opt: &options{
 			timeout: time.Second * 5,
@@ -74,7 +74,7 @@ func (v *service) Up() error {
 	return nil
 }
 
-func (v *service) Inject(r TApi) {
+func (v *service) Add(r TApi) {
 	for _, tag := range r.RouteTags() {
 		resolve, ok := v.handlers[tag]
 		if !ok {
@@ -90,16 +90,16 @@ func (v *service) Inject(r TApi) {
 
 func (v *service) Handle(resolve *syncing.Map[string, THandleFunc]) func(wc web.Ctx) {
 	return func(wc web.Ctx) {
-		req := poolRequest.Get()
-		defer poolRequest.Put(req)
+		req := poolRequestRaw.Get()
+		defer poolRequestRaw.Put(req)
 
 		if err := wc.BindJSON(req); err != nil {
 			wc.String(400, v.opt.errHandler("", err).Error())
 			return
 		}
 
-		res := poolResponse.Get()
-		defer poolResponse.Put(res)
+		res := poolResponseAnySync.Get()
+		defer poolResponseAnySync.Put(res)
 
 		ctx, cancel := context.WithTimeout(wc.Context(), v.opt.timeout)
 		defer cancel()
@@ -115,7 +115,7 @@ func (v *service) Handle(resolve *syncing.Map[string, THandleFunc]) func(wc web.
 			method := strings.ToLower(item.Method)
 
 			wg.Background(method, func(ctx context.Context) {
-				out := response{
+				out := responseAny{
 					Id: item.Id,
 				}
 
@@ -138,6 +138,6 @@ func (v *service) Handle(resolve *syncing.Map[string, THandleFunc]) func(wc web.
 		}
 
 		wg.Wait()
-		wc.JSON(200, bulkResponse(res.Extract()))
+		wc.JSON(200, bulkResponseAny(res.Extract()))
 	}
 }

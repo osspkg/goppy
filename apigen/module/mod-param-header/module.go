@@ -31,11 +31,11 @@ func (v Module) Build(w at.Joiner, m at.ParamMeta, value at.Param) error {
 }
 
 func (v Module) generateIn(w at.Joiner, m at.ParamMeta, p at.Param) error {
-	m.Import.Set("web", "go.osspkg.com/goppy/v3/web")
+	m.Import.Set("cast", "go.osspkg.com/cast")
 
 	w.Join(
 		List(ID(m.CodeName), Raw("_")).Op("=").
-			ID("web").Op(".").ID("StrTo").Raw("[").Pkg(p.Pkg).ID(p.Type).Raw("]").
+			ID("cast").Op(".").ID("StrTo").Raw("[").Pkg(p.Pkg).ID(p.Type).Raw("]").
 			Call(
 				ID("webCtx").Op(".").ID("Header").Call().Op(".").ID("Get").Call(Text(m.Value)),
 			),

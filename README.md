@@ -5,6 +5,12 @@
 [![CI](https://github.com/osspkg/goppy/actions/workflows/ci.yml/badge.svg)](https://github.com/osspkg/goppy/actions/workflows/ci.yml)
 ![GitHub](https://img.shields.io/github/license/osspkg/goppy)
 
+## Install tool
+
+```bash
+go install go.osspkg.com/goppy/v3/cmd/goppy@latest
+```
+
 ## Features
 
 - Config auto generation

@@ -31,8 +31,8 @@ type Token interface {
 	HeaderName() string
 	SecureOnly() bool
 
-	CreateJWT(payload json.Marshaler, audience string, lifetime time.Duration) (uuid.UUID, []byte, error)
-	VerifyJWT(token []byte) (head *Header, payload []byte, err error)
+	Create(payload json.Marshaler, audience string, lifetime time.Duration) (uuid.UUID, []byte, error)
+	Verify(token []byte) (head *Header, payload []byte, err error)
 
 	CreateCookie(ctx web.Ctx, payload json.Marshaler, lifetime time.Duration) (uuid.UUID, error)
 	FlushCookie(ctx web.Ctx)
@@ -125,7 +125,7 @@ func (v *_service) setupSigners(c ConfigSign) error {
 	return nil
 }
 
-func (v *_service) CreateJWT(payload json.Marshaler, audience string, lifetime time.Duration) (uuid.UUID, []byte, error) {
+func (v *_service) Create(payload json.Marshaler, audience string, lifetime time.Duration) (uuid.UUID, []byte, error) {
 	if payload == nil {
 		return uuid.Nil, nil, fmt.Errorf("jwt: empty payload")
 	}
@@ -195,7 +195,7 @@ func (v *_service) CreateJWT(payload json.Marshaler, audience string, lifetime t
 	return tokId, w.Bytes(), nil
 }
 
-func (v *_service) VerifyJWT(token []byte) (*Header, []byte, error) {
+func (v *_service) Verify(token []byte) (*Header, []byte, error) {
 	if len(token) == 0 {
 		return nil, nil, ErrEmptyToken
 	}
@@ -249,7 +249,7 @@ func (v *_service) CreateCookie(ctx web.Ctx, payload json.Marshaler, lifetime ti
 		return uuid.Nil, fmt.Errorf("jwt: empty payload")
 	}
 
-	tokId, tok, err := v.CreateJWT(payload, v.Audience(), lifetime)
+	tokId, tok, err := v.Create(payload, v.Audience(), lifetime)
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("jwt: failed to create token: %w", err)
 	}

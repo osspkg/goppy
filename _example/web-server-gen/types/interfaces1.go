@@ -8,19 +8,19 @@ package types
 import "context"
 
 type Api interface {
-	// Root
+	// RootV1
 	// @tb in.userID=cookie:x-user-id
-	Root(
+	RootV1(
 		ctx context.Context,
 		userID int64,
 		userName string,
 	) (status bool, err error)
 
-	// Auth
+	// AuthV1
 	// @tb in.userID=header:x-user-id
 	// @tb out.status=header:x-user-id,cookie:uid
 	// @tb out.status=cookie:uid
-	Auth(
+	AuthV1(
 		ctx context.Context,
 		userID int64,
 		userName string,
@@ -28,7 +28,7 @@ type Api interface {
 }
 
 type User interface {
-	Name(
+	NameV1(
 		ctx context.Context,
 		userID int64,
 	) (name string, err error)
