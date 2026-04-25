@@ -12,7 +12,6 @@ import (
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -20,12 +19,12 @@ func CmdLint() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("lint", "Linting code")
 		setter.ExecFunc(func(_ []string) {
-			console.Infof("--- LINT ---")
+			console.Infof("goppy lint")
 
 			updateGoMod()
 
 			cmds := make([]string, 0, 50)
-			cmds = append(cmds, "go generate ./...", "gofmt -w -s .", "golangci-lint --version")
+			cmds = append(cmds, "go generate ./...", "goimports -l -w .", "gofmt -w -s .", "golangci-lint --version")
 			mods, err := fs.SearchFiles(fs.CurrentDir(), "go.mod")
 			console.FatalIfErr(err, "detects go.mod in workspace")
 			for _, mod := range mods {

@@ -30,7 +30,7 @@ func CmdLicense() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("license", "Update license information")
 		setter.ExecFunc(func(_ []string) {
-			console.Infof("--- LICENSE ---")
+			console.Infof("goppy license")
 
 			model := &License{}
 			if !fs.FileExist(licFilename) {

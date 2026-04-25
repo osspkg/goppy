@@ -82,7 +82,7 @@ func (e *errResponse) Error() string {
 	return fmt.Sprintf("#%d %v", e.Code, e.Message)
 }
 
-func errorConvert(e error) *errResponse {
+func errConvert(e error) *errResponse {
 	if e == nil {
 		return nil
 	}

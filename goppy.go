@@ -142,7 +142,7 @@ func (v *_app) Run() {
 	wg.OnPanic(func(e error) { logx.Error("Run background", "err", e) })
 
 	{
-		conf := &applog.GroupConfig{}
+		conf := &applog.ConfigGroup{}
 		v.configs = append(v.configs, conf)
 
 		wg.Background("log writer", func(_ context.Context) {

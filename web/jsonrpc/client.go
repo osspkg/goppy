@@ -20,37 +20,27 @@ import (
 type Client struct {
 	address string
 	cli     client.HTTPClient
-	opts    *cliopts
+	genID   func() string
 }
 
 func New(address string, opts ...Opt) *Client {
 	cliOpts := &cliopts{
-		timeout:        0,
-		genID:          uuid.NewString,
-		defaultHeaders: make(map[string]string, 2),
-		contextHeaders: make(map[string]any, 2),
+		genID: uuid.NewString,
+		httpopts: []client.HTTPOption{
+			client.WithComparisonType(
+				comparison.JSON{Force: true},
+			),
+		},
 	}
 
 	for _, opt := range opts {
 		opt(cliOpts)
 	}
 
-	httpcliopts := []client.HTTPOption{
-		client.WithComparisonType(
-			comparison.JSON{Force: true},
-		),
-		client.WithDefaultHeaders(cliOpts.defaultHeaders),
-		client.WithTimeouts(cliOpts.timeout, cliOpts.keepalive),
-	}
-
-	for k, v := range cliOpts.contextHeaders {
-		httpcliopts = append(httpcliopts, client.WithContextHeaderValue(k, v))
-	}
-
 	return &Client{
 		address: address,
-		cli:     client.NewHTTPClient(httpcliopts...),
-		opts:    cliOpts,
+		cli:     client.NewHTTPClient(cliOpts.httpopts...),
+		genID:   cliOpts.genID,
 	}
 }
 
@@ -91,7 +81,7 @@ func (c *Client) BulkCall(ctx context.Context, bulk ...*Chunk) error {
 	ids := make(map[string]*Chunk, len(bulk))
 
 	for _, ch := range bulk {
-		id := c.opts.genID()
+		id := c.genID()
 		ids[id] = ch
 		*req = append(*req, requestAny{
 			Id:     id,

@@ -28,8 +28,7 @@ func CmdTB() console.CommandGetter {
 			flagsSetter.StringVar("mod", "json-rpc", "generation modules (optional)")
 		})
 		setter.ExecFunc(func(out, _iface, _mod string) {
-			console.ShowDebug(true)
-			console.Infof("--- GENERATE ---")
+			console.Infof("goppy tb")
 
 			curDir := fs.CurrentDir()
 
@@ -82,7 +81,10 @@ func CmdTB() console.CommandGetter {
 					console.FatalIfErr(e, "parse go file: %s", filePath)
 				}
 
-				vv.DumpStdout()
+				if console.CanShowDebug() {
+					vv.DumpStdout()
+				}
+
 				build.Files = append(build.Files, vv.ToFile())
 			}
 

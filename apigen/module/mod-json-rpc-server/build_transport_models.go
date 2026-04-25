@@ -46,23 +46,23 @@ func (v Module) buildTransportModel(imp at.ImportSetter, file at.File) []types.T
 	for _, object := range file.Faces {
 		for _, method := range object.Methods {
 
-			args := map[string][]at.Param{
-				modelNameReq: method.InParams,
-				modelNameRes: method.OutParams,
+			args := []argParam{
+				{tmpl: modelNameReq, params: method.InParams},
+				{tmpl: modelNameRes, params: method.OutParams},
 			}
 
-			for tmpl, params := range args {
+			for _, arg := range args {
 
 				var (
 					argsOut []types.Token
 				)
 
-				for _, p := range params {
-					if ignoreModelParam(tmpl, p.Type, p.Pkg) {
+				for _, p := range arg.params {
+					if ignoreModelParam(arg.tmpl, p.Type, p.Pkg) {
 						continue
 					}
 
-					if vals, ok := method.Tags[do.IfElse(tmpl == modelNameReq, "in.", "out.")+p.Name]; ok && noBodyParam(vals) {
+					if vals, ok := method.Tags[do.IfElse(arg.tmpl == modelNameReq, "in.", "out.")+p.Name]; ok && noBodyParam(vals) {
 						continue
 					}
 
@@ -81,7 +81,7 @@ func (v Module) buildTransportModel(imp at.ImportSetter, file at.File) []types.T
 				}
 
 				models = append(models, Line().Comment(jsonGenComment).
-					Type().ID(fmt.Sprintf(tmpl, object.Name+method.Name)).Struct().Block(argsOut...),
+					Type().ID(fmt.Sprintf(arg.tmpl, object.Name+method.Name)).Struct().Block(argsOut...),
 				)
 			}
 		}

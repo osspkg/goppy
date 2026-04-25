@@ -6,6 +6,8 @@
 package client
 
 import (
+	"context"
+	"net"
 	"net/http"
 	"time"
 
@@ -34,12 +36,18 @@ func WithMaxIdleConns(count int) HTTPOption {
 	}
 }
 
-func WithDefaultHeaders(h map[string]string) HTTPOption {
+func WithUnixSocket(path string) HTTPOption {
 	return func(c *httpCli) {
-		c.defaultHeaders = make(http.Header, len(h))
-		for k, v := range h {
-			c.defaultHeaders.Set(k, v)
-		}
+		c.nativeClient.Transport.(*http.Transport).DialContext =
+			func(ctx context.Context, _, _ string) (net.Conn, error) {
+				return c.netDialer.Dial("unix", path)
+			}
+	}
+}
+
+func WithStaticHeader(key, value string) HTTPOption {
+	return func(c *httpCli) {
+		c.defaultHeaders.Set(key, value)
 	}
 }
 

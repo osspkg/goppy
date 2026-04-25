@@ -15,7 +15,6 @@ import (
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -26,7 +25,7 @@ func CmdSetupLib() console.CommandGetter {
 			flagsSetter.Bool("force", "force update")
 		})
 		setter.ExecFunc(func(_ []string, force bool) {
-			console.Infof("--- SETUP LIB ---")
+			console.Infof("goppy setup-lib")
 
 			updateGitIgnore()
 			installTools()
@@ -43,7 +42,7 @@ func CmdSetupApp() console.CommandGetter {
 			flagsSetter.Bool("force", "force update")
 		})
 		setter.ExecFunc(func(_ []string, force bool) {
-			console.Infof("--- SETUP APP ---")
+			console.Infof("goppy setup-app")
 
 			updateGitIgnore()
 			installTools()

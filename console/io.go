@@ -313,6 +313,10 @@ func ShowDebug(ok bool) {
 	atomic.StoreUint32(&debugLevel, v)
 }
 
+func CanShowDebug() bool {
+	return atomic.LoadUint32(&debugLevel) > 0
+}
+
 func Debugf(msg string, args ...interface{}) {
 	if atomic.LoadUint32(&debugLevel) > 0 {
 		writeWithColor(colorBlue, "[DEB] "+msg, args)

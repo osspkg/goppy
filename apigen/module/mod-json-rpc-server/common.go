@@ -5,7 +5,11 @@
 
 package mod_json_rpc_server
 
-import "strings"
+import (
+	"strings"
+
+	at "go.osspkg.com/goppy/v3/apigen/types"
+)
 
 const (
 	transportName = "JSONRPC%sTransport"
@@ -51,4 +55,9 @@ func noBodyParam(vals []string) bool {
 		}
 	}
 	return false
+}
+
+type argParam struct {
+	tmpl   string
+	params []at.Param
 }

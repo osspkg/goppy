@@ -7,17 +7,17 @@ package main
 
 import (
 	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/env"
 	"go.osspkg.com/goppy/v3/internal/commands"
-	"go.osspkg.com/goppy/v3/internal/gen/ormb"
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
 func main() {
-	console.ShowDebug(true)
-	app := console.New("goppy", "Goppy SDK Development Tool")
+	console.ShowDebug(env.Get("GOPPY_DEBUG", "false") == "true")
 
 	global.SetupEnv()
 
+	app := console.New("goppy", "Goppy SDK Development Tool")
 	app.AddCommand(
 		commands.CmdLicense(),
 		commands.CmdLint(),
@@ -27,8 +27,8 @@ func main() {
 		commands.CmdSetupApp(),
 		commands.CmdGoSite(),
 		commands.CmdTB(),
-		ormb.Command(),
+		commands.CmdFS(),
+		commands.CmdORM(),
 	)
-
 	app.Exec()
 }

@@ -123,13 +123,13 @@ func (v *service) Handle(resolve *syncing.Map[string, THandleFunc]) func(wc web.
 
 					result, err := handler(ctx, wc, item.Params)
 					if err != nil {
-						out.Error = errorConvert(v.opt.errHandler(method, err))
+						out.Error = errConvert(v.opt.errHandler(method, err))
 					} else {
 						out.Result = result
 					}
 
 				} else {
-					out.Error = errorConvert(ErrUnsupportedMethod)
+					out.Error = errConvert(ErrUnsupportedMethod)
 				}
 
 				res.Append(out)

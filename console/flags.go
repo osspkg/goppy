@@ -8,6 +8,7 @@ package console
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 type (
@@ -175,10 +176,16 @@ func (f *Flags) Bool(name string, usage string) {
 		name:  name,
 		usage: usage,
 		call: func(getter ArgGetter) (interface{}, error) {
-			if getter.Has(name) {
+			val := getter.Get(name)
+			if val == nil {
+				return false, nil
+			}
+			switch strings.ToLower(*val) {
+			case "false", "n", "no", "0":
+				return false, nil
+			default:
 				return true, nil
 			}
-			return false, nil
 		},
 	})
 }
