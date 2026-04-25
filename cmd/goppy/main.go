@@ -27,6 +27,7 @@ func main() {
 		commands.CmdSetupApp(),
 		commands.CmdGoSite(),
 		commands.CmdTB(),
+		commands.CmdFS(),
 		ormb.Command(),
 	)
 

@@ -8,7 +8,7 @@ package applog
 import "go.osspkg.com/logx"
 
 type (
-	GroupConfig struct {
+	ConfigGroup struct {
 		Log Config `yaml:"log"`
 	}
 
@@ -19,12 +19,10 @@ type (
 	}
 )
 
-func Default() *GroupConfig {
-	return &GroupConfig{
-		Log: Config{
-			Level:    logx.LevelDebug,
-			FilePath: "/dev/stdout",
-			Format:   "string",
-		},
+func (v *ConfigGroup) Default() {
+	v.Log = Config{
+		Level:    logx.LevelDebug,
+		FilePath: "/dev/stdout",
+		Format:   "string",
 	}
 }

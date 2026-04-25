@@ -8,7 +8,6 @@ import (
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
-
 	types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
 )
 

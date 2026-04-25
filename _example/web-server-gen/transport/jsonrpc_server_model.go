@@ -20,21 +20,21 @@ type jsonrpcApiRootV1ModelResponse struct {
 }
 
 //easyjson:json
-type jsonrpcApiAuthV1ModelResponse struct{}
-
-//easyjson:json
 type jsonrpcApiAuthV1ModelRequest struct {
 	UserName string `json:"userName"`
 }
 
 //easyjson:json
-type jsonrpcUserNameV1ModelResponse struct {
-	Name string `json:"name"`
-}
+type jsonrpcApiAuthV1ModelResponse struct{}
 
 //easyjson:json
 type jsonrpcUserNameV1ModelRequest struct {
 	UserID int64 `json:"userID"`
+}
+
+//easyjson:json
+type jsonrpcUserNameV1ModelResponse struct {
+	Name string `json:"name"`
 }
 
 //easyjson:json

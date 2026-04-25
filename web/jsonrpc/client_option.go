@@ -7,16 +7,15 @@ package jsonrpc
 
 import (
 	"time"
+
+	"go.osspkg.com/goppy/v3/web/client"
 )
 
 type Opt func(o *cliopts)
 
 type cliopts struct {
-	timeout        time.Duration
-	keepalive      time.Duration
-	genID          func() string
-	defaultHeaders map[string]string
-	contextHeaders map[string]any
+	genID    func() string
+	httpopts []client.HTTPOption
 }
 
 func SetGenID(arg func() string) Opt {
@@ -30,19 +29,24 @@ func SetGenID(arg func() string) Opt {
 
 func SetTimeout(timeout, keepalive time.Duration) Opt {
 	return func(o *cliopts) {
-		o.timeout = max(timeout, time.Second)
-		o.keepalive = max(keepalive, time.Second)
+		o.httpopts = append(o.httpopts, client.WithTimeouts(timeout, keepalive))
 	}
 }
 
 func SetHeader(key, value string) Opt {
 	return func(o *cliopts) {
-		o.defaultHeaders[key] = value
+		o.httpopts = append(o.httpopts, client.WithStaticHeader(key, value))
 	}
 }
 
 func SetContextHeader(header string, key any) Opt {
 	return func(o *cliopts) {
-		o.contextHeaders[header] = key
+		o.httpopts = append(o.httpopts, client.WithContextHeaderValue(header, key))
+	}
+}
+
+func SetUnixSocket(path string) Opt {
+	return func(o *cliopts) {
+		o.httpopts = append(o.httpopts, client.WithUnixSocket(path))
 	}
 }

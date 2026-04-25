@@ -64,15 +64,15 @@ type PostByIDResponse struct {
 }
 
 //easyjson:json
-type PostListResponse struct {
-	Text []types.Text `json:"text,omitempty"`
-}
-
-//easyjson:json
 type PostListRequest struct {
 	UserID int64 `json:"userID"`
 }
 
 func (PostListRequest) Method() string {
 	return "post.list"
+}
+
+//easyjson:json
+type PostListResponse struct {
+	Text []types.Text `json:"text,omitempty"`
 }

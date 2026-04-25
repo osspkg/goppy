@@ -87,9 +87,7 @@ func TestUnit_HTTPClient(t *testing.T) {
 	time.Sleep(time.Second * 2)
 
 	cli := client.NewHTTPClient(
-		client.WithDefaultHeaders(map[string]string{
-			"User-Agent": "Mozilla/5.0",
-		}),
+		client.WithStaticHeader("User-Agent", "Mozilla/5.0"),
 		client.WithSignatures(map[string]signature.Signature{
 			"127.0.0.1:12345": signature.NewSHA1("key-1", "1234567890"),
 		}),

@@ -17,7 +17,6 @@ import (
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v3/internal/applog"
 	"go.osspkg.com/goppy/v3/plugins"
 )
 
@@ -39,15 +38,7 @@ func Recovery(filename string, configs []any) error {
 		}
 	}
 
-	cfg := &applog.GroupConfig{
-		Log: applog.Config{
-			Level:    4,
-			FilePath: "/dev/stdout",
-			Format:   "string",
-		},
-	}
-
-	return codec.FileEncoder(filename).Encode(append(configs, cfg)...)
+	return codec.FileEncoder(filename).Encode(configs...)
 }
 
 type Config struct {

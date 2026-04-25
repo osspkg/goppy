@@ -47,23 +47,23 @@ func (v Module) buildTransportModel(imp at.ImportSetter, file at.File) []types.T
 	for _, object := range file.Faces {
 		for _, method := range object.Methods {
 
-			args := map[string][]at.Param{
-				modelNameRequest:  method.InParams,
-				modelNameResponse: method.OutParams,
+			args := []argParam{
+				{tmpl: modelNameRequest, params: method.InParams},
+				{tmpl: modelNameResponse, params: method.OutParams},
 			}
 
-			for tmpl, params := range args {
+			for _, arg := range args {
 
 				var (
 					argsOut []types.Token
 				)
 
-				for _, p := range params {
-					if ignoreModelParam(tmpl, p.Type, p.Pkg) {
+				for _, p := range arg.params {
+					if ignoreModelParam(arg.tmpl, p.Type, p.Pkg) {
 						continue
 					}
 
-					if vals, ok := method.Tags[do.IfElse(tmpl == modelNameRequest, "in.", "out.")+p.Name]; ok && noBodyParam(vals) {
+					if vals, ok := method.Tags[do.IfElse(arg.tmpl == modelNameRequest, "in.", "out.")+p.Name]; ok && noBodyParam(vals) {
 						continue
 					}
 
@@ -83,12 +83,12 @@ func (v Module) buildTransportModel(imp at.ImportSetter, file at.File) []types.T
 
 				models = append(models,
 					Line().Comment(jsonGenComment).
-						Type().ID(fmt.Sprintf(tmpl, object.Name+method.Name)).Struct().Block(argsOut...),
+						Type().ID(fmt.Sprintf(arg.tmpl, object.Name+method.Name)).Struct().Block(argsOut...),
 				)
 
-				if tmpl == modelNameRequest {
+				if arg.tmpl == modelNameRequest {
 					models = append(models, Line().
-						Func().Bracket(ID(fmt.Sprintf(tmpl, object.Name+method.Name))).
+						Func().Bracket(ID(fmt.Sprintf(arg.tmpl, object.Name+method.Name))).
 						ID("Method").Bracket().String().Block(
 						Return().Text(strings.ToLower(object.Name+"."+method.Name)),
 					),

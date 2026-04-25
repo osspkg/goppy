@@ -1,0 +1,9 @@
+http:
+    - tag: main
+      addr: "@env(UNIX_SOCKET_PATH#/tmp/unix.sock)"
+      network: unix
+
+log:
+    level: 1
+    file_path: /dev/stdout
+    format: string

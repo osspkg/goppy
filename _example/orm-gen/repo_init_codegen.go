@@ -10,9 +10,8 @@ import (
 	"fmt"
 	"strings"
 
-	"go.osspkg.com/ioutils/pool"
-
 	"go.osspkg.com/goppy/v3/orm"
+	"go.osspkg.com/ioutils/pool"
 )
 
 type Repo struct {
@@ -20,7 +19,7 @@ type Repo struct {
 	rtag, wtag string
 }
 
-func NewRepo(orm orm.ORM) *Repo {
+func newRepo(orm orm.ORM) *Repo {
 	return &Repo{
 		orm:  orm,
 		rtag: "slave",

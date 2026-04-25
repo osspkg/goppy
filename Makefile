@@ -11,6 +11,7 @@ setup:
 .PHONY: lint
 lint:
 	goppy lint
+	cd _example && goppy lint
 
 .PHONY: license
 license:
@@ -18,14 +19,14 @@ license:
 
 .PHONY: build
 build:
-	goppy build --arch=amd64
+	goppy build --arch=amd64 --cgo
 
 .PHONY: tests
 tests:
 	goppy test
 
 .PHONY: pre-commit
-pre-commit: install setup license lint build tests
+pre-commit: install setup lint license build tests
 
 .PHONY: ci
 ci: pre-commit

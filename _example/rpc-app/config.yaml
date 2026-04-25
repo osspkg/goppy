@@ -1,0 +1,21 @@
+http:
+    - tag: main
+      addr: 0.0.0.0:8080
+
+rpc:
+    - name: go-plugin
+      type: goplugin
+      path: ./build/rpc-go-plugin_amd64.so
+      options: {}
+
+    - name: unix-plugin
+      type: unix
+      path: ./build/rpc-unix-plugin_amd64
+      options:
+        config: ./rpc-unix-plugin/config.yaml
+        config-recovery: true
+
+log:
+    level: 4
+    file_path: /dev/stdout
+    format: string
