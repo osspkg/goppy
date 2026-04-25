@@ -41,6 +41,7 @@ func CmdBuild() console.CommandGetter {
 
 			pack := make([]string, 0, 10)
 			buildDir := global.GetBuildDir()
+			console.FatalIfErr(os.MkdirAll(buildDir, 0744), "create build dir")
 
 			var mainFiles []string
 			var err error
@@ -121,12 +122,10 @@ func CmdBuild() console.CommandGetter {
 								"CGO_ENABLED=0",
 								`go build -ldflags='-s -w' -a -o `+buildDir+"/"+appName+".wasm "+main)
 							pack = append(pack, "cp -rf \"$(go env GOROOT)/lib/wasm/wasm_exec.js\" "+buildDir+"/wasm_exec.js")
-							console.FatalIfErr(
-								os.WriteFile(
-									buildDir+"/"+appName+".html",
-									[]byte(fmt.Sprintf(htmlWasmTmpl, appName)),
-									0644),
-								"write html")
+							console.FatalIfErr(os.WriteFile(
+								buildDir+"/"+appName+".html",
+								[]byte(fmt.Sprintf(htmlWasmTmpl, appName)),
+								0644), "write html")
 
 						default:
 							console.Warnf("possible only mode: app,plugin,wasm")
