@@ -3,7 +3,7 @@
  *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
  */
 
-package ormb
+package commands
 
 import (
 	"go/ast"
@@ -13,8 +13,9 @@ import (
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/syncing"
 
-	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/internal/gen/ormb"
 
+	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/dialects"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/visitor"
@@ -22,7 +23,7 @@ import (
 	"go.osspkg.com/goppy/v3/orm/dialect"
 )
 
-func Command() console.CommandGetter {
+func CmdORM() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("gen-orm", "generate code for orm")
 		setter.Flag(func(flagsSetter console.FlagsSetter) {
@@ -34,9 +35,7 @@ func Command() console.CommandGetter {
 			flagsSetter.IntVar("index", 0, "index for sql file as prefix")
 		})
 		setter.ExecFunc(func(_ []string, _dialect, _dbRead, _dbWrite, _outDir, _modelName string, _index int64) {
-			console.Infof("--- GENERATE ---")
-
-			console.ShowDebug(false)
+			console.Infof("goppy gen-orm")
 
 			gen, ok := dialects.Get(dialect.Name(_dialect))
 			if !ok {
@@ -76,8 +75,8 @@ func Command() console.CommandGetter {
 					ModelName: _modelName,
 				}
 
-				console.FatalIfErr(GenerateSQL(cc, vv, gen), "generate orm sql")
-				console.FatalIfErr(GenerateCode(cc, vv, gen), "generate orm code")
+				console.FatalIfErr(ormb.GenerateSQL(cc, vv, gen), "generate orm sql")
+				console.FatalIfErr(ormb.GenerateCode(cc, vv, gen), "generate orm code")
 			}
 
 			global.ExecPack(true, "gofmt -w -s .", "goimports -l -w .")

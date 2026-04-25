@@ -11,7 +11,6 @@ setup:
 .PHONY: lint
 lint:
 	goppy lint
-	cd _example && goppy lint
 
 .PHONY: license
 license:
@@ -34,8 +33,3 @@ ci: pre-commit
 .PHONY: tidy
 tidy:
 	go mod tidy -v
-
-example-tb: install
-	cd ./_example/web-server-gen && \
-		go generate -run goppy ./... && \
-		go generate -run easyjson ./...

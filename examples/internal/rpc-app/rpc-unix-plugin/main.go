@@ -13,8 +13,9 @@ import (
 
 	"go.osspkg.com/logx"
 
+	"go.osspkg.com/goppy/v3/examples/internal/rpc-app/rpc-unix-plugin/transport"
+
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/_example/rpc-app/rpc-unix-plugin/transport"
 	"go.osspkg.com/goppy/v3/web"
 	"go.osspkg.com/goppy/v3/web/jsonrpc"
 )

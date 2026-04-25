@@ -13,8 +13,8 @@ import (
 	"go.osspkg.com/logx"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/_example/web-server-gen/transport"
-	"go.osspkg.com/goppy/v3/_example/web-server-gen/types"
+	"go.osspkg.com/goppy/v3/examples/internal/web-server-gen/transport"
+	"go.osspkg.com/goppy/v3/examples/internal/web-server-gen/types"
 	"go.osspkg.com/goppy/v3/web"
 	"go.osspkg.com/goppy/v3/web/jsonrpc"
 )

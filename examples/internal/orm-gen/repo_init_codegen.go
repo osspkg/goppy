@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"strings"
 
-	"go.osspkg.com/goppy/v3/orm"
 	"go.osspkg.com/ioutils/pool"
+
+	"go.osspkg.com/goppy/v3/orm"
 )
 
 type Repo struct {

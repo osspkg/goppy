@@ -17,7 +17,6 @@ import (
 	"golang.org/x/mod/modfile"
 
 	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -28,7 +27,7 @@ func Cmd() console.CommandGetter {
 			fs.Bool("minor", "update minor version (default - patch)")
 		})
 		setter.ExecFunc(func(_ []string, minor bool) {
-			console.Infof("--- READ CONFIG ---")
+			console.Infof("goppy tag")
 
 			var (
 				allMods map[string]*global.Module

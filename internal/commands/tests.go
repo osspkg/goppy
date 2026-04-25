@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -17,7 +16,7 @@ func CmdTest() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("test", "Testing code")
 		setter.ExecFunc(func(_ []string) {
-			console.Infof("--- TESTS ---")
+			console.Infof("goppy test")
 
 			pack := []string{
 				"go clean -testcache",

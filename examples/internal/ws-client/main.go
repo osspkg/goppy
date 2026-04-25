@@ -49,10 +49,11 @@ func (v *Controller) Ticker(call func(event.Id, any) error) {
 	t := time.NewTicker(time.Second * 3)
 	defer t.Stop()
 
+	//nolint:staticcheck
 	for {
 		select {
 		case <-t.C:
-			call(1, []int{0})
+			call(1, []int{0}) //nolint:staticcheck,errcheck
 		}
 	}
 }

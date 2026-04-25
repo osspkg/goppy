@@ -8,15 +8,16 @@ package transport
 
 import (
 	stdjson "encoding/json"
-	fmt "fmt"
-
-	jsonrpc "go.osspkg.com/goppy/v3/web/jsonrpc"
-
-	context "context"
 
 	web "go.osspkg.com/goppy/v3/web"
 
-	types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
+	types "go.osspkg.com/goppy/v3/examples/internal/web-server-gen/types"
+
+	context "context"
+
+	fmt "fmt"
+
+	jsonrpc "go.osspkg.com/goppy/v3/web/jsonrpc"
 )
 
 type JSONRPCUserTransport struct {

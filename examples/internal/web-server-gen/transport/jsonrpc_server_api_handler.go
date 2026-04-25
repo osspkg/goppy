@@ -7,22 +7,22 @@
 package transport
 
 import (
+	context "context"
 	stdjson "encoding/json"
 
-	types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
+	web "go.osspkg.com/goppy/v3/web"
+
 	jsonrpc "go.osspkg.com/goppy/v3/web/jsonrpc"
 
-	cast "go.osspkg.com/cast"
+	types "go.osspkg.com/goppy/v3/examples/internal/web-server-gen/types"
 
 	nethttp "net/http"
 
 	time "time"
 
-	context "context"
-
 	fmt "fmt"
 
-	web "go.osspkg.com/goppy/v3/web"
+	cast "go.osspkg.com/cast"
 )
 
 type JSONRPCApiTransport struct {

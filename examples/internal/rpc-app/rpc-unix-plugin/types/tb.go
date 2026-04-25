@@ -6,3 +6,4 @@
 package types
 
 //go:generate goppy tb --mod=json-rpc-server --out=./../transport
+//go:generate easyjson ./../transport/jsonrpc_server_model.go

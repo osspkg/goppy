@@ -16,7 +16,6 @@ import (
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/global"
 )
 
@@ -36,7 +35,7 @@ func CmdGoSite() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("gosite", "Generate go pkg html")
 		setter.ExecFunc(func(_ []string) {
-			console.Infof("--- READ CONFIG ---")
+			console.Infof("goppy gosite")
 
 			confpath := fs.CurrentDir() + "/.gosite.yaml"
 			if !fs.FileExist(confpath) {

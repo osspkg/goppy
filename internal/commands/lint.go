@@ -19,7 +19,7 @@ func CmdLint() console.CommandGetter {
 	return console.NewCommand(func(setter console.CommandSetter) {
 		setter.Setup("lint", "Linting code")
 		setter.ExecFunc(func(_ []string) {
-			console.Infof("--- LINT ---")
+			console.Infof("goppy lint")
 
 			updateGoMod()
 

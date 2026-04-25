@@ -111,6 +111,7 @@ func (v *Controller) Timer() {
 	t := time.NewTicker(time.Second * 3)
 	defer t.Stop()
 
+	//nolint:staticcheck
 	for {
 		select {
 		case tt := <-t.C:

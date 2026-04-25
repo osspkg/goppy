@@ -7,7 +7,7 @@
 package client
 
 //go:generate easyjson
-import types "go.osspkg.com/goppy/v3/_example/web-server-gen/types"
+import types "go.osspkg.com/goppy/v3/examples/internal/web-server-gen/types"
 
 //easyjson:json
 type ApiRootV1Request struct {

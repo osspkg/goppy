@@ -37,7 +37,7 @@ func CmdBuild() console.CommandGetter {
 			flagsSetter.Bool("cgo", "set CGO_ENABLED=1 for build")
 		})
 		setter.ExecFunc(func(_ []string, _arch, _mode, _main string, _cgo bool) {
-			console.Infof("--- BUILD ---")
+			console.Infof("goppy build")
 
 			pack := make([]string, 0, 10)
 			buildDir := global.GetBuildDir()
