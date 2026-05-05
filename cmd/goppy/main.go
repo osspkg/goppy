@@ -29,6 +29,7 @@ func main() {
 		commands.CmdTB(),
 		commands.CmdFS(),
 		commands.CmdORM(),
+		commands.CmdPROXY(),
 	)
 	app.Exec()
 }
