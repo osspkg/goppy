@@ -13,10 +13,10 @@ import (
 	"go.osspkg.com/errors"
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v3/apigen/builder"
-	"go.osspkg.com/goppy/v3/apigen/parser"
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/global"
+	"go.osspkg.com/goppy/v3/pkg/apigen/builder"
+	"go.osspkg.com/goppy/v3/pkg/apigen/parser"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func CmdTB() console.CommandGetter {

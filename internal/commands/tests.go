@@ -8,8 +8,8 @@ package commands
 import (
 	"os"
 
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/global"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func CmdTest() console.CommandGetter {

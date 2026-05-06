@@ -18,9 +18,10 @@ import (
 	"github.com/google/uuid"
 	"go.osspkg.com/do"
 	"go.osspkg.com/events"
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
+
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 const proxyFilename = ".devproxy.yaml"
@@ -122,7 +123,7 @@ func CmdPROXY() console.CommandGetter {
 				Transport: &http.Transport{
 					Proxy:                 http.ProxyFromEnvironment,
 					DialContext:           (&net.Dialer{Timeout: 30 * time.Second, KeepAlive: 30 * time.Second}).DialContext,
-					TLSClientConfig:       &tls.Config{InsecureSkipVerify: true},
+					TLSClientConfig:       &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
 					ForceAttemptHTTP2:     true,
 					MaxIdleConns:          100,
 					IdleConnTimeout:       90 * time.Second,
@@ -184,8 +185,9 @@ func CmdPROXY() console.CommandGetter {
 			}
 
 			srv := &http.Server{
-				Addr:    config.Address,
-				Handler: handler,
+				Addr:              config.Address,
+				Handler:           handler,
+				ReadHeaderTimeout: 1 * time.Second,
 			}
 
 			ctx, cancel := context.WithCancel(context.Background())

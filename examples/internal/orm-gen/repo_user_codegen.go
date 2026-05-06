@@ -9,7 +9,7 @@ package orm_gen
 import (
 	"context"
 
-	"go.osspkg.com/goppy/v3/orm"
+	"go.osspkg.com/goppy/v3/plugins/orm"
 )
 
 const sqlCreateUser = `INSERT INTO "users" ("name", "value", "meta0") VALUES ($1, $2, $3)`

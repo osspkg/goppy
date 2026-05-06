@@ -6,10 +6,10 @@
 package main
 
 import (
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/env"
 	"go.osspkg.com/goppy/v3/internal/commands"
 	"go.osspkg.com/goppy/v3/internal/global"
+	"go.osspkg.com/goppy/v3/pkg/console"
+	"go.osspkg.com/goppy/v3/pkg/env"
 )
 
 func main() {
@@ -30,6 +30,7 @@ func main() {
 		commands.CmdFS(),
 		commands.CmdORM(),
 		commands.CmdPROXY(),
+		commands.CmdAssetsBuild(),
 	)
 	app.Exec()
 }

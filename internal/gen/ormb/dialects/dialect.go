@@ -11,8 +11,8 @@ import (
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
 	dialectpgsql "go.osspkg.com/goppy/v3/internal/gen/ormb/dialects/dialect-pgsql"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/table"
-	"go.osspkg.com/goppy/v3/orm/clients/pgsql"
-	"go.osspkg.com/goppy/v3/orm/dialect"
+	"go.osspkg.com/goppy/v3/plugins/orm/clients/pgsql"
+	"go.osspkg.com/goppy/v3/plugins/orm/dialect"
 )
 
 var (

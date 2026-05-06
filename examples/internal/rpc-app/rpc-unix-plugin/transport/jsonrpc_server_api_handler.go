@@ -8,13 +8,13 @@ package transport
 
 import (
 	context "context"
-	fmt "fmt"
-
 	stdjson "encoding/json"
 
-	jsonrpc "go.osspkg.com/goppy/v3/web/jsonrpc"
+	jsonrpc "go.osspkg.com/goppy/v3/plugins/web/jsonrpc"
 
-	web "go.osspkg.com/goppy/v3/web"
+	fmt "fmt"
+
+	web "go.osspkg.com/goppy/v3/plugins/web"
 
 	types "go.osspkg.com/goppy/v3/examples/internal/rpc-app/rpc-unix-plugin/types"
 )

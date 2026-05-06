@@ -12,7 +12,7 @@ import (
 
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func CmdFS() console.CommandGetter {

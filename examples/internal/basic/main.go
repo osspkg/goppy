@@ -12,14 +12,15 @@ import (
 	"os"
 
 	"go.osspkg.com/logx"
-	"go.osspkg.com/xc"
+
+	"go.osspkg.com/goppy/v3/pkg/xc"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/dic/broker"
-	"go.osspkg.com/goppy/v3/metrics"
-	"go.osspkg.com/goppy/v3/plugins"
-	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/pkg/console"
+	"go.osspkg.com/goppy/v3/pkg/dic/broker"
+	"go.osspkg.com/goppy/v3/plugin"
+	"go.osspkg.com/goppy/v3/plugins/metrics"
+	"go.osspkg.com/goppy/v3/plugins/web"
 )
 
 type IStatus interface {
@@ -58,13 +59,13 @@ func main() {
 			},
 		),
 	)
-	app.Command(func(ctx context.Context, _ plugins.DIResolver, setter console.CommandSetter) {
+	app.Command(func(ctx context.Context, _ plugin.DIResolver, setter console.CommandSetter) {
 		setter.Setup("env", "show all envs")
 		setter.ExecFunc(func() {
 			fmt.Println(os.Environ())
 		})
 	})
-	app.Command(func(ctx context.Context, r plugins.DIResolver, setter console.CommandSetter) {
+	app.Command(func(ctx context.Context, r plugin.DIResolver, setter console.CommandSetter) {
 		setter.Setup("ctrl", "call ctrl")
 		setter.ExecFunc(func() {
 			logx.SetLevel(0)

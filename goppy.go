@@ -9,23 +9,23 @@ import (
 	"context"
 	"fmt"
 
-	"go.osspkg.com/config"
-	cenv "go.osspkg.com/config/env"
 	"go.osspkg.com/events"
 	"go.osspkg.com/logx"
 	"go.osspkg.com/syncing"
-	"go.osspkg.com/xc"
 	"go.uber.org/automaxprocs/maxprocs"
 
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/dic"
-	"go.osspkg.com/goppy/v3/dic/broker"
-	"go.osspkg.com/goppy/v3/env"
+	"go.osspkg.com/goppy/v3/pkg/xc"
+
 	"go.osspkg.com/goppy/v3/internal/appconfig"
 	"go.osspkg.com/goppy/v3/internal/applog"
 	"go.osspkg.com/goppy/v3/internal/appreflect"
 	"go.osspkg.com/goppy/v3/internal/appsteps"
-	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/pkg/config"
+	"go.osspkg.com/goppy/v3/pkg/console"
+	"go.osspkg.com/goppy/v3/pkg/dic"
+	"go.osspkg.com/goppy/v3/pkg/dic/broker"
+	"go.osspkg.com/goppy/v3/pkg/env"
+	"go.osspkg.com/goppy/v3/plugin"
 )
 
 func init() {
@@ -45,7 +45,7 @@ type (
 
 	Goppy interface {
 		Plugins(...any)
-		Command(func(context.Context, plugins.DIResolver, console.CommandSetter))
+		Command(func(context.Context, plugin.DIResolver, console.CommandSetter))
 		Run()
 	}
 )
@@ -70,21 +70,21 @@ func New(name, version, description string) Goppy {
 
 // Plugins setting the list of plugins to initialize
 func (v *_app) Plugins(dependency ...any) {
-	args := plugins.Inject(dependency...)
+	args := plugin.Inject(dependency...)
 
 	for _, arg := range args {
 
 		for _, item := range appreflect.AnySlice(arg.Config) {
-			appreflect.Validate(item, plugins.AllowedKindConfig(), func(in any) error {
+			appreflect.Validate(item, plugin.AllowedKindConfig(), func(in any) error {
 				v.configs = append(v.configs, in)
 				return nil
 			})
 		}
 
 		for _, item := range appreflect.AnySlice(arg.Inject) {
-			appreflect.Validate(item, plugins.AllowedKindInject(), func(in any) error {
+			appreflect.Validate(item, plugin.AllowedKindInject(), func(in any) error {
 				switch val := in.(type) {
-				case plugins.Broker:
+				case plugin.Broker:
 					return v.container.BrokerRegister(val)
 				case config.Resolver:
 					v.resolvers = append(v.resolvers, val)
@@ -113,7 +113,7 @@ func (v *_app) Resolve(arg any) error {
 	return nil
 }
 
-func (v *_app) Command(cmd func(context.Context, plugins.DIResolver, console.CommandSetter)) {
+func (v *_app) Command(cmd func(context.Context, plugin.DIResolver, console.CommandSetter)) {
 	v.console.AddCommand(console.NewCommand(func(setter console.CommandSetter) {
 		cmd(v.ctx.Context(), v, setter)
 	}))
@@ -156,7 +156,7 @@ func (v *_app) Run() {
 
 	{
 		if len(v.resolvers) == 0 {
-			v.resolvers = append(v.resolvers, cenv.New())
+			v.resolvers = append(v.resolvers, config.NewEnvResolver())
 		}
 
 		console.FatalIfErr(v.container.BrokerRegister(

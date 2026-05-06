@@ -12,7 +12,7 @@ import (
 
 	uuid "github.com/google/uuid"
 
-	"go.osspkg.com/goppy/v3/orm"
+	"go.osspkg.com/goppy/v3/plugins/orm"
 )
 
 const sqlCreateMeta = `INSERT INTO "meta" ("uid", "user_id", "roles", "fail", "created_at", "updated_at", "deleted_at") VALUES ($1, $2, $3, $4, $5, $6, $7)`

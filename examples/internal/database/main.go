@@ -12,10 +12,10 @@ import (
 	"go.osspkg.com/logx"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/orm"
-	"go.osspkg.com/goppy/v3/orm/clients/sqlite"
-	"go.osspkg.com/goppy/v3/plugins"
-	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/plugin"
+	"go.osspkg.com/goppy/v3/plugins/orm"
+	"go.osspkg.com/goppy/v3/plugins/orm/clients/sqlite"
+	"go.osspkg.com/goppy/v3/plugins/web"
 )
 
 func main() {
@@ -38,7 +38,7 @@ func main() {
 		}),
 		orm.WithMigration(),
 	)
-	app.Plugins(plugins.Inject(
+	app.Plugins(plugin.Inject(
 		NewController,
 		func(routes web.ServerPool, c *Controller) {
 			router, ok := routes.Main()

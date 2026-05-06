@@ -8,7 +8,7 @@ package main
 import (
 	"fmt"
 
-	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func main() {

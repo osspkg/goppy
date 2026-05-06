@@ -12,12 +12,12 @@ import (
 	"strconv"
 	"syscall"
 
-	"go.osspkg.com/config"
 	"go.osspkg.com/errors"
 	"go.osspkg.com/ioutils/codec"
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/pkg/config"
+	"go.osspkg.com/goppy/v3/plugin"
 )
 
 func Recovery(filename string, configs []any) error {
@@ -26,12 +26,12 @@ func Recovery(filename string, configs []any) error {
 	}
 
 	for _, cfg := range configs {
-		if vv, ok := cfg.(plugins.Defaulter); ok {
+		if vv, ok := cfg.(plugin.Defaulter); ok {
 			vv.Default()
 			continue
 		}
 
-		if vv, ok := cfg.(plugins.Defaulter2); ok {
+		if vv, ok := cfg.(plugin.Defaulter2); ok {
 			if err := vv.Default(); err != nil {
 				return err
 			}
@@ -68,7 +68,7 @@ func DecodeAndValidate(c Config, resolvers []config.Resolver, configs []any) err
 		if err := rc.Decode(cfg); err != nil {
 			return fmt.Errorf("decode config %T error: %w", cfg, err)
 		}
-		vv, ok := cfg.(plugins.Validator)
+		vv, ok := cfg.(plugin.Validator)
 		if !ok {
 			continue
 		}

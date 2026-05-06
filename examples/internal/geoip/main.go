@@ -10,8 +10,8 @@ import (
 	"net"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/geoip"
-	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/plugins/geoip"
+	"go.osspkg.com/goppy/v3/plugins/web"
 )
 
 func main() {
