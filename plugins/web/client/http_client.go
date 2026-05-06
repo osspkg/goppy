@@ -116,6 +116,10 @@ func (cli *httpCli) Send(ctx context.Context, method, url string, in, out any) (
 		}
 	}
 
+	if _, err = body.Seek(0, 0); err != nil {
+		return fmt.Errorf("http client: failed to seek request body: %w", err)
+	}
+
 	req, err := http.NewRequestWithContext(ctx, method, url, io.NopCloser(body))
 	if err != nil {
 		return fmt.Errorf("http client: failed to create request: %w", err)
