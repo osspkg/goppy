@@ -16,8 +16,8 @@ import (
 	"go.osspkg.com/validate"
 	"golang.org/x/mod/modfile"
 
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/global"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func Cmd() console.CommandGetter {

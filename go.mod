@@ -3,13 +3,13 @@ module go.osspkg.com/goppy/v3
 go 1.25.0
 
 require (
-	github.com/blevesearch/bleve/v2 v2.5.7
-	github.com/go-sql-driver/mysql v1.9.3
+	github.com/blevesearch/bleve/v2 v2.6.0
+	github.com/go-sql-driver/mysql v1.10.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/lib/pq v1.12.3
 	github.com/mailru/easyjson v0.9.2
-	github.com/mattn/go-sqlite3 v1.14.42
+	github.com/mattn/go-sqlite3 v1.14.44
 	github.com/miekg/dns v1.1.72
 	github.com/oschwald/geoip2-golang v1.13.0
 	github.com/prometheus/client_golang v1.23.2
@@ -18,7 +18,6 @@ require (
 	go.osspkg.com/bb v1.0.0
 	go.osspkg.com/casecheck v0.3.0
 	go.osspkg.com/cast v0.0.0-20260330033934-90d4d7b6ee08
-	go.osspkg.com/config v0.2.0
 	go.osspkg.com/do v0.2.1
 	go.osspkg.com/errors v0.4.0
 	go.osspkg.com/events v0.3.0
@@ -28,10 +27,8 @@ require (
 	go.osspkg.com/network v0.6.0
 	go.osspkg.com/random v0.5.0
 	go.osspkg.com/routine v0.4.1
-	go.osspkg.com/static v1.4.0
 	go.osspkg.com/syncing v0.4.3
 	go.osspkg.com/validate v0.1.0
-	go.osspkg.com/xc v0.4.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.50.0
 	golang.org/x/exp v0.0.0-20260410095643-746e56fc9e2f
@@ -43,28 +40,29 @@ require (
 
 require (
 	cloud.google.com/go/compute/metadata v0.3.0 // indirect
-	filippo.io/edwards25519 v1.1.0 // indirect
+	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
-	github.com/RoaringBitmap/roaring/v2 v2.14.4 // indirect
+	github.com/RoaringBitmap/roaring/v2 v2.14.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.24.4 // indirect
-	github.com/blevesearch/bleve_index_api v1.2.11 // indirect
-	github.com/blevesearch/geo v0.2.4 // indirect
-	github.com/blevesearch/go-faiss v1.0.26 // indirect
+	github.com/blevesearch/bleve_index_api v1.3.11 // indirect
+	github.com/blevesearch/geo v0.2.5 // indirect
+	github.com/blevesearch/go-faiss v1.1.0 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
 	github.com/blevesearch/gtreap v0.1.1 // indirect
-	github.com/blevesearch/mmap-go v1.0.4 // indirect
-	github.com/blevesearch/scorch_segment_api/v2 v2.3.13 // indirect
+	github.com/blevesearch/mmap-go v1.2.0 // indirect
+	github.com/blevesearch/scorch_segment_api/v2 v2.4.7 // indirect
 	github.com/blevesearch/segment v0.9.1 // indirect
 	github.com/blevesearch/snowballstem v0.9.0 // indirect
 	github.com/blevesearch/upsidedown_store_api v1.0.2 // indirect
-	github.com/blevesearch/vellum v1.1.0 // indirect
-	github.com/blevesearch/zapx/v11 v11.4.2 // indirect
-	github.com/blevesearch/zapx/v12 v12.4.2 // indirect
-	github.com/blevesearch/zapx/v13 v13.4.2 // indirect
-	github.com/blevesearch/zapx/v14 v14.4.2 // indirect
-	github.com/blevesearch/zapx/v15 v15.4.2 // indirect
-	github.com/blevesearch/zapx/v16 v16.2.8 // indirect
+	github.com/blevesearch/vellum v1.2.0 // indirect
+	github.com/blevesearch/zapx/v11 v11.4.3 // indirect
+	github.com/blevesearch/zapx/v12 v12.4.3 // indirect
+	github.com/blevesearch/zapx/v13 v13.4.3 // indirect
+	github.com/blevesearch/zapx/v14 v14.4.3 // indirect
+	github.com/blevesearch/zapx/v15 v15.4.3 // indirect
+	github.com/blevesearch/zapx/v16 v16.3.4 // indirect
+	github.com/blevesearch/zapx/v17 v17.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/snappy v1.0.0 // indirect

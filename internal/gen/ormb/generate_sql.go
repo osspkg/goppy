@@ -12,11 +12,10 @@ import (
 
 	"go.osspkg.com/ioutils/data"
 
-	"go.osspkg.com/goppy/v3/console"
-
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/dialects"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/visitor"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func GenerateSQL(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error {

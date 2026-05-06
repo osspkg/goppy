@@ -1,0 +1,49 @@
+/*
+ *  Copyright (c) 2022-2026 Mikhail Knyazhev <markus621@yandex.com>. All rights reserved.
+ *  Use of this source code is governed by a BSD 3-Clause license that can be found in the LICENSE file.
+ */
+
+package plugin
+
+import (
+	"fmt"
+	"reflect"
+)
+
+type AllowedKind struct {
+	kind       []reflect.Kind
+	errMessage string
+}
+
+func AllowedKindConfig() AllowedKind {
+	return AllowedKind{
+		kind:       []reflect.Kind{reflect.Ptr},
+		errMessage: "Plugin.Config can only be a reference to an object",
+	}
+}
+
+func AllowedKindInject() AllowedKind {
+	return AllowedKind{
+		kind: []reflect.Kind{
+			reflect.Bool,
+			reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float32, reflect.Float64,
+			reflect.String,
+			reflect.Array, reflect.Chan, reflect.Map, reflect.Slice,
+			reflect.Struct, reflect.Ptr, reflect.Func,
+		},
+		errMessage: "Plugin.Inject unsupported",
+	}
+}
+
+func (v AllowedKind) Validate(in any) error {
+	into := reflect.TypeOf(in)
+	for _, k := range v.kind {
+		if into.Kind() == k {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("%s, but got `%T`", v.errMessage, in)
+}

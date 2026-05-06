@@ -10,7 +10,7 @@ import (
 	"io"
 	"strings"
 
-	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func SplitLast(s, sep string) string {

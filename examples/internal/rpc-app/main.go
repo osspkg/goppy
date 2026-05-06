@@ -7,8 +7,8 @@ package main
 
 import (
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/rpc"
-	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/plugins/rpc"
+	"go.osspkg.com/goppy/v3/plugins/web"
 )
 
 func main() {

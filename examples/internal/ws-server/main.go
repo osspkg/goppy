@@ -14,9 +14,9 @@ import (
 	"go.osspkg.com/syncing"
 
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/web"
-	"go.osspkg.com/goppy/v3/ws"
-	"go.osspkg.com/goppy/v3/ws/event"
+	"go.osspkg.com/goppy/v3/plugins/web"
+	"go.osspkg.com/goppy/v3/plugins/ws"
+	"go.osspkg.com/goppy/v3/plugins/ws/event"
 )
 
 func main() {

@@ -15,7 +15,7 @@ import (
 	"go.osspkg.com/ioutils/fs"
 	"go.osspkg.com/ioutils/shell"
 
-	"go.osspkg.com/goppy/v3/console"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 type logger struct {

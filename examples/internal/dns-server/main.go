@@ -7,7 +7,7 @@ package main
 
 import (
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/xdns"
+	"go.osspkg.com/goppy/v3/plugins/xdns"
 )
 
 func main() {

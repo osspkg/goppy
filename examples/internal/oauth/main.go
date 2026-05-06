@@ -7,9 +7,9 @@ package main
 
 import (
 	"go.osspkg.com/goppy/v3"
-	"go.osspkg.com/goppy/v3/auth"
-	"go.osspkg.com/goppy/v3/auth/oauth"
-	"go.osspkg.com/goppy/v3/web"
+	"go.osspkg.com/goppy/v3/plugins/auth"
+	"go.osspkg.com/goppy/v3/plugins/auth/oauth"
+	"go.osspkg.com/goppy/v3/plugins/web"
 )
 
 func main() {

@@ -16,8 +16,8 @@ import (
 
 	"go.osspkg.com/ioutils/fs"
 
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/global"
+	"go.osspkg.com/goppy/v3/pkg/console"
 )
 
 func CmdGenerate() console.CommandGetter {
@@ -168,7 +168,7 @@ import (
 {{end}}{{if .mod_db_mysql}}"go.osspkg.com/goppy/v3/ormmysql"
 {{end}}{{if .mod_db_sqlite}}"go.osspkg.com/goppy/v3/ormsqlite"
 {{end}}{{if .mod_db_postgre}}"go.osspkg.com/goppy/v3/ormpgsql"
-{{end}}{{if or .mod_web_server .mod_web_client}}"go.osspkg.com/goppy/v3/web"
+{{end}}{{if or .mod_web_server .mod_web_client}}"go.osspkg.com/goppy/v3/plugins/web"
 {{end}}{{if or .mod_websocket_server .mod_websocket_client}}"go.osspkg.com/goppy/v3/ws"
 {{end}}{{if or .mod_dns_server .mod_dns_client}}"go.osspkg.com/goppy/v3/xdns"
 {{end}}

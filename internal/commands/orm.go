@@ -14,13 +14,12 @@ import (
 	"go.osspkg.com/syncing"
 
 	"go.osspkg.com/goppy/v3/internal/gen/ormb"
-
-	"go.osspkg.com/goppy/v3/console"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/common"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/dialects"
 	"go.osspkg.com/goppy/v3/internal/gen/ormb/visitor"
 	"go.osspkg.com/goppy/v3/internal/global"
-	"go.osspkg.com/goppy/v3/orm/dialect"
+	"go.osspkg.com/goppy/v3/pkg/console"
+	"go.osspkg.com/goppy/v3/plugins/orm/dialect"
 )
 
 func CmdORM() console.CommandGetter {

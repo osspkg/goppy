@@ -60,7 +60,7 @@ func (c Code) header(w io.Writer, ci common.CodeInfo) {
 	common.Writelnf(w, `package %s`, ci.PkgName)
 	common.Writeln(w, `import (`)
 	common.Writeln(w, `"context"`)
-	common.Writeln(w, `"go.osspkg.com/goppy/v3/orm"`)
+	common.Writeln(w, `"go.osspkg.com/goppy/v3/plugins/orm"`)
 	for _, imp := range ci.Imports {
 		common.Writelnf(w, `%s "%s"`, imp.Name, imp.Pkg)
 	}

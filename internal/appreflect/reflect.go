@@ -8,8 +8,8 @@ package appreflect
 import (
 	"reflect"
 
-	"go.osspkg.com/goppy/v3/console"
-	"go.osspkg.com/goppy/v3/plugins"
+	"go.osspkg.com/goppy/v3/pkg/console"
+	"go.osspkg.com/goppy/v3/plugin"
 )
 
 func AnySlice(arg any) []any {
@@ -26,7 +26,7 @@ func AnySlice(arg any) []any {
 	return result
 }
 
-func Validate(arg any, k plugins.AllowedKind, call func(any) error) {
+func Validate(arg any, k plugin.AllowedKind, call func(any) error) {
 	if arg == nil {
 		return
 	}
