@@ -53,6 +53,7 @@ func GenerateCode(cc common.Config, vv *visitor.Visitor, g *dialects.Gen) error 
 		common.Writeln(w, `"fmt"`)
 		common.Writeln(w, `"strings"`)
 		common.Writeln(w, `"go.osspkg.com/ioutils/pool"`)
+		common.Writeln(w, `"go.osspkg.com/goppy/v3/plugins/orm"`)
 		for _, imp := range ci.Imports {
 			common.Writelnf(w, `%s "%s"`, imp.Name, imp.Pkg)
 		}
