@@ -28,7 +28,7 @@ require (
 	go.osspkg.com/random v0.5.0
 	go.osspkg.com/routine v0.4.1
 	go.osspkg.com/syncing v0.4.3
-	go.osspkg.com/validate v0.1.0
+	go.osspkg.com/validate v0.2.0
 	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.51.0
 	golang.org/x/exp v0.0.0-20260508232706-74f9aab9d74a
