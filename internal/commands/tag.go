@@ -13,7 +13,7 @@ import (
 
 	"go.osspkg.com/algorithms/graph/kahn"
 	"go.osspkg.com/ioutils/fs"
-	"go.osspkg.com/validate"
+	"go.osspkg.com/validate/version"
 	"golang.org/x/mod/modfile"
 
 	"go.osspkg.com/goppy/v3/internal/global"
@@ -61,7 +61,7 @@ func Cmd() console.CommandGetter {
 				}
 				b, err = global.Exec("git tag -l \"" + m.Prefix + "v*\"")
 				console.FatalIfErr(err, "Get tags for: %s", m.Name)
-				m.Version = validate.MaxVersion(strings.Split(string(b), "\n")...)
+				m.Version = version.GetMax(strings.Split(string(b), "\n")...)
 			}
 
 			console.Infof("--- DETECT CHANGES ---")

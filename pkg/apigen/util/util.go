@@ -55,6 +55,25 @@ func ToUpperCamelCase(s string) string {
 	return builder.String()
 }
 
+func ToLowerCamelCase(s string) string {
+	if s == "" {
+		return ""
+	}
+
+	var builder strings.Builder
+	builder.Grow(len(s) + 2)
+
+	for i, r := range s {
+		if i == 0 && !unicode.IsUpper(r) {
+			builder.WriteRune(unicode.ToLower(r))
+		} else {
+			builder.WriteRune(r)
+		}
+	}
+
+	return builder.String()
+}
+
 var crc32q = crc32.MakeTable(0xD5828281)
 
 func CRC32(s string) string {

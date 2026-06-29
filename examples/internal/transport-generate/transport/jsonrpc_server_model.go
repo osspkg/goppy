@@ -11,6 +11,7 @@ import types "go.osspkg.com/goppy/v3/examples/internal/transport-generate/types"
 
 //easyjson:json
 type jsonrpcApiRootV1ModelRequest struct {
+	userID   int64  `json:"-"`
 	UserName string `json:"userName"`
 }
 
@@ -21,11 +22,14 @@ type jsonrpcApiRootV1ModelResponse struct {
 
 //easyjson:json
 type jsonrpcApiAuthV1ModelRequest struct {
+	userID   int64  `json:"-"`
 	UserName string `json:"userName"`
 }
 
 //easyjson:json
-type jsonrpcApiAuthV1ModelResponse struct{}
+type jsonrpcApiAuthV1ModelResponse struct {
+	status bool `json:"-"`
+}
 
 //easyjson:json
 type jsonrpcUserNameV1ModelRequest struct {

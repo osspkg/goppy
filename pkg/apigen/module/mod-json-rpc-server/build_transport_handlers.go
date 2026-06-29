@@ -104,7 +104,7 @@ func (v Module) buildTransport(
 	return
 }
 
-func (v Module) buildTransportHandler(imp at.ImportSetter, imports *syncing.Map[string, string], object at.Face) []types.Token {
+func (v Module) buildTransportHandler(imp at.ImportSetter, _ *syncing.Map[string, string], object at.Face) []types.Token {
 	var models []types.Token //nolint:prealloc
 
 	trName := fmt.Sprintf(transportName, object.Name)
@@ -141,19 +141,15 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, imports *syncing.Map[
 
 		// --------------------------------------
 
-		inParamArgs := make(map[string]string)
 		for _, p := range method.InParams {
 			vals, ok := method.Tags["in."+p.Name]
 			if !ok {
 				continue
 			}
-			paramName := "in" + util.ToUpperCamelCase(p.Name)
-			inParamArgs[p.Name] = paramName
-			handleSrc = append(handleSrc,
-				Var().ID(paramName).
-					Raw(do.IfElse(p.Slice, "[]", "")).
-					Raw(do.IfElse(p.Ptr, "*", "")).
-					Pkg(p.Pkg).ID(p.Type),
+			paramName := "req." + do.IfElse(
+				noBodyParam(vals),
+				util.ToLowerCamelCase(p.Name),
+				util.ToUpperCamelCase(p.Name),
 			)
 			for _, item := range vals {
 				modName, modVal, modArgs := at.TagSplit(item)
@@ -186,33 +182,27 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, imports *syncing.Map[
 			case p.Pkg == "context" && p.Type == "Context":
 				handleIn = append(handleIn, ID("ctx"))
 			default:
-				if name, ok := inParamArgs[p.Name]; ok {
-					if link, ok := imports.Get(p.Pkg); ok {
-						imp.Set(p.Pkg, link)
-					}
-
-					handleIn = append(handleIn, ID(name))
-				} else {
-					handleIn = append(handleIn, ID("req").Op(".").ID(util.ToUpperCamelCase(p.Name)))
-				}
+				vals, ok := method.Tags["in."+p.Name]
+				paramName := do.IfElse(
+					ok && noBodyParam(vals),
+					util.ToLowerCamelCase(p.Name),
+					util.ToUpperCamelCase(p.Name),
+				)
+				handleIn = append(handleIn, ID("req").Op(".").ID(paramName))
 			}
 		}
 
 		// --------------------------------------
 
-		outParamArgs := make(map[string]string)
 		for _, p := range method.OutParams {
 			vals, ok := method.Tags["out."+p.Name]
 			if !ok {
 				continue
 			}
-			paramName := "out" + util.ToUpperCamelCase(p.Name)
-			outParamArgs[p.Name] = paramName
-			handleSrc = append(handleSrc,
-				Var().ID(paramName).
-					Raw(do.IfElse(p.Slice, "[]", "")).
-					Raw(do.IfElse(p.Ptr, "*", "")).
-					Pkg(p.Pkg).ID(p.Type),
+			paramName := "res." + do.IfElse(
+				noBodyParam(vals),
+				util.ToLowerCamelCase(p.Name),
+				util.ToUpperCamelCase(p.Name),
 			)
 			for _, item := range vals {
 				modName, modVal, modArgs := at.TagSplit(item)
@@ -247,15 +237,13 @@ func (v Module) buildTransportHandler(imp at.ImportSetter, imports *syncing.Map[
 			case p.Type == "error":
 				handleOut = append(handleOut, ID("err"))
 			default:
-				if name, ok := outParamArgs[p.Name]; ok {
-					if link, ok := imports.Get(p.Pkg); ok {
-						imp.Set(p.Pkg, link)
-					}
-
-					handleOut = append(handleOut, ID(name))
-				} else {
-					handleOut = append(handleOut, ID("res").Op(".").ID(util.ToUpperCamelCase(p.Name)))
-				}
+				vals, ok := method.Tags["out."+p.Name]
+				paramName := do.IfElse(
+					ok && noBodyParam(vals),
+					util.ToLowerCamelCase(p.Name),
+					util.ToUpperCamelCase(p.Name),
+				)
+				handleOut = append(handleOut, ID("res").Op(".").ID(paramName))
 			}
 		}
 

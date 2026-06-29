@@ -7,23 +7,24 @@
 package transport
 
 import (
-	cast "go.osspkg.com/cast"
-
-	types "go.osspkg.com/goppy/v3/examples/internal/transport-generate/types"
-
-	nethttp "net/http"
-
-	time "time"
-
-	fmt "fmt"
-
 	stdjson "encoding/json"
+	fmt "fmt"
 
 	web "go.osspkg.com/goppy/v3/plugins/web"
 
 	jsonrpc "go.osspkg.com/goppy/v3/plugins/web/jsonrpc"
 
+	cast "go.osspkg.com/cast"
+
+	nethttp "net/http"
+
+	time "time"
+
 	context "context"
+
+	types "go.osspkg.com/goppy/v3/examples/internal/transport-generate/types"
+
+	validate "go.osspkg.com/validate"
 )
 
 type JSONRPCApiTransport struct {
@@ -57,15 +58,33 @@ func (v *JSONRPCApiTransport) CallRootV1(ctx context.Context, webCtx web.Ctx, pa
 		return nil, err
 	}
 	var res jsonrpcApiRootV1ModelResponse
-	var inUserID int64
 	//Module: cookie
-	inUserID, _ = cast.StrTo[int64](webCtx.Cookie().Get("x-user-id"))
+	req.userID, err = cast.StrTo[int64](webCtx.Cookie().Get("x-user-id"))
 	if err != nil {
 		err = fmt.Errorf("invalid request: %w", err)
 		return nil, err
 	}
 
-	res.Status, err = v.handle.RootV1(ctx, inUserID, req.UserName)
+	//Module: validate
+	err = validate.Global().Validate(ctx, func(cb validate.Callback) {
+		cb.Require("no-empty", req.userID)
+	})
+	if err != nil {
+		err = fmt.Errorf("invalid request: %w", err)
+		return nil, err
+	}
+
+	//Module: validate
+	err = validate.Global().Validate(ctx, func(cb validate.Callback) {
+		cb.Optional("no-empty", req.UserName)
+		cb.Optional("123", req.UserName)
+	})
+	if err != nil {
+		err = fmt.Errorf("invalid request: %w", err)
+		return nil, err
+	}
+
+	res.Status, err = v.handle.RootV1(ctx, req.userID, req.UserName)
 	if err != nil {
 		return nil, err
 	}
@@ -79,21 +98,19 @@ func (v *JSONRPCApiTransport) CallAuthV1(ctx context.Context, webCtx web.Ctx, pa
 		return nil, err
 	}
 	var res jsonrpcApiAuthV1ModelResponse
-	var inUserID int64
 	//Module: header
-	inUserID, _ = cast.StrTo[int64](webCtx.Header().Get("x-user-id"))
+	req.userID, err = cast.StrTo[int64](webCtx.Header().Get("x-user-id"))
 	if err != nil {
 		err = fmt.Errorf("invalid request: %w", err)
 		return nil, err
 	}
 
-	var outStatus bool
 	defer func() {
 		//Module: header
 		if err != nil {
 			return
 		}
-		webCtx.Header().Set("x-user-id", fmt.Sprintf("%v", outStatus))
+		webCtx.Header().Set("x-user-id", fmt.Sprintf("%v", res.status))
 
 	}()
 	defer func() {
@@ -103,7 +120,7 @@ func (v *JSONRPCApiTransport) CallAuthV1(ctx context.Context, webCtx web.Ctx, pa
 		}
 		webCtx.Cookie().Set(&nethttp.Cookie{
 			Name:     "uid",
-			Value:    fmt.Sprintf("%v", outStatus),
+			Value:    fmt.Sprintf("%v", res.status),
 			Path:     "/",
 			Expires:  time.Now().Add(86400 * time.Second),
 			Secure:   true,
@@ -119,7 +136,7 @@ func (v *JSONRPCApiTransport) CallAuthV1(ctx context.Context, webCtx web.Ctx, pa
 		}
 		webCtx.Cookie().Set(&nethttp.Cookie{
 			Name:     "uid",
-			Value:    fmt.Sprintf("%v", outStatus),
+			Value:    fmt.Sprintf("%v", res.status),
 			Path:     "/",
 			Expires:  time.Now().Add(86400 * time.Second),
 			Secure:   true,
@@ -128,7 +145,7 @@ func (v *JSONRPCApiTransport) CallAuthV1(ctx context.Context, webCtx web.Ctx, pa
 		})
 
 	}()
-	outStatus, err = v.handle.AuthV1(ctx, inUserID, req.UserName)
+	res.status, err = v.handle.AuthV1(ctx, req.userID, req.UserName)
 	if err != nil {
 		return nil, err
 	}

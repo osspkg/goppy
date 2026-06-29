@@ -14,7 +14,7 @@ import (
 
 	"go.osspkg.com/errors"
 	"go.osspkg.com/ioutils/fs"
-	"go.osspkg.com/validate"
+	"go.osspkg.com/validate/version"
 	"golang.org/x/mod/modfile"
 )
 
@@ -25,7 +25,7 @@ type Module struct {
 	Name    string
 	File    string
 	Prefix  string
-	Version *validate.Version
+	Version *version.Version
 	Changed bool
 }
 

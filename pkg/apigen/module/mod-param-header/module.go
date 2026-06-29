@@ -34,7 +34,7 @@ func (v Module) generateIn(w at.Joiner, m at.ParamMeta, p at.Param) error {
 	m.Import.Set("cast", "go.osspkg.com/cast")
 
 	w.Join(
-		List(ID(m.CodeName), Raw("_")).Op("=").
+		List(Raw(m.CodeName), ID("err")).Op("=").
 			ID("cast").Op(".").ID("StrTo").Raw("[").Pkg(p.Pkg).ID(p.Type).Raw("]").
 			Call(
 				ID("webCtx").Op(".").ID("Header").Call().Op(".").ID("Get").Call(Text(m.Value)),

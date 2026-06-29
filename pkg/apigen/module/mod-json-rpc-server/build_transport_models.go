@@ -13,8 +13,9 @@ import (
 	"go.osspkg.com/gogen/types"
 	"go.osspkg.com/syncing"
 
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
 	"go.osspkg.com/goppy/v3/pkg/apigen/util"
+
+	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
 )
 
 func (v Module) buildTransportModels(w at.Writer, m at.GlobalMeta, files []at.File) error {
@@ -62,21 +63,29 @@ func (v Module) buildTransportModel(imp at.ImportSetter, file at.File) []types.T
 						continue
 					}
 
-					if vals, ok := method.Tags[do.IfElse(arg.tmpl == modelNameReq, "in.", "out.")+p.Name]; ok && noBodyParam(vals) {
-						continue
-					}
+					vals, valsOk := method.Tags[do.IfElse(arg.tmpl == modelNameReq, "in.", "out.")+p.Name]
 
 					if link, ok := file.Imports.Get(p.Pkg); ok {
 						imp.Set(p.Pkg, link)
 					}
 
 					argsOut = append(argsOut,
-						ID(util.ToUpperCamelCase(p.Name)).
+						ID(do.IfElse(
+							valsOk && noBodyParam(vals),
+							util.ToLowerCamelCase(p.Name),
+							util.ToUpperCamelCase(p.Name),
+						)).
 							Raw(do.IfElse(p.Slice, "[]", "")).
 							Raw(do.IfElse(p.Ptr, "*", "")).
 							Pkg(p.Pkg).ID(p.Type).
-							Raw(fmt.Sprintf("`json:\"%s%s\"`", p.Name,
-								do.IfElse(p.Omitempty, ",omitempty", ""))),
+							Raw(
+								do.IfElse(
+									valsOk && noBodyParam(vals),
+									"`json:\"-\"`",
+									fmt.Sprintf("`json:\"%s%s\"`", p.Name,
+										do.IfElse(p.Omitempty, ",omitempty", "")),
+								),
+							),
 					)
 				}
 

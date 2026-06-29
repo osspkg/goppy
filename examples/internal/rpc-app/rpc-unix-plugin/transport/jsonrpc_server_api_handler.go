@@ -12,11 +12,11 @@ import (
 
 	stdjson "encoding/json"
 
+	types "go.osspkg.com/goppy/v3/examples/internal/rpc-app/rpc-unix-plugin/types"
+
 	web "go.osspkg.com/goppy/v3/plugins/web"
 
 	jsonrpc "go.osspkg.com/goppy/v3/plugins/web/jsonrpc"
-
-	types "go.osspkg.com/goppy/v3/examples/internal/rpc-app/rpc-unix-plugin/types"
 )
 
 type JSONRPCApiTransport struct {

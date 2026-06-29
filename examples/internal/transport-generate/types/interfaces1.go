@@ -9,7 +9,8 @@ import "context"
 
 type Api interface {
 	// RootV1
-	// @tb in.userID=cookie:x-user-id
+	// @tb in.userID=cookie:x-user-id;validate:required,no-empty
+	// @tb in.userName=validate:no-empty,123
 	RootV1(
 		ctx context.Context,
 		userID int64,
@@ -18,7 +19,7 @@ type Api interface {
 
 	// AuthV1
 	// @tb in.userID=header:x-user-id
-	// @tb out.status=header:x-user-id,cookie:uid
+	// @tb out.status=header:x-user-id;cookie:uid
 	// @tb out.status=cookie:uid
 	AuthV1(
 		ctx context.Context,

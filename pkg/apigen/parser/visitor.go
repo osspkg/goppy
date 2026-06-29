@@ -229,7 +229,7 @@ func (v *visitor) parseComment(comment string, tags *types.Tags) {
 		util.PanicIfError(err, "parse comment")
 
 		(*tags)[key] = append((*tags)[key], do.Convert[string, string](
-			strings.Split(value, ","),
+			strings.Split(value, ";"),
 			func(value string, index int) string {
 				return strings.TrimSpace(value)
 			},

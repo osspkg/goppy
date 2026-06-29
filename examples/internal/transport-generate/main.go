@@ -31,7 +31,7 @@ func main() {
 			jsonrpc.Timeout(5*time.Second),
 			jsonrpc.ErrHandler(func(method string, err error) error {
 				logx.Error("json-rpc call failed", "method", method, "err", err)
-				return fmt.Errorf("json-rpc call failed: %w", err)
+				return err
 			}),
 		),
 	)

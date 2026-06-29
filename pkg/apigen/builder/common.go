@@ -10,6 +10,7 @@ import (
 	modjsonrpcserver "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-json-rpc-server"
 	modparamcookie "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-param-cookie"
 	modparamheader "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-param-header"
+	modvalidate "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-validate"
 	"go.osspkg.com/goppy/v3/pkg/apigen/types"
 )
 
@@ -18,4 +19,5 @@ func init() {
 	types.Register[types.GlobalModule](modjsonrpcclient.Module{FilePrefix: "jsonrpc_client"})
 	types.Register[types.ParamModule](modparamcookie.Module{})
 	types.Register[types.ParamModule](modparamheader.Module{})
+	types.Register[types.ParamModule](modvalidate.Module{})
 }
