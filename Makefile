@@ -33,3 +33,6 @@ ci: pre-commit
 .PHONY: tidy
 tidy:
 	go mod tidy -v
+
+tb_test: install
+	cd examples/internal/transport-generate/ && make run

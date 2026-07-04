@@ -315,7 +315,7 @@ func getParam(param *ast.Field) (p types.Param) {
 	p.Type = getTypeName(param.Type)
 	p.Slice = strings.HasPrefix(p.Type, "[]")
 	p.Ptr = strings.HasPrefix(p.Type, "*")
-	p.Omitempty = p.Ptr || p.Slice
+	p.Omitempty = p.Ptr || p.Slice || p.Type == "interface{}" || p.Type == "any"
 
 	list := strings.Split(p.Type, ".")
 	switch len(list) {
@@ -355,6 +355,7 @@ func getTypeName(expr ast.Expr) string {
 	case *ast.ArrayType:
 		return "[]" + getTypeName(t.Elt)
 	default:
+		util.PanicIfError(fmt.Errorf("invalid type: %T", t), "get type name")
 		return ""
 	}
 }

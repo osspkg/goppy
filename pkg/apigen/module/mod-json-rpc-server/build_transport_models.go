@@ -7,6 +7,7 @@ package mod_json_rpc_server
 
 import (
 	"fmt"
+	"sort"
 
 	"go.osspkg.com/do"
 	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
@@ -30,7 +31,10 @@ func (v Module) buildTransportModels(w at.Writer, m at.GlobalMeta, files []at.Fi
 		models = append(models, v.buildTransportModel(list, file)...)
 	}
 
-	for alias, link := range list.Yield() {
+	aliases := list.Keys()
+	sort.Strings(aliases)
+	for _, alias := range aliases {
+		link, _ := list.Get(alias)
 		t.Import(alias, link)
 	}
 

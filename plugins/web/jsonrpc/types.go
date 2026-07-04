@@ -44,7 +44,7 @@ func (br *bulkRequestAny) Reset() {
 type responseRaw struct {
 	Id     string          `json:"id"`
 	Result json.RawMessage `json:"result,omitempty"`
-	Error  *errResponse    `json:"error,omitempty"`
+	Error  *RPCError       `json:"error,omitempty"`
 }
 
 //easyjson:json
@@ -56,9 +56,9 @@ func (br *bulkResponseRaw) Reset() {
 
 //easyjson:json
 type responseAny struct {
-	Id     string       `json:"id"`
-	Result any          `json:"result,omitempty"`
-	Error  *errResponse `json:"error,omitempty"`
+	Id     string    `json:"id"`
+	Result any       `json:"result,omitempty"`
+	Error  *RPCError `json:"error,omitempty"`
 }
 
 //easyjson:json
@@ -69,24 +69,24 @@ func (br *bulkResponseAny) Reset() {
 }
 
 //easyjson:json
-type errResponse struct {
+type RPCError struct {
 	Message string            `json:"message"`
 	Code    int64             `json:"code"`
 	Ctx     map[string]string `json:"ctx,omitempty"`
 }
 
-func (e *errResponse) Error() string {
+func (e *RPCError) Error() string {
 	if e.Ctx != nil {
 		return fmt.Sprintf("#%d %v {%+v}", e.Code, e.Message, e.Ctx)
 	}
 	return fmt.Sprintf("#%d %v", e.Code, e.Message)
 }
 
-func errConvert(e error) *errResponse {
+func errConvert(e error) *RPCError {
 	if e == nil {
 		return nil
 	}
-	err := &errResponse{}
+	err := &RPCError{}
 	te, ok := e.(TError)
 	if ok {
 		err.Code = te.GetCode()

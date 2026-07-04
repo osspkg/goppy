@@ -12,11 +12,11 @@ import (
 
 	stdjson "encoding/json"
 
-	web "go.osspkg.com/goppy/v3/plugins/web"
-
 	jsonrpc "go.osspkg.com/goppy/v3/plugins/web/jsonrpc"
 
 	types "go.osspkg.com/goppy/v3/examples/internal/transport-generate/types"
+
+	web "go.osspkg.com/goppy/v3/plugins/web"
 )
 
 type JSONRPCUserTransport struct {

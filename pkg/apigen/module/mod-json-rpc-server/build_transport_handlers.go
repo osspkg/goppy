@@ -7,6 +7,7 @@ package mod_json_rpc_server
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"go.osspkg.com/do"
@@ -35,7 +36,10 @@ func (v Module) buildTransportHandlers(w at.Writer, m at.GlobalMeta, files []at.
 			handlers := v.buildTransport(list, face)
 			handlers = append(handlers, v.buildTransportHandler(list, file.Imports, face)...)
 
-			for alias, link := range list.Yield() {
+			aliases := list.Keys()
+			sort.Strings(aliases)
+			for _, alias := range aliases {
+				link, _ := list.Get(alias)
 				t.Import(alias, link)
 			}
 

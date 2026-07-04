@@ -7,6 +7,7 @@ package mod_json_rpc_client
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"go.osspkg.com/do"
@@ -30,7 +31,10 @@ func (v Module) buildClientModels(w at.Writer, m at.GlobalMeta, files []at.File)
 		models = append(models, v.buildTransportModel(list, file)...)
 	}
 
-	for alias, link := range list.Yield() {
+	aliases := list.Keys()
+	sort.Strings(aliases)
+	for _, alias := range aliases {
+		link, _ := list.Get(alias)
 		t.Import(alias, link)
 	}
 

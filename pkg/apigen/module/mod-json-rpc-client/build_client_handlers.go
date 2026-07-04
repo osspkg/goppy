@@ -7,6 +7,7 @@ package mod_json_rpc_client
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
@@ -29,7 +30,10 @@ func (v Module) buildClientHandlers(w at.Writer, m at.GlobalMeta, files []at.Fil
 			handlers := v.buildClient(list, face)
 			handlers = append(handlers, v.buildClientHandler(list, file.Imports, face)...)
 
-			for alias, link := range list.Yield() {
+			aliases := list.Keys()
+			sort.Strings(aliases)
+			for _, alias := range aliases {
+				link, _ := list.Get(alias)
 				t.Import(alias, link)
 			}
 
