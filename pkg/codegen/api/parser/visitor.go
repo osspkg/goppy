@@ -21,8 +21,8 @@ import (
 	"go.osspkg.com/syncing"
 
 	"go.osspkg.com/goppy/v3/internal/global"
-	"go.osspkg.com/goppy/v3/pkg/apigen/types"
-	"go.osspkg.com/goppy/v3/pkg/apigen/util"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/types"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/util"
 )
 
 type (

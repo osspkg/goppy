@@ -6,12 +6,12 @@
 package builder
 
 import (
-	modjsonrpcclient "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-json-rpc-client"
-	modjsonrpcserver "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-json-rpc-server"
-	modparamcookie "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-param-cookie"
-	modparamheader "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-param-header"
-	modvalidate "go.osspkg.com/goppy/v3/pkg/apigen/module/mod-validate"
-	"go.osspkg.com/goppy/v3/pkg/apigen/types"
+	modjsonrpcclient "go.osspkg.com/goppy/v3/pkg/codegen/api/module/mod-json-rpc-client"
+	modjsonrpcserver "go.osspkg.com/goppy/v3/pkg/codegen/api/module/mod-json-rpc-server"
+	modparamcookie "go.osspkg.com/goppy/v3/pkg/codegen/api/module/mod-param-cookie"
+	modparamheader "go.osspkg.com/goppy/v3/pkg/codegen/api/module/mod-param-header"
+	modvalidate "go.osspkg.com/goppy/v3/pkg/codegen/api/module/mod-validate"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/types"
 )
 
 func init() {

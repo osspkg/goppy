@@ -14,7 +14,7 @@ import (
 	"go.osspkg.com/gogen/types"
 	"go.osspkg.com/syncing"
 
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
+	at "go.osspkg.com/goppy/v3/pkg/codegen/api/types"
 )
 
 func (v Module) buildClientHandlers(w at.Writer, m at.GlobalMeta, files []at.File) error {

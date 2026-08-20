@@ -16,7 +16,7 @@ import (
 	"go.osspkg.com/gogen/golang"
 	"go.osspkg.com/gogen/types"
 
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
+	at "go.osspkg.com/goppy/v3/pkg/codegen/api/types"
 	"go.osspkg.com/goppy/v3/pkg/console"
 )
 

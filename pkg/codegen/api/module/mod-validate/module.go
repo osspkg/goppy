@@ -13,7 +13,7 @@ import (
 	. "go.osspkg.com/gogen/golang" //nolint:staticcheck
 	"go.osspkg.com/gogen/types"
 
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
+	at "go.osspkg.com/goppy/v3/pkg/codegen/api/types"
 )
 
 type Module struct{}

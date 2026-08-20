@@ -8,7 +8,7 @@ package mod_json_rpc_server
 import (
 	"strings"
 
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
+	at "go.osspkg.com/goppy/v3/pkg/codegen/api/types"
 )
 
 const (

@@ -14,8 +14,8 @@ import (
 	"go.osspkg.com/ioutils/fs"
 
 	"go.osspkg.com/goppy/v3/internal/global"
-	"go.osspkg.com/goppy/v3/pkg/apigen/builder"
-	"go.osspkg.com/goppy/v3/pkg/apigen/parser"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/builder"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/parser"
 	"go.osspkg.com/goppy/v3/pkg/console"
 )
 

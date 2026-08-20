@@ -14,9 +14,8 @@ import (
 	"go.osspkg.com/gogen/types"
 	"go.osspkg.com/syncing"
 
-	"go.osspkg.com/goppy/v3/pkg/apigen/util"
-
-	at "go.osspkg.com/goppy/v3/pkg/apigen/types"
+	at "go.osspkg.com/goppy/v3/pkg/codegen/api/types"
+	"go.osspkg.com/goppy/v3/pkg/codegen/api/util"
 )
 
 func (v Module) buildTransportModels(w at.Writer, m at.GlobalMeta, files []at.File) error {

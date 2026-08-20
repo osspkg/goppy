@@ -16,7 +16,7 @@ require (
 	github.com/prometheus/client_model v0.6.2
 	go.osspkg.com/algorithms v1.7.1
 	go.osspkg.com/bb v1.0.0
-	go.osspkg.com/casecheck v0.3.0
+	go.osspkg.com/casecheck v0.3.1
 	go.osspkg.com/cast v0.0.0-20260330033934-90d4d7b6ee08
 	go.osspkg.com/do v0.3.0
 	go.osspkg.com/errors v0.4.0
